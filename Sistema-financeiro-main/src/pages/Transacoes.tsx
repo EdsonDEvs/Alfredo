@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -8,19 +8,17 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Badge } from '@/components/ui/badge'
-import { useAuth } from '@/hooks/useAuth'
+import { useTransacoesSync, notifyTransacoesUpdate } from '@/hooks/useTransacoesSync'
 import { TransacoesService } from '@/services/transacoes'
 import { toast } from '@/hooks/use-toast'
-import { Plus, Edit, Trash2, TrendingUp, TrendingDown } from 'lucide-react'
+import { Plus, Edit, Trash2, TrendingUp, TrendingDown, RefreshCw } from 'lucide-react'
 import { useFormattedCurrency } from '@/hooks/useFormattedCurrency'
 import { formatDate, formatTime } from '@/utils/date'
 import type { Transacao } from '@/lib/supabase'
 
 export default function Transacoes() {
-  const { user } = useAuth()
+  const { transacoes, loading: isLoading, refresh, lastUpdate } = useTransacoesSync()
   const { format } = useFormattedCurrency()
-  const [transacoes, setTransacoes] = useState<Transacao[]>([])
-  const [isLoading, setIsLoading] = useState(true)
   const [dialogOpen, setDialogOpen] = useState(false)
   
   // Filtros
@@ -35,38 +33,6 @@ export default function Transacoes() {
     tipo: '',
     category_id: '',
   })
-
-  // Carregar dados
-  const fetchData = async () => {
-    try {
-      setIsLoading(true)
-      
-      if (!user?.id) {
-        throw new Error('Usuário não autenticado')
-      }
-
-      // Buscar transações
-      const transacoesData = await TransacoesService.getTransacoes(user.id)
-      setTransacoes(transacoesData || [])
-      
-    } catch (error: any) {
-      console.error('Erro ao carregar dados:', error)
-      toast({
-        title: "Erro ao carregar dados",
-        description: error.message,
-        variant: "destructive",
-      })
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
-  // Carregar dados quando o componente montar
-  useEffect(() => {
-    if (user?.id) {
-      fetchData()
-    }
-  }, [user])
 
   // Transações filtradas
   const filteredTransacoes = transacoes.filter(transacao => {
@@ -105,11 +71,95 @@ export default function Transacoes() {
         <div>
           <h1 className="text-2xl font-bold">Transações</h1>
           <p className="text-gray-600">Gerencie suas receitas e despesas</p>
+          <p className="text-xs text-gray-400 mt-1">
+            Total: {transacoes.length} transações | Última atualização: {new Date(lastUpdate).toLocaleTimeString()}
+          </p>
         </div>
-        <Button onClick={() => setDialogOpen(true)}>
-          <Plus className="h-4 w-4 mr-2" />
-          Nova Transação
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" size="sm" onClick={refresh} disabled={isLoading}>
+            <RefreshCw className={`h-4 w-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
+            Atualizar
+          </Button>
+          <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+            <DialogTrigger asChild>
+              <Button>
+                <Plus className="h-4 w-4 mr-2" />
+                Nova Transação
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Nova Transação</DialogTitle>
+                <DialogDescription>
+                  Adicione uma nova receita ou despesa
+                </DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4">
+                <div>
+                  <Label htmlFor="quando">Data</Label>
+                  <Input
+                    id="quando"
+                    type="date"
+                    value={formData.quando}
+                    onChange={(e) => setFormData({...formData, quando: e.target.value})}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="estabelecimento">Estabelecimento</Label>
+                  <Input
+                    id="estabelecimento"
+                    value={formData.estabelecimento}
+                    onChange={(e) => setFormData({...formData, estabelecimento: e.target.value})}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="valor">Valor</Label>
+                  <Input
+                    id="valor"
+                    type="number"
+                    step="0.01"
+                    value={formData.valor}
+                    onChange={(e) => setFormData({...formData, valor: parseFloat(e.target.value) || 0})}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="tipo">Tipo</Label>
+                  <Select value={formData.tipo} onValueChange={(value) => setFormData({...formData, tipo: value})}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione o tipo" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="receita">Receita</SelectItem>
+                      <SelectItem value="despesa">Despesa</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label htmlFor="detalhes">Detalhes</Label>
+                  <Textarea
+                    id="detalhes"
+                    value={formData.detalhes}
+                    onChange={(e) => setFormData({...formData, detalhes: e.target.value})}
+                  />
+                </div>
+                <div className="flex justify-end space-x-2">
+                  <Button variant="outline" onClick={() => setDialogOpen(false)}>
+                    Cancelar
+                  </Button>
+                  <Button onClick={() => {
+                    toast({
+                      title: "Funcionalidade em desenvolvimento",
+                      description: "Criação de transações será implementada em breve",
+                    })
+                    setDialogOpen(false)
+                  }}>
+                    Salvar
+                  </Button>
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
+        </div>
       </div>
 
       {/* Cards de resumo */}
@@ -231,81 +281,6 @@ export default function Transacoes() {
           </div>
         </CardContent>
       </Card>
-
-      {/* Dialog para nova transação */}
-      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Nova Transação</DialogTitle>
-            <DialogDescription>
-              Adicione uma nova receita ou despesa
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div>
-              <Label htmlFor="quando">Data</Label>
-              <Input
-                id="quando"
-                type="date"
-                value={formData.quando}
-                onChange={(e) => setFormData({...formData, quando: e.target.value})}
-              />
-            </div>
-            <div>
-              <Label htmlFor="estabelecimento">Estabelecimento</Label>
-              <Input
-                id="estabelecimento"
-                value={formData.estabelecimento}
-                onChange={(e) => setFormData({...formData, estabelecimento: e.target.value})}
-              />
-            </div>
-            <div>
-              <Label htmlFor="valor">Valor</Label>
-              <Input
-                id="valor"
-                type="number"
-                step="0.01"
-                value={formData.valor}
-                onChange={(e) => setFormData({...formData, valor: parseFloat(e.target.value) || 0})}
-              />
-            </div>
-            <div>
-              <Label htmlFor="tipo">Tipo</Label>
-              <Select value={formData.tipo} onValueChange={(value) => setFormData({...formData, tipo: value})}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione o tipo" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="receita">Receita</SelectItem>
-                  <SelectItem value="despesa">Despesa</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <Label htmlFor="detalhes">Detalhes</Label>
-              <Textarea
-                id="detalhes"
-                value={formData.detalhes}
-                onChange={(e) => setFormData({...formData, detalhes: e.target.value})}
-              />
-            </div>
-            <div className="flex justify-end space-x-2">
-              <Button variant="outline" onClick={() => setDialogOpen(false)}>
-                Cancelar
-              </Button>
-              <Button onClick={() => {
-                toast({
-                  title: "Funcionalidade em desenvolvimento",
-                  description: "Criação de transações será implementada em breve",
-                })
-                setDialogOpen(false)
-              }}>
-                Salvar
-              </Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
     </div>
   )
 }

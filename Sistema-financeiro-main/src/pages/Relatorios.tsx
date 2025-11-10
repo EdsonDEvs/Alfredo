@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -7,50 +7,19 @@ import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Badge } from '@/components/ui/badge'
 import { FileText, TrendingUp, TrendingDown, DollarSign } from 'lucide-react'
-import { useAuth } from '@/hooks/useAuth'
-import { TransacoesService } from '@/services/transacoes'
-import { formatCurrency } from '@/utils/currency'
-import { toast } from '@/hooks/use-toast'
+import { useTransacoesSync } from '@/hooks/useTransacoesSync'
+import { useFormattedCurrency } from '@/hooks/useFormattedCurrency'
 import type { Transacao } from '@/lib/supabase'
 
 export default function Relatorios() {
-  const { user } = useAuth()
-  const [transactions, setTransactions] = useState<Transacao[]>([])
-  const [isLoading, setIsLoading] = useState(true)
+  const { transacoes: transactions, loading: isLoading } = useTransacoesSync()
+  const { format } = useFormattedCurrency()
   const [filters, setFilters] = useState({
     startDate: '',
     endDate: '',
     type: 'all',
     categoryId: 'all'
   })
-
-  // Carregar transações
-  const fetchTransactions = async () => {
-    try {
-      setIsLoading(true)
-      if (!user?.id) {
-        throw new Error('Usuário não autenticado')
-      }
-
-      const data = await TransacoesService.getTransacoes(user.id)
-      setTransactions(data || [])
-    } catch (error: any) {
-      console.error('Erro ao carregar transações:', error)
-      toast({
-        title: "Erro ao carregar transações",
-        description: error.message,
-        variant: "destructive",
-      })
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
-  useEffect(() => {
-    if (user?.id) {
-      fetchTransactions()
-    }
-  }, [user])
 
   // Filtrar transações
   const filteredTransactions = transactions.filter(transaction => {
@@ -192,14 +161,14 @@ export default function Relatorios() {
               <TrendingUp className="h-8 w-8 text-green-600" />
               <div>
                 <p className="text-sm text-gray-600">Total Receitas</p>
-                <p className="text-2xl font-bold text-green-600">{formatCurrency(receitas)}</p>
+                <p className="text-2xl font-bold text-green-600">{format(receitas)}</p>
               </div>
             </div>
             <div className="flex items-center space-x-3 p-4 bg-red-50 rounded-lg">
               <TrendingDown className="h-8 w-8 text-red-600" />
               <div>
                 <p className="text-sm text-gray-600">Total Despesas</p>
-                <p className="text-2xl font-bold text-red-600">{formatCurrency(despesas)}</p>
+                <p className="text-2xl font-bold text-red-600">{format(despesas)}</p>
               </div>
             </div>
             <div className="flex items-center space-x-3 p-4 bg-blue-50 rounded-lg">
@@ -207,7 +176,7 @@ export default function Relatorios() {
               <div>
                 <p className="text-sm text-gray-600">Saldo</p>
                 <p className={`text-2xl font-bold ${saldo >= 0 ? 'text-blue-600' : 'text-red-600'}`}>
-                  {formatCurrency(saldo)}
+                  {format(saldo)}
                 </p>
               </div>
             </div>
@@ -227,13 +196,13 @@ export default function Relatorios() {
                 <div>
                   <h3 className="font-medium">{category}</h3>
                   <div className="flex space-x-4 text-sm text-gray-600">
-                    <span>Receitas: {formatCurrency(data.receitas)}</span>
-                    <span>Despesas: {formatCurrency(data.despesas)}</span>
+                    <span>Receitas: {format(data.receitas)}</span>
+                    <span>Despesas: {format(data.despesas)}</span>
                   </div>
                 </div>
                 <div className="text-right">
                   <p className={`font-bold ${data.total >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                    {formatCurrency(data.total)}
+                    {format(data.total)}
                   </p>
                   <Badge variant={data.total >= 0 ? 'default' : 'destructive'}>
                     {data.total >= 0 ? 'Positivo' : 'Negativo'}
@@ -277,7 +246,7 @@ export default function Relatorios() {
                   </div>
                   <div className="text-right">
                     <p className={`font-bold ${transaction.tipo === 'receita' ? 'text-green-600' : 'text-red-600'}`}>
-                      {transaction.tipo === 'receita' ? '+' : '-'}{formatCurrency(transaction.valor)}
+                      {transaction.tipo === 'receita' ? '+' : '-'}{format(transaction.valor)}
                     </p>
                   </div>
                 </div>

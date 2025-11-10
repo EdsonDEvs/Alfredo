@@ -165,4 +165,100 @@ export class TransacoesService {
 
     return data || []
   }
+
+  // Importar múltiplas transações em lote
+  static async importTransacoes(
+    userId: string,
+    transacoes: Omit<Transacao, 'id' | 'created_at'>[]
+  ): Promise<{ success: number; errors: string[] }> {
+    if (transacoes.length === 0) {
+      return { success: 0, errors: ['Nenhuma transação para importar'] }
+    }
+
+    // Buscar ou criar uma categoria padrão (obrigatório - banco não aceita null)
+    let defaultCategoryId: string
+    
+    try {
+      // Tentar buscar categorias existentes
+      const categorias = await this.getMainCategories(userId)
+      
+      if (categorias.length > 0) {
+        // Usar primeira categoria disponível
+        defaultCategoryId = categorias[0].id
+      } else {
+        // Criar categoria padrão "Geral" se não existir nenhuma
+        console.log('Nenhuma categoria encontrada, criando categoria padrão...')
+        const { data: newCategory, error: createError } = await supabase
+          .from('categorias')
+          .insert({
+            userid: userId,
+            nome: 'Geral',
+            tags: 'importacao',
+            // is_main_category pode não existir na tabela, então não incluímos
+          })
+          .select()
+          .single()
+
+        if (createError || !newCategory) {
+          throw new Error(`Não foi possível criar categoria padrão: ${createError?.message || 'Erro desconhecido'}`)
+        }
+        
+        defaultCategoryId = newCategory.id
+        console.log('Categoria padrão criada:', defaultCategoryId)
+      }
+    } catch (error: any) {
+      console.error('Erro ao buscar/criar categoria padrão:', error)
+      throw new Error(`Não foi possível garantir categoria para importação: ${error.message || 'Erro desconhecido'}`)
+    }
+
+    // Adicionar userid e category_id padrão a todas as transações
+    // IMPORTANTE: category_id é obrigatório (NOT NULL no banco)
+    const transacoesComUserId = transacoes.map(t => {
+      // Garantir que category_id seja sempre um UUID válido
+      let finalCategoryId: string = defaultCategoryId
+      
+      // Se a transação já tem um category_id válido, usar esse
+      if (t.category_id && t.category_id.trim() !== '' && t.category_id !== 'null' && t.category_id !== 'undefined') {
+        // Validar se é um UUID válido
+        const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+        if (uuidRegex.test(t.category_id)) {
+          finalCategoryId = t.category_id
+        }
+      }
+      
+      return {
+        ...t,
+        userid: userId,
+        category_id: finalCategoryId // Sempre um UUID válido
+      }
+    })
+
+    // Inserir em lotes (Supabase tem limite de 1000 por vez)
+    const batchSize = 1000
+    let successCount = 0
+    const errors: string[] = []
+
+    for (let i = 0; i < transacoesComUserId.length; i += batchSize) {
+      const batch = transacoesComUserId.slice(i, i + batchSize)
+      
+      try {
+        const { data, error } = await supabase
+          .from('transacoes')
+          .insert(batch)
+          .select()
+
+        if (error) {
+          errors.push(`Erro no lote ${Math.floor(i / batchSize) + 1}: ${error.message}`)
+          console.error('Erro ao importar lote:', error)
+        } else {
+          successCount += data?.length || 0
+        }
+      } catch (error: any) {
+        errors.push(`Erro no lote ${Math.floor(i / batchSize) + 1}: ${error.message}`)
+        console.error('Erro ao importar lote:', error)
+      }
+    }
+
+    return { success: successCount, errors }
+  }
 }

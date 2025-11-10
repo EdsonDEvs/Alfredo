@@ -7,6 +7,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { ThemeProvider } from '@/hooks/useTheme'
 import { AuthProvider } from '@/hooks/useAuth'
 import { CurrencyProvider } from '@/hooks/useCurrency'
+import { TransacoesSyncProvider } from '@/hooks/useTransacoesSync'
 import { SafeTooltipProvider } from '@/components/ui/SafeTooltipProvider'
 import { AppLayout } from '@/components/layout/AppLayout'
 import { ErrorBoundary } from '@/components/ErrorBoundary'
@@ -27,29 +28,31 @@ function App() {
         <AuthProvider>
           <CurrencyProvider>
             <Router>
-              <SafeTooltipProvider delayDuration={300} skipDelayDuration={0}>
-                <Routes>
-                  <Route path="/auth" element={<Auth />} />
-                  <Route
-                    path="/"
-                    element={
-                      <ProtectedRoute>
-                        <AppLayout />
-                      </ProtectedRoute>
-                    }
-                  >
-                    <Route index element={<Dashboard />} />
-                    <Route path="dashboard" element={<Dashboard />} />
-                    <Route path="transacoes" element={<Transacoes />} />
-                    <Route path="categorias" element={<Categorias />} />
-                    <Route path="relatorios" element={<Relatorios />} />
-                    <Route path="lembretes" element={<Lembretes />} />
-                    <Route path="metas" element={<Metas />} />
-                    <Route path="perfil" element={<Perfil />} />
-                  </Route>
-                  <Route path="/dashboard" element={<Navigate to="/" replace />} />
-                </Routes>
-              </SafeTooltipProvider>
+              <TransacoesSyncProvider>
+                <SafeTooltipProvider delayDuration={300} skipDelayDuration={0}>
+                  <Routes>
+                    <Route path="/auth" element={<Auth />} />
+                    <Route
+                      path="/"
+                      element={
+                        <ProtectedRoute>
+                          <AppLayout />
+                        </ProtectedRoute>
+                      }
+                    >
+                      <Route index element={<Dashboard />} />
+                      <Route path="dashboard" element={<Dashboard />} />
+                      <Route path="transacoes" element={<Transacoes />} />
+                      <Route path="categorias" element={<Categorias />} />
+                      <Route path="relatorios" element={<Relatorios />} />
+                      <Route path="lembretes" element={<Lembretes />} />
+                      <Route path="metas" element={<Metas />} />
+                      <Route path="perfil" element={<Perfil />} />
+                    </Route>
+                    <Route path="/dashboard" element={<Navigate to="/" replace />} />
+                  </Routes>
+                </SafeTooltipProvider>
+              </TransacoesSyncProvider>
             </Router>
           </CurrencyProvider>
         </AuthProvider>

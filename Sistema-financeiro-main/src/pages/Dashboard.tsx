@@ -1,90 +1,67 @@
 
-import { useState, useEffect, useMemo } from 'react'
-import { useAuth } from '@/hooks/useAuth'
-import { TransacoesService } from '@/services/transacoes'
-import { toast } from '@/hooks/use-toast'
+import { useState, useMemo, useEffect } from 'react'
+import { useTransacoesSync } from '@/hooks/useTransacoesSync'
 import { DashboardStats } from '@/components/dashboard/DashboardStats'
 import { DashboardFilters } from '@/components/dashboard/DashboardFilters'
-import type { Transacao } from '@/lib/supabase'
+import { ExcelImporter } from '@/components/dashboard/ExcelImporter'
 import { DashboardCharts } from '@/components/dashboard/DashboardCharts'
+import { Button } from '@/components/ui/button'
+import { RefreshCw } from 'lucide-react'
 
 export default function Dashboard() {
-  console.log('📊 Dashboard: Componente sendo renderizado')
+  const { transacoes, loading, refresh, lastUpdate } = useTransacoesSync()
   
-  const { user } = useAuth()
-  const [transacoes, setTransacoes] = useState<Transacao[]>([])
-  const [loading, setLoading] = useState(true)
+  // Estados dos filtros - Usar mês e ano atual por padrão
+  const now = new Date()
+  const [filterMode, setFilterMode] = useState<'month' | 'period'>('month')
+  const [filterMonth, setFilterMonth] = useState(now.getMonth().toString())
+  const [filterYear, setFilterYear] = useState(now.getFullYear().toString())
   
-  // Estados dos filtros - Configurar para mostrar dados mais recentes
-  const [filterMonth, setFilterMonth] = useState('7') // Agosto (0-11, então 7 = agosto)
-  const [filterYear, setFilterYear] = useState('2025')
-
-  // Função para buscar dados
-  const fetchData = async () => {
-    try {
-      console.log('📊 Dashboard: Iniciando fetchData...')
-      setLoading(true)
-      
-      if (!user?.id) {
-        throw new Error('Usuário não autenticado')
-      }
-
-      console.log('📊 Dashboard: Buscando transações para usuário:', user.id)
-      // Buscar transações usando Supabase
-      const transacoesData = await TransacoesService.getTransacoes(user.id)
-
-      console.log('📊 Dashboard: Transações carregadas:', transacoesData)
-      setTransacoes(transacoesData || [])
-      
-    } catch (error: any) {
-      console.error('📊 Dashboard: Erro detalhado:', error)
-      toast({
-        title: "Erro ao carregar dados",
-        description: error.message,
-        variant: "destructive",
-      })
-    } finally {
-      console.log('📊 Dashboard: fetchData finalizado, loading:', false)
-      setLoading(false)
-    }
-  }
-
-  // Carregar dados quando o componente montar
+  // Estados para filtro por período
+  const [startDate, setStartDate] = useState(() => {
+    // Data inicial padrão: primeiro dia do mês atual
+    const firstDay = new Date(now.getFullYear(), now.getMonth(), 1)
+    return firstDay.toISOString().split('T')[0]
+  })
+  const [endDate, setEndDate] = useState(() => {
+    // Data final padrão: último dia do mês atual
+    const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0)
+    return lastDay.toISOString().split('T')[0]
+  })
+  
+  // Recarregar quando lastUpdate mudar (dados foram atualizados)
   useEffect(() => {
-    console.log('📊 Dashboard: Estado atual:', {
-      user: user?.id,
-      loading,
-      transacoesCount: transacoes.length,
-      filterMonth,
-      filterYear
-    })
-    
-    if (user?.id) {
-      fetchData()
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user?.id, filterMonth, filterYear])
+    // Não precisa fazer nada, o useMemo já vai recalcular automaticamente
+  }, [lastUpdate])
 
-  // Filtrar transações por mês e ano
+  // Filtrar transações por mês/ano ou período
   const filteredTransacoes = useMemo(() => {
     if (!transacoes.length) return []
     
     return transacoes.filter(transacao => {
+      if (!transacao.quando) return false
+      
       const transacaoDate = new Date(transacao.quando)
-      const transacaoMonth = transacaoDate.getMonth().toString()
-      const transacaoYear = transacaoDate.getFullYear().toString()
+      if (isNaN(transacaoDate.getTime())) return false
       
-      const matches = transacaoMonth === filterMonth && transacaoYear === filterYear
-      
-      console.log('📊 Dashboard: Filtrando transação:', 
-                  'Data:', transacao.quando, 
-                  'Mês:', transacaoMonth, 
-                  'Ano:', transacaoYear, 
-                  'Matches:', matches)
-      
-      return matches
+      if (filterMode === 'month') {
+        // Filtro por mês/ano
+        const transacaoMonth = transacaoDate.getMonth().toString()
+        const transacaoYear = transacaoDate.getFullYear().toString()
+        return transacaoMonth === filterMonth && transacaoYear === filterYear
+      } else {
+        // Filtro por período
+        if (!startDate || !endDate) return true // Se não houver datas, mostrar todas
+        
+        const transacaoDateStr = transacaoDate.toISOString().split('T')[0]
+        const start = new Date(startDate)
+        const end = new Date(endDate)
+        end.setHours(23, 59, 59, 999) // Incluir o dia inteiro da data final
+        
+        return transacaoDate >= start && transacaoDate <= end
+      }
     })
-  }, [transacoes, filterMonth, filterYear])
+  }, [transacoes, filterMode, filterMonth, filterYear, startDate, endDate])
 
   // Calcular estatísticas
   const stats = useMemo(() => {
@@ -120,24 +97,66 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-6">
+      {/* Cabeçalho com botão de importação */}
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-2xl font-bold">Dashboard</h1>
+          <p className="text-gray-600">Visão geral das suas finanças</p>
+          <p className="text-xs text-gray-400 mt-1">
+            Total de transações: {transacoes.length} | Última atualização: {new Date(lastUpdate).toLocaleTimeString()}
+          </p>
+        </div>
+        <div className="flex gap-2">
+          <Button variant="outline" size="sm" onClick={refresh} disabled={loading}>
+            <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+            Atualizar
+          </Button>
+          <ExcelImporter onImportComplete={refresh} />
+        </div>
+      </div>
+
       <DashboardFilters 
         filterMonth={filterMonth}
         filterYear={filterYear}
         setFilterMonth={setFilterMonth}
         setFilterYear={setFilterYear}
+        filterMode={filterMode}
+        setFilterMode={setFilterMode}
+        startDate={startDate}
+        endDate={endDate}
+        setStartDate={setStartDate}
+        setEndDate={setEndDate}
         transactionCount={filteredTransacoes.length}
       />
+      
+      {/* Informação sobre filtros */}
+      {transacoes.length > 0 && filteredTransacoes.length === 0 && (
+        <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4">
+          <p className="text-sm text-yellow-800 dark:text-yellow-200">
+            ⚠️ Nenhuma transação encontrada para o período selecionado.
+            {filterMode === 'month' ? (
+              <> Você tem {transacoes.length} transação(ões) no total. Tente alterar o filtro de mês/ano.</>
+            ) : (
+              <> Você tem {transacoes.length} transação(ões) no total. Tente alterar o período de datas.</>
+            )}
+          </p>
+        </div>
+      )}
+      
+      {/* Validação de período */}
+      {filterMode === 'period' && startDate && endDate && startDate > endDate && (
+        <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
+          <p className="text-sm text-red-800 dark:text-red-200">
+            ⚠️ A data inicial não pode ser maior que a data final. Por favor, corrija as datas.
+          </p>
+        </div>
+      )}
       
       <DashboardStats stats={stats} />
 
       {/* Gráficos do período */}
       <DashboardCharts transacoes={filteredTransacoes} />
       
-      <div className="text-center text-gray-500">
-        <p>Dashboard funcionando com Supabase!</p>
-        <p>Transações encontradas: {transacoes.length}</p>
-        <p>Transações filtradas: {filteredTransacoes.length}</p>
-      </div>
     </div>
   )
 }
