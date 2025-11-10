@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { createOrUpdateSubscription } from '@/integrations/firebase/subscriptionService';
+import { n8nService } from '@/integrations/n8n/webhookService';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { CheckCircle, Loader2, ArrowRight } from 'lucide-react';
@@ -9,6 +10,7 @@ import { toast } from '@/hooks/use-toast';
 
 export default function PaymentSuccess() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [searchParams] = useSearchParams();
   const { user, signUp, signIn } = useAuth();
   const [isProcessing, setIsProcessing] = useState(true);
@@ -29,7 +31,7 @@ export default function PaymentSuccess() {
         console.log('📋 Dados capturados:', { customerId, email, paymentId, status });
         
                  // Se não há dados na URL, tentar capturar do localStorage
-         const storedData = localStorage.getItem('alfredo_payment_data');
+         const storedData = localStorage.getItem('alfredo_cadastro_data') || localStorage.getItem('alfredo_payment_data');
          if (storedData) {
            const parsedData = JSON.parse(storedData);
            setUserData(parsedData);
@@ -59,8 +61,34 @@ export default function PaymentSuccess() {
             }
          }
         
-        // Simular processamento de pagamento
-        await new Promise(resolve => setTimeout(resolve, 2000));
+        // Obter dados do cadastro (do state ou localStorage)
+        const cadastroData = location.state || (storedData ? JSON.parse(storedData) : null);
+        
+        // Se temos dados do cadastro, enviar para n8n criar a conta
+        if (cadastroData && (cadastroData.nome || cadastroData.email)) {
+          console.log('🔄 Enviando confirmação de pagamento para n8n...');
+          
+          const n8nResponse = await n8nService.confirmPayment({
+            nome: cadastroData.nome || userData?.nome || '',
+            email: cadastroData.email || userData?.email || email || '',
+            phone: cadastroData.phone || userData?.phone || '',
+            whatsapp: cadastroData.whatsapp || userData?.whatsapp || '',
+            plan: cadastroData.plan || 'premium',
+            paymentId: paymentId || searchParams.get('payment_id') || '',
+            paymentStatus: status || 'confirmed'
+          });
+
+          if (n8nResponse.success) {
+            console.log('✅ Conta criada no Supabase via n8n:', n8nResponse);
+            toast({
+              title: "Conta criada com sucesso!",
+              description: "Sua conta foi criada automaticamente. Você receberá as credenciais por email e WhatsApp.",
+            });
+          } else {
+            console.warn('⚠️ Aviso ao criar conta via n8n:', n8nResponse.error);
+            // Continuar mesmo se n8n falhar
+          }
+        }
         
         // Atualizar assinatura se o usuário estiver logado
         if (user?.uid) {

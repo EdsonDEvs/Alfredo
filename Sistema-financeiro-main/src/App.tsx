@@ -12,6 +12,9 @@ import { SafeTooltipProvider } from '@/components/ui/SafeTooltipProvider'
 import { AppLayout } from '@/components/layout/AppLayout'
 import { ErrorBoundary } from '@/components/ErrorBoundary'
 import Auth from '@/pages/Auth'
+import Landing from '@/pages/Landing'
+import Cadastro from '@/pages/Cadastro'
+import PaymentSuccess from '@/pages/PaymentSuccess'
 import Dashboard from '@/pages/Dashboard'
 import Transacoes from '@/pages/Transacoes'
 import Categorias from '@/pages/Categorias'
@@ -31,6 +34,9 @@ function App() {
               <TransacoesSyncProvider>
                 <SafeTooltipProvider delayDuration={300} skipDelayDuration={0}>
                   <Routes>
+                    <Route path="/landing" element={<Landing />} />
+                    <Route path="/cadastro" element={<Cadastro />} />
+                    <Route path="/payment-success" element={<PaymentSuccess />} />
                     <Route path="/auth" element={<Auth />} />
                     <Route
                       path="/"

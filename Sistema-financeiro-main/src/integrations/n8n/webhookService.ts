@@ -176,6 +176,65 @@ export class N8nWebhookService {
   }
 
   /**
+   * Notifica confirmação de pagamento para criar conta do usuário
+   */
+  async confirmPayment(paymentData: {
+    nome: string;
+    email: string;
+    phone: string;
+    whatsapp: string;
+    plan: string;
+    paymentId?: string;
+    paymentStatus?: string;
+  }): Promise<N8nResponse> {
+    try {
+      console.log('🔄 Enviando confirmação de pagamento para n8n:', paymentData);
+
+      // Webhook do n8n para confirmação de pagamento
+      // URL baseada no workflow "Cria conta usuário" que você mostrou
+      const webhookUrl = import.meta.env.VITE_N8N_WEBHOOK_URL || 
+                        `${this.baseUrl}/webhook-test/confirma-pagamento`;
+
+      const response = await fetch(webhookUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          nome: paymentData.nome,
+          email: paymentData.email,
+          phone: paymentData.phone,
+          whatsapp: paymentData.whatsapp,
+          plan: paymentData.plan,
+          paymentId: paymentData.paymentId,
+          paymentStatus: paymentData.paymentStatus || 'confirmed',
+          timestamp: new Date().toISOString()
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      console.log('✅ Pagamento confirmado e conta criada:', result);
+
+      return {
+        success: true,
+        message: 'Conta criada com sucesso',
+        userId: result.userId,
+        ...result
+      };
+    } catch (error) {
+      console.error('❌ Erro ao confirmar pagamento:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Erro desconhecido',
+      };
+    }
+  }
+
+  /**
    * Testa conectividade com o n8n
    */
   async testConnection(): Promise<boolean> {
