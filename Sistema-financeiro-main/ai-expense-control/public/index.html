@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Expense Control - Netlify</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-height: 100vh;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+        }
+        .status {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        .endpoint {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            font-family: monospace;
+        }
+        .test-section {
+            margin: 30px 0;
+        }
+        input, textarea, button {
+            width: 100%;
+            padding: 12px;
+            margin: 8px 0;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+        }
+        button {
+            background: #4CAF50;
+            color: white;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        button:hover {
+            background: #45a049;
+        }
+        .result {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🤖 AI Expense Control</h1>
+        
+        <div class="status">
+            <h2>✅ Status do Sistema</h2>
+            <p>🚀 Deployado no Netlify Functions</p>
+            <p>📱 WhatsApp Integration: Configurado</p>
+            <p>🔥 Firebase: Conectado</p>
+        </div>
+
+        <div class="endpoint">
+            <h3>🔗 Endpoints Disponíveis:</h3>
+            <p><strong>Health Check:</strong> /.netlify/functions/aiExpenseControl/health</p>
+            <p><strong>WhatsApp Webhook:</strong> /.netlify/functions/aiExpenseControl/whatsapp/webhook</p>
+            <p><strong>Processar Texto:</strong> /.netlify/functions/aiExpenseControl/ingest/text</p>
+            <p><strong>Processar Foto:</strong> /.netlify/functions/aiExpenseControl/ingest/photo</p>
+            <p><strong>Processar Áudio:</strong> /.netlify/functions/aiExpenseControl/ingest/audio</p>
+        </div>
+
+        <div class="test-section">
+            <h2>🧪 Testar Sistema</h2>
+            
+            <h3>1. Health Check</h3>
+            <button onclick="testHealth()">Testar Health Check</button>
+            <div id="health-result" class="result"></div>
+
+            <h3>2. Processar Texto</h3>
+            <textarea id="test-text" placeholder="Digite uma mensagem de teste (ex: Gastei R$ 50 no mercado hoje)" rows="3"></textarea>
+            <button onclick="testText()">Processar Texto</button>
+            <div id="text-result" class="result"></div>
+
+            <h3>3. Testar WhatsApp Webhook</h3>
+            <button onclick="testWhatsApp()">Testar Webhook WhatsApp</button>
+            <div id="whatsapp-result" class="result"></div>
+        </div>
+    </div>
+
+    <script>
+        const baseUrl = '/.netlify/functions/aiExpenseControl';
+
+        async function testHealth() {
+            try {
+                const response = await fetch(`${baseUrl}/health`);
+                const data = await response.json();
+                document.getElementById('health-result').textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                document.getElementById('health-result').textContent = `Erro: ${error.message}`;
+            }
+        }
+
+        async function testText() {
+            const text = document.getElementById('test-text').value;
+            if (!text) {
+                alert('Digite um texto para testar!');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${baseUrl}/ingest/text`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        text: text,
+                        userId: 'teste-netlify'
+                    })
+                });
+                const data = await response.json();
+                document.getElementById('text-result').textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                document.getElementById('text-result').textContent = `Erro: ${error.message}`;
+            }
+        }
+
+        async function testWhatsApp() {
+            try {
+                const response = await fetch(`${baseUrl}/whatsapp/webhook?hub.mode=subscribe&hub.verify_token=SantosDrumont&hub.challenge=teste123`);
+                const data = await response.text();
+                document.getElementById('whatsapp-result').textContent = `Resposta: ${data}`;
+            } catch (error) {
+                document.getElementById('whatsapp-result').textContent = `Erro: ${error.message}`;
+            }
+        }
+
+        // Testar health check automaticamente
+        window.onload = function() {
+            testHealth();
+        };
+    </script>
+</body>
+</html>
