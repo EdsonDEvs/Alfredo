@@ -1,8 +1,8 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { formatCurrency } from '@/utils/currency'
+import { useFormattedCurrency } from '@/hooks/useFormattedCurrency'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useAuth } from '@/hooks/useAuth'
 import type { Categoria } from '@/lib/supabase'
 import { TransacoesService } from '@/services/transacoes'
@@ -15,6 +15,7 @@ const COLORS = ['#4361ee', '#7209b7', '#f72585', '#4cc9f0', '#4895ef', '#4361ee'
 
 export function DashboardCharts({ transacoes }: DashboardChartsProps) {
   const { user } = useAuth()
+  const { format, convertValue } = useFormattedCurrency()
   const [categorias, setCategorias] = useState<Categoria[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -34,14 +35,16 @@ export function DashboardCharts({ transacoes }: DashboardChartsProps) {
     fetchCategorias()
   }, [user?.id])
 
-  const getChartData = () => {
+  const getChartData = useMemo(() => {
     const categoriasMap: { [key: string]: number } = {}
 
     transacoes.forEach((t: any) => {
       if (t.valor && t.tipo === 'despesa') {
         // Buscar o nome da categoria pelo category_id (relacionamento carregado via service)
         const categoriaNome = t?.categorias?.nome || 'Sem Categoria'
-        categoriasMap[categoriaNome] = (categoriasMap[categoriaNome] || 0) + Math.abs(t.valor)
+        // Converter valor de BRL para moeda atual
+        const convertedValue = convertValue ? convertValue(Math.abs(t.valor), 'BRL') : Math.abs(t.valor)
+        categoriasMap[categoriaNome] = (categoriasMap[categoriaNome] || 0) + convertedValue
       }
     })
 
@@ -49,29 +52,54 @@ export function DashboardCharts({ transacoes }: DashboardChartsProps) {
       categoria,
       valor
     }))
-  }
+  }, [transacoes, convertValue])
 
-  const getPieData = () => {
-    const receitas = transacoes.filter((t: any) => t.tipo === 'receita').reduce((sum: number, t: any) => sum + (t.valor || 0), 0)
-    const despesas = transacoes.filter((t: any) => t.tipo === 'despesa').reduce((sum: number, t: any) => sum + (t.valor || 0), 0)
+  const getPieData = useMemo(() => {
+    const receitas = transacoes
+      .filter((t: any) => t.tipo === 'receita')
+      .reduce((sum: number, t: any) => {
+        const converted = convertValue ? convertValue(t.valor || 0, 'BRL') : (t.valor || 0)
+        return sum + converted
+      }, 0)
+    
+    const despesas = transacoes
+      .filter((t: any) => t.tipo === 'despesa')
+      .reduce((sum: number, t: any) => {
+        const converted = convertValue ? convertValue(Math.abs(t.valor || 0), 'BRL') : Math.abs(t.valor || 0)
+        return sum + converted
+      }, 0)
 
     return [
       { name: 'Receitas', value: receitas },
       { name: 'Despesas', value: Math.abs(despesas) }
     ]
-  }
+  }, [transacoes, convertValue])
 
-  const totalReceitas = transacoes.filter((t: any) => t.tipo === 'receita').reduce((sum: number, t: any) => sum + (t.valor || 0), 0)
-  const totalDespesas = transacoes.filter((t: any) => t.tipo === 'despesa').reduce((sum: number, t: any) => sum + (t.valor || 0), 0)
-  const saldo = totalReceitas - totalDespesas
+  const stats = useMemo(() => {
+    const totalReceitas = transacoes
+      .filter((t: any) => t.tipo === 'receita')
+      .reduce((sum: number, t: any) => {
+        const converted = convertValue ? convertValue(t.valor || 0, 'BRL') : (t.valor || 0)
+        return sum + converted
+      }, 0)
+    
+    const totalDespesas = transacoes
+      .filter((t: any) => t.tipo === 'despesa')
+      .reduce((sum: number, t: any) => {
+        const converted = convertValue ? convertValue(Math.abs(t.valor || 0), 'BRL') : Math.abs(t.valor || 0)
+        return sum + converted
+      }, 0)
+    
+    const saldo = totalReceitas - totalDespesas
 
-  const stats = {
-    totalReceitas,
-    totalDespesas,
-    saldo,
-    transacoesCount: transacoes.length,
-    lembretesCount: 0
-  }
+    return {
+      totalReceitas,
+      totalDespesas,
+      saldo,
+      transacoesCount: transacoes.length,
+      lembretesCount: 0
+    }
+  }, [transacoes, convertValue])
 
   return (
     <div className="grid gap-6 md:grid-cols-2">
@@ -91,7 +119,7 @@ export function DashboardCharts({ transacoes }: DashboardChartsProps) {
                   <p className="mt-2 text-gray-600">Carregando categorias...</p>
                 </div>
               </div>
-            ) : getChartData().length === 0 ? (
+            ) : getChartData.length === 0 ? (
               <div className="flex items-center justify-center h-full">
                 <div className="text-center text-gray-500">
                   <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -103,11 +131,11 @@ export function DashboardCharts({ transacoes }: DashboardChartsProps) {
               </div>
             ) : (
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={getChartData()}>
+                <BarChart data={getChartData}>
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="categoria" />
                   <YAxis />
-                  <Tooltip formatter={(value) => formatCurrency(Number(value))} />
+                  <Tooltip formatter={(value) => format(Number(value))} />
                   <Bar dataKey="valor" fill="#4361ee" />
                 </BarChart>
               </ResponsiveContainer>
@@ -128,19 +156,19 @@ export function DashboardCharts({ transacoes }: DashboardChartsProps) {
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
-                  data={getPieData()}
+                  data={getPieData}
                   cx="50%"
                   cy="50%"
                   outerRadius={80}
                   fill="#8884d8"
                   dataKey="value"
-                  label={({ name, value }) => `${name}: ${formatCurrency(value)}`}
+                  label={({ name, value }) => `${name}: ${format(value)}`}
                 >
-                  {getPieData().map((entry, index) => (
+                  {getPieData.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                   ))}
                 </Pie>
-                <Tooltip formatter={(value) => formatCurrency(Number(value))} />
+                <Tooltip formatter={(value) => format(Number(value))} />
               </PieChart>
             </ResponsiveContainer>
           </div>
@@ -159,20 +187,20 @@ export function DashboardCharts({ transacoes }: DashboardChartsProps) {
             <div className="flex items-center justify-between">
               <span className="text-sm font-medium">Receitas</span>
               <span className="text-green-600 font-semibold">
-                {formatCurrency(stats.totalReceitas)}
+                {format(stats.totalReceitas)}
               </span>
             </div>
             <div className="flex items-center justify-between">
               <span className="text-sm font-medium">Despesas</span>
               <span className="text-red-600 font-semibold">
-                {formatCurrency(stats.totalDespesas)}
+                {format(stats.totalDespesas)}
               </span>
             </div>
             <div className="border-t pt-4">
               <div className="flex items-center justify-between">
                 <span className="text-sm font-medium">Saldo</span>
-                <span className={`font-bold ${saldo >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                  {formatCurrency(saldo)}
+                <span className={`font-bold ${stats.saldo >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                  {format(stats.saldo)}
                 </span>
               </div>
             </div>

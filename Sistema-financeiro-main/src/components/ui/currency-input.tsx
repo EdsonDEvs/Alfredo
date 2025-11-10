@@ -2,6 +2,7 @@
 import React, { forwardRef } from 'react'
 import { Input } from '@/components/ui/input'
 import { formatCurrencyInput, parseCurrency } from '@/utils/currency'
+import { useCurrency } from '@/hooks/useCurrency'
 import { cn } from '@/lib/utils'
 
 interface CurrencyInputProps extends Omit<React.ComponentProps<"input">, "onChange" | "value"> {
@@ -11,27 +12,33 @@ interface CurrencyInputProps extends Omit<React.ComponentProps<"input">, "onChan
 
 const CurrencyInput = forwardRef<HTMLInputElement, CurrencyInputProps>(
   ({ className, value, onChange, ...props }, ref) => {
+    const { currency, locale } = useCurrency()
     const [displayValue, setDisplayValue] = React.useState('')
 
     React.useEffect(() => {
       if (value !== undefined) {
         const numValue = typeof value === 'string' ? parseFloat(value) : value
         if (!isNaN(numValue)) {
-          setDisplayValue(formatCurrencyInput((numValue * 100).toString()))
+          setDisplayValue(formatCurrencyInput((numValue * 100).toString(), currency, locale))
         }
       }
-    }, [value])
+    }, [value, currency, locale])
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       const inputValue = e.target.value
-      const formatted = formatCurrencyInput(inputValue)
+      const formatted = formatCurrencyInput(inputValue, currency, locale)
       setDisplayValue(formatted)
       
       if (onChange) {
-        const numericValue = parseCurrency(formatted)
+        const numericValue = parseCurrency(formatted, locale)
         onChange(numericValue)
       }
     }
+
+    // Gerar placeholder baseado na moeda
+    const placeholder = React.useMemo(() => {
+      return formatCurrencyInput('0', currency, locale)
+    }, [currency, locale])
 
     return (
       <Input
@@ -40,7 +47,7 @@ const CurrencyInput = forwardRef<HTMLInputElement, CurrencyInputProps>(
         value={displayValue}
         onChange={handleChange}
         className={cn(className)}
-        placeholder="R$ 0,00"
+        placeholder={placeholder}
       />
     )
   }

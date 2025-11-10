@@ -62,7 +62,8 @@ export default function Dashboard() {
     if (user?.id) {
       fetchData()
     }
-  }, [user, filterMonth, filterYear])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id, filterMonth, filterYear])
 
   // Filtrar transações por mês e ano
   const filteredTransacoes = useMemo(() => {

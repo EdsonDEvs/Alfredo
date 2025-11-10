@@ -1,7 +1,7 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { TrendingUp, TrendingDown, DollarSign, Calendar } from 'lucide-react'
-import { formatCurrency } from '@/utils/currency'
+import { useFormattedCurrency } from '@/hooks/useFormattedCurrency'
 
 interface DashboardStatsProps {
   stats: {
@@ -14,6 +14,8 @@ interface DashboardStatsProps {
 }
 
 export function DashboardStats({ stats }: DashboardStatsProps) {
+  const { format } = useFormattedCurrency()
+
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
       <Card className="border-l-4 border-l-green-500">
@@ -25,7 +27,7 @@ export function DashboardStats({ stats }: DashboardStatsProps) {
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold text-green-600 text-center">
-            {formatCurrency(stats.totalReceitas)}
+            {format(stats.totalReceitas)}
           </div>
           <p className="text-xs text-muted-foreground text-center">
             Mês atual
@@ -42,7 +44,7 @@ export function DashboardStats({ stats }: DashboardStatsProps) {
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold text-red-600 text-center">
-            {formatCurrency(stats.totalDespesas)}
+            {format(stats.totalDespesas)}
           </div>
           <p className="text-xs text-muted-foreground text-center">
             Mês atual
@@ -59,7 +61,7 @@ export function DashboardStats({ stats }: DashboardStatsProps) {
         </CardHeader>
         <CardContent>
           <div className={`text-2xl font-bold text-center ${stats.saldo >= 0 ? 'text-primary' : 'text-red-600'}`}>
-            {formatCurrency(stats.saldo)}
+            {format(stats.saldo)}
           </div>
           <p className="text-xs text-muted-foreground text-center">
             Receitas - Despesas

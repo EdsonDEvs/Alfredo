@@ -65,12 +65,15 @@ export interface Transacao {
 
 export interface Profile {
   id: string;
-  userid: string;
-  full_name?: string;
-  avatar_url?: string;
-  subscription_status?: string;
-  subscription_plan?: string;
-  phone_number?: string; // Campo para identificação WhatsApp
+  nome?: string | null; // Nome do usuário (coluna real na tabela)
+  email?: string | null;
+  phone?: string | null; // Telefone (coluna real na tabela)
+  whatsapp?: string | null;
+  avatar_url?: string | null;
+  subscription_status?: string | null;
+  subscription_end_date?: string | null;
+  currency?: 'BRL' | 'USD' | 'EUR'; // Moeda preferida do usuário
+  locale?: string; // Locale preferido do usuário
   created_at: string;
   updated_at: string;
 }

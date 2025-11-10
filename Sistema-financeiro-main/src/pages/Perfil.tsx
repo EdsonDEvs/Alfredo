@@ -13,6 +13,7 @@ import { useNavigate } from 'react-router-dom'
 import { supabase } from '@/lib/supabase'
 import type { Profile } from '@/lib/supabase'
 import { Badge } from '@/components/ui/badge'
+import { CurrencySelector } from '@/components/profile/CurrencySelector'
 
 export default function Perfil() {
   const { user, signOut } = useAuth()
@@ -23,10 +24,10 @@ export default function Perfil() {
   const [deleting, setDeleting] = useState(false)
 
   const [formData, setFormData] = useState({
-    full_name: '',
-    phone_number: '',
-    subscription_status: 'active',
-    subscription_plan: 'premium'
+    nome: '',
+    phone: '',
+    whatsapp: '',
+    subscription_status: 'active'
   })
 
   useEffect(() => {
@@ -56,10 +57,10 @@ export default function Perfil() {
       if (data) {
         setProfile(data)
         setFormData({
-          full_name: data.full_name || '',
-          phone_number: data.phone_number || '',
-          subscription_status: data.subscription_status || 'active',
-          subscription_plan: data.subscription_plan || 'premium'
+          nome: data.nome || '',
+          phone: data.phone || '',
+          whatsapp: data.whatsapp || '',
+          subscription_status: data.subscription_status || 'active'
         })
       }
     } catch (error: any) {
@@ -86,10 +87,10 @@ export default function Perfil() {
       const { error } = await supabase
         .from('profiles')
         .update({
-          full_name: formData.full_name,
-          phone_number: formData.phone_number,
+          nome: formData.nome,
+          phone: formData.phone,
+          whatsapp: formData.whatsapp,
           subscription_status: formData.subscription_status,
-          subscription_plan: formData.subscription_plan,
           updated_at: new Date().toISOString()
         })
         .eq('id', user.id)
@@ -180,7 +181,7 @@ export default function Perfil() {
 
       <div className="grid gap-6 md:grid-cols-3">
         {/* Informações do Perfil */}
-        <div className="md:col-span-2">
+        <div className="md:col-span-2 space-y-6">
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -192,48 +193,48 @@ export default function Perfil() {
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="flex items-center space-x-4">
                   <Avatar className="h-16 w-16">
-                    <AvatarImage src={profile?.avatar_url} />
+                    <AvatarImage src={profile?.avatar_url || undefined} />
                     <AvatarFallback>
-                      {profile?.full_name?.charAt(0) || user?.email?.charAt(0) || 'U'}
+                      {profile?.nome?.charAt(0) || user?.email?.charAt(0) || 'U'}
                     </AvatarFallback>
                   </Avatar>
                   <div>
-                    <p className="font-medium">{profile?.full_name || 'Usuário'}</p>
+                    <p className="font-medium">{profile?.nome || user?.email || 'Usuário'}</p>
                     <p className="text-sm text-gray-600">{user?.email}</p>
                   </div>
                 </div>
 
                 <div>
-                  <Label htmlFor="full_name">Nome Completo</Label>
+                  <Label htmlFor="nome">Nome Completo</Label>
                   <Input
-                    id="full_name"
-                    value={formData.full_name}
-                    onChange={(e) => setFormData({...formData, full_name: e.target.value})}
+                    id="nome"
+                    value={formData.nome}
+                    onChange={(e) => setFormData({...formData, nome: e.target.value})}
                     placeholder="Seu nome completo"
                   />
                 </div>
 
                 <div>
-                  <Label htmlFor="phone_number">Telefone (WhatsApp)</Label>
+                  <Label htmlFor="phone">Telefone</Label>
                   <Input
-                    id="phone_number"
-                    value={formData.phone_number}
-                    onChange={(e) => setFormData({...formData, phone_number: e.target.value})}
+                    id="phone"
+                    value={formData.phone}
+                    onChange={(e) => setFormData({...formData, phone: e.target.value})}
+                    placeholder="+55 11 99999-9999"
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="whatsapp">WhatsApp</Label>
+                  <Input
+                    id="whatsapp"
+                    value={formData.whatsapp}
+                    onChange={(e) => setFormData({...formData, whatsapp: e.target.value})}
                     placeholder="5511999999999"
                   />
                   <p className="text-sm text-gray-500 mt-1">
                     Formato: 5511999999999 (sem +)
                   </p>
-                </div>
-
-                <div>
-                  <Label htmlFor="subscription_plan">Plano</Label>
-                  <Input
-                    id="subscription_plan"
-                    value={formData.subscription_plan}
-                    disabled
-                    className="bg-gray-100"
-                  />
                 </div>
 
                 <Button type="submit" disabled={saving}>
@@ -242,6 +243,9 @@ export default function Perfil() {
               </form>
             </CardContent>
           </Card>
+
+          {/* Seletor de Moeda */}
+          <CurrencySelector />
         </div>
 
         {/* Sidebar */}
@@ -263,8 +267,8 @@ export default function Perfil() {
                   </Badge>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-sm text-gray-600">Plano:</span>
-                  <span className="text-sm font-medium">{profile?.subscription_plan || 'premium'}</span>
+                  <span className="text-sm text-gray-600">Email:</span>
+                  <span className="text-sm font-medium">{profile?.email || user?.email || '-'}</span>
                 </div>
               </div>
             </CardContent>

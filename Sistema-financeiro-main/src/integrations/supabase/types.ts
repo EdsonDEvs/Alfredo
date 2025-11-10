@@ -82,9 +82,11 @@ export type Database = {
           ativo: boolean | null
           avatar_url: string | null
           created_at: string
+          currency: string | null
           customerid: string | null
           email: string | null
           id: string
+          locale: string | null
           nome: string | null
           phone: string | null
           stripe_customer_id: string | null
@@ -100,9 +102,11 @@ export type Database = {
           ativo?: boolean | null
           avatar_url?: string | null
           created_at?: string
+          currency?: string | null
           customerid?: string | null
           email?: string | null
           id: string
+          locale?: string | null
           nome?: string | null
           phone?: string | null
           stripe_customer_id?: string | null
@@ -118,9 +122,11 @@ export type Database = {
           ativo?: boolean | null
           avatar_url?: string | null
           created_at?: string
+          currency?: string | null
           customerid?: string | null
           email?: string | null
           id?: string
+          locale?: string | null
           nome?: string | null
           phone?: string | null
           stripe_customer_id?: string | null

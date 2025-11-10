@@ -12,12 +12,13 @@ import { useAuth } from '@/hooks/useAuth'
 import { TransacoesService } from '@/services/transacoes'
 import { toast } from '@/hooks/use-toast'
 import { Plus, Edit, Trash2, TrendingUp, TrendingDown } from 'lucide-react'
-import { formatCurrency } from '@/utils/currency'
+import { useFormattedCurrency } from '@/hooks/useFormattedCurrency'
 import { formatDate, formatTime } from '@/utils/date'
 import type { Transacao } from '@/lib/supabase'
 
 export default function Transacoes() {
   const { user } = useAuth()
+  const { format } = useFormattedCurrency()
   const [transacoes, setTransacoes] = useState<Transacao[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [dialogOpen, setDialogOpen] = useState(false)
@@ -118,7 +119,7 @@ export default function Transacoes() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-600">Total Receitas</p>
-                <p className="text-2xl font-bold text-green-600">{formatCurrency(totalReceitas)}</p>
+                <p className="text-2xl font-bold text-green-600">{format(totalReceitas)}</p>
               </div>
               <TrendingUp className="h-8 w-8 text-green-500" />
             </div>
@@ -130,7 +131,7 @@ export default function Transacoes() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-600">Total Despesas</p>
-                <p className="text-2xl font-bold text-red-600">{formatCurrency(totalDespesas)}</p>
+                <p className="text-2xl font-bold text-red-600">{format(totalDespesas)}</p>
               </div>
               <TrendingDown className="h-8 w-8 text-red-500" />
             </div>
@@ -143,7 +144,7 @@ export default function Transacoes() {
               <div>
                 <p className="text-sm text-gray-600">Saldo</p>
                 <p className={`text-2xl font-bold ${saldo >= 0 ? 'text-blue-600' : 'text-red-600'}`}>
-                  {formatCurrency(saldo)}
+                  {format(saldo)}
                 </p>
               </div>
             </div>
@@ -218,7 +219,7 @@ export default function Transacoes() {
                   </div>
                   <div className="text-right">
                     <p className={`font-bold ${transacao.tipo === 'receita' ? 'text-green-600' : 'text-red-600'}`}>
-                      {transacao.tipo === 'receita' ? '+' : '-'}{formatCurrency(transacao.valor)}
+                      {transacao.tipo === 'receita' ? '+' : '-'}{format(transacao.valor)}
                     </p>
                     <Badge variant="outline" className="mt-1">
                       {transacao.categorias?.nome || 'Sem categoria'}
