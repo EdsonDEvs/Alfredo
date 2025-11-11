@@ -23,6 +23,7 @@ import Lembretes from '@/pages/Lembretes'
 import Metas from '@/pages/Metas'
 import Perfil from '@/pages/Perfil'
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute'
+import { InstallPrompt } from '@/components/pwa/InstallPrompt'
 
 function App() {
   return (
@@ -57,6 +58,8 @@ function App() {
                     </Route>
                     <Route path="/dashboard" element={<Navigate to="/" replace />} />
                   </Routes>
+                  {/* Prompt de instalação do PWA */}
+                  <InstallPrompt />
                 </SafeTooltipProvider>
               </TransacoesSyncProvider>
             </Router>
