@@ -34,21 +34,25 @@ export function DashboardFilters({
 }: DashboardFiltersProps) {
   return (
     <Card>
-      <CardContent className="p-4">
-        <div className="flex flex-col gap-4">
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-            <div>
-              <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
-              <p className="text-muted-foreground">
+      <CardContent className="p-3 sm:p-4">
+        <div className="flex flex-col gap-3 sm:gap-4">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4">
+            <div className="flex-1">
+              <h2 className="text-xl sm:text-2xl md:text-3xl font-bold tracking-tight">Dashboard</h2>
+              <p className="text-xs sm:text-sm text-muted-foreground mt-1">
                 Visão geral das suas finanças pessoais
-                {transactionCount > 0 && ` • ${transactionCount} transações encontradas`}
+                {transactionCount > 0 && (
+                  <span className="block sm:inline">
+                    {transactionCount > 0 && ` • ${transactionCount} transações encontradas`}
+                  </span>
+                )}
               </p>
             </div>
             
-            <div className="flex gap-2 items-center">
-              <Filter className="h-4 w-4 text-muted-foreground" />
+            <div className="flex gap-2 items-center w-full sm:w-auto">
+              <Filter className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />
               <Select value={filterMode} onValueChange={(value) => setFilterMode(value as 'month' | 'period')}>
-                <SelectTrigger className="w-32">
+                <SelectTrigger className="w-full sm:w-32 text-xs sm:text-sm">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -60,10 +64,10 @@ export function DashboardFilters({
           </div>
 
           {filterMode === 'month' ? (
-            <div className="flex gap-2 items-center">
-              <Calendar className="h-4 w-4 text-muted-foreground" />
+            <div className="flex flex-col sm:flex-row gap-2 sm:gap-2 items-stretch sm:items-center">
+              <Calendar className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground hidden sm:block" />
               <Select value={filterMonth} onValueChange={setFilterMonth}>
-                <SelectTrigger className="w-40">
+                <SelectTrigger className="w-full sm:w-40 text-xs sm:text-sm">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -75,7 +79,7 @@ export function DashboardFilters({
                 </SelectContent>
               </Select>
               <Select value={filterYear} onValueChange={setFilterYear}>
-                <SelectTrigger className="w-24">
+                <SelectTrigger className="w-full sm:w-24 text-xs sm:text-sm">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -91,25 +95,25 @@ export function DashboardFilters({
               </Select>
             </div>
           ) : (
-            <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-end">
-              <div className="flex-1">
-                <Label htmlFor="startDate">Data Inicial</Label>
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 items-stretch sm:items-end">
+              <div className="flex-1 w-full">
+                <Label htmlFor="startDate" className="text-xs sm:text-sm">Data Inicial</Label>
                 <Input
                   id="startDate"
                   type="date"
                   value={startDate}
                   onChange={(e) => setStartDate(e.target.value)}
-                  className="mt-1"
+                  className="mt-1 text-xs sm:text-sm"
                 />
               </div>
-              <div className="flex-1">
-                <Label htmlFor="endDate">Data Final</Label>
+              <div className="flex-1 w-full">
+                <Label htmlFor="endDate" className="text-xs sm:text-sm">Data Final</Label>
                 <Input
                   id="endDate"
                   type="date"
                   value={endDate}
                   onChange={(e) => setEndDate(e.target.value)}
-                  className="mt-1"
+                  className="mt-1 text-xs sm:text-sm"
                   min={startDate}
                 />
               </div>

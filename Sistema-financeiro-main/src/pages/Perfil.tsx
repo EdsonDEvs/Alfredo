@@ -170,74 +170,77 @@ export default function Perfil() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Cabeçalho */}
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-2xl font-bold">Perfil</h1>
-          <p className="text-gray-600">Gerencie suas informações pessoais</p>
+          <h1 className="text-xl sm:text-2xl font-bold">Perfil</h1>
+          <p className="text-sm sm:text-base text-gray-600">Gerencie suas informações pessoais</p>
         </div>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-3">
+      <div className="grid gap-4 sm:gap-6 lg:grid-cols-3">
         {/* Informações do Perfil */}
-        <div className="md:col-span-2 space-y-6">
+        <div className="lg:col-span-2 space-y-4 sm:space-y-6">
           <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <User className="h-5 w-5" />
+            <CardHeader className="p-4 sm:p-6">
+              <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                <User className="h-4 w-4 sm:h-5 sm:w-5" />
                 Informações Pessoais
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="flex items-center space-x-4">
-                  <Avatar className="h-16 w-16">
+            <CardContent className="p-4 sm:p-6 pt-0">
+              <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
+                <div className="flex items-center space-x-3 sm:space-x-4">
+                  <Avatar className="h-12 w-12 sm:h-16 sm:w-16">
                     <AvatarImage src={profile?.avatar_url || undefined} />
-                    <AvatarFallback>
+                    <AvatarFallback className="text-sm sm:text-base">
                       {profile?.nome?.charAt(0) || user?.email?.charAt(0) || 'U'}
                     </AvatarFallback>
                   </Avatar>
-                  <div>
-                    <p className="font-medium">{profile?.nome || user?.email || 'Usuário'}</p>
-                    <p className="text-sm text-gray-600">{user?.email}</p>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium text-sm sm:text-base truncate">{profile?.nome || user?.email || 'Usuário'}</p>
+                    <p className="text-xs sm:text-sm text-gray-600 truncate">{user?.email}</p>
                   </div>
                 </div>
 
                 <div>
-                  <Label htmlFor="nome">Nome Completo</Label>
+                  <Label htmlFor="nome" className="text-xs sm:text-sm">Nome Completo</Label>
                   <Input
                     id="nome"
                     value={formData.nome}
                     onChange={(e) => setFormData({...formData, nome: e.target.value})}
                     placeholder="Seu nome completo"
+                    className="text-xs sm:text-sm mt-1"
                   />
                 </div>
 
                 <div>
-                  <Label htmlFor="phone">Telefone</Label>
+                  <Label htmlFor="phone" className="text-xs sm:text-sm">Telefone</Label>
                   <Input
                     id="phone"
                     value={formData.phone}
                     onChange={(e) => setFormData({...formData, phone: e.target.value})}
                     placeholder="+55 11 99999-9999"
+                    className="text-xs sm:text-sm mt-1"
                   />
                 </div>
 
                 <div>
-                  <Label htmlFor="whatsapp">WhatsApp</Label>
+                  <Label htmlFor="whatsapp" className="text-xs sm:text-sm">WhatsApp</Label>
                   <Input
                     id="whatsapp"
                     value={formData.whatsapp}
                     onChange={(e) => setFormData({...formData, whatsapp: e.target.value})}
                     placeholder="5511999999999"
+                    className="text-xs sm:text-sm mt-1"
                   />
-                  <p className="text-sm text-gray-500 mt-1">
+                  <p className="text-xs text-gray-500 mt-1">
                     Formato: 5511999999999 (sem +)
                   </p>
                 </div>
 
-                <Button type="submit" disabled={saving}>
+                <Button type="submit" disabled={saving} className="w-full sm:w-auto text-sm sm:text-base">
                   {saving ? 'Salvando...' : 'Salvar Alterações'}
                 </Button>
               </form>
@@ -249,26 +252,26 @@ export default function Perfil() {
         </div>
 
         {/* Sidebar */}
-        <div className="space-y-4">
+        <div className="space-y-4 sm:space-y-4">
           {/* Status da Assinatura */}
           <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <CreditCard className="h-5 w-5" />
+            <CardHeader className="p-4 sm:p-6">
+              <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                <CreditCard className="h-4 w-4 sm:h-5 sm:w-5" />
                 Assinatura
               </CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="p-4 sm:p-6 pt-0">
               <div className="space-y-2">
-                <div className="flex justify-between">
-                  <span className="text-sm text-gray-600">Status:</span>
-                  <Badge variant={profile?.subscription_status === 'active' ? 'default' : 'secondary'}>
+                <div className="flex justify-between items-center">
+                  <span className="text-xs sm:text-sm text-gray-600">Status:</span>
+                  <Badge variant={profile?.subscription_status === 'active' ? 'default' : 'secondary'} className="text-xs">
                     {profile?.subscription_status || 'active'}
                   </Badge>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-sm text-gray-600">Email:</span>
-                  <span className="text-sm font-medium">{profile?.email || user?.email || '-'}</span>
+                <div className="flex justify-between items-center">
+                  <span className="text-xs sm:text-sm text-gray-600">Email:</span>
+                  <span className="text-xs sm:text-sm font-medium truncate ml-2">{profile?.email || user?.email || '-'}</span>
                 </div>
               </div>
             </CardContent>
@@ -276,36 +279,36 @@ export default function Perfil() {
 
           {/* Ações */}
           <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Settings className="h-5 w-5" />
+            <CardHeader className="p-4 sm:p-6">
+              <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                <Settings className="h-4 w-4 sm:h-5 sm:w-5" />
                 Ações
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-2">
-              <Button variant="outline" className="w-full" onClick={() => signOut()}>
+            <CardContent className="space-y-2 p-4 sm:p-6 pt-0">
+              <Button variant="outline" className="w-full text-sm sm:text-base" onClick={() => signOut()}>
                 Sair
               </Button>
               
               <AlertDialog>
                 <AlertDialogTrigger asChild>
-                  <Button variant="destructive" className="w-full">
-                    <Trash2 className="h-4 w-4 mr-2" />
+                  <Button variant="destructive" className="w-full text-sm sm:text-base">
+                    <Trash2 className="h-3 w-3 sm:h-4 sm:w-4 mr-2" />
                     Deletar Conta
                   </Button>
                 </AlertDialogTrigger>
-                <AlertDialogContent>
+                <AlertDialogContent className="max-w-[95vw] sm:max-w-md">
                   <AlertDialogHeader>
-                    <AlertDialogTitle>Deletar Conta</AlertDialogTitle>
-                    <AlertDialogDescription>
+                    <AlertDialogTitle className="text-lg sm:text-xl">Deletar Conta</AlertDialogTitle>
+                    <AlertDialogDescription className="text-xs sm:text-sm">
                       Esta ação não pode ser desfeita. Isso irá remover permanentemente sua conta e todos os dados associados.
                     </AlertDialogDescription>
                   </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                  <AlertDialogFooter className="flex-col sm:flex-row gap-2">
+                    <AlertDialogCancel className="w-full sm:w-auto text-sm">Cancelar</AlertDialogCancel>
                     <AlertDialogAction
                       onClick={handleDeleteAccount}
-                      className="bg-red-600 hover:bg-red-700"
+                      className="bg-red-600 hover:bg-red-700 w-full sm:w-auto text-sm"
                       disabled={deleting}
                     >
                       {deleting ? 'Deletando...' : 'Deletar Conta'}

@@ -96,20 +96,21 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Cabeçalho com botão de importação */}
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-2xl font-bold">Dashboard</h1>
-          <p className="text-gray-600">Visão geral das suas finanças</p>
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4">
+        <div className="flex-1">
+          <h1 className="text-xl sm:text-2xl font-bold">Dashboard</h1>
+          <p className="text-sm sm:text-base text-gray-600">Visão geral das suas finanças</p>
           <p className="text-xs text-gray-400 mt-1">
-            Total de transações: {transacoes.length} | Última atualização: {new Date(lastUpdate).toLocaleTimeString()}
+            Total: {transacoes.length} | Atualizado: {new Date(lastUpdate).toLocaleTimeString()}
           </p>
         </div>
-        <div className="flex gap-2">
-          <Button variant="outline" size="sm" onClick={refresh} disabled={loading}>
-            <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
-            Atualizar
+        <div className="flex gap-2 w-full sm:w-auto">
+          <Button variant="outline" size="sm" onClick={refresh} disabled={loading} className="flex-1 sm:flex-initial text-xs sm:text-sm">
+            <RefreshCw className={`h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2 ${loading ? 'animate-spin' : ''}`} />
+            <span className="hidden sm:inline">Atualizar</span>
+            <span className="sm:hidden">Atualizar</span>
           </Button>
           <ExcelImporter onImportComplete={refresh} />
         </div>
@@ -131,8 +132,8 @@ export default function Dashboard() {
       
       {/* Informação sobre filtros */}
       {transacoes.length > 0 && filteredTransacoes.length === 0 && (
-        <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4">
-          <p className="text-sm text-yellow-800 dark:text-yellow-200">
+        <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-3 sm:p-4">
+          <p className="text-xs sm:text-sm text-yellow-800 dark:text-yellow-200">
             ⚠️ Nenhuma transação encontrada para o período selecionado.
             {filterMode === 'month' ? (
               <> Você tem {transacoes.length} transação(ões) no total. Tente alterar o filtro de mês/ano.</>
@@ -145,8 +146,8 @@ export default function Dashboard() {
       
       {/* Validação de período */}
       {filterMode === 'period' && startDate && endDate && startDate > endDate && (
-        <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
-          <p className="text-sm text-red-800 dark:text-red-200">
+        <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-3 sm:p-4">
+          <p className="text-xs sm:text-sm text-red-800 dark:text-red-200">
             ⚠️ A data inicial não pode ser maior que a data final. Por favor, corrija as datas.
           </p>
         </div>

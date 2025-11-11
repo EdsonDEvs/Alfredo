@@ -65,36 +65,37 @@ export default function Transacoes() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Cabeçalho */}
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-2xl font-bold">Transações</h1>
-          <p className="text-gray-600">Gerencie suas receitas e despesas</p>
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4">
+        <div className="flex-1">
+          <h1 className="text-xl sm:text-2xl font-bold">Transações</h1>
+          <p className="text-sm sm:text-base text-gray-600">Gerencie suas receitas e despesas</p>
           <p className="text-xs text-gray-400 mt-1">
-            Total: {transacoes.length} transações | Última atualização: {new Date(lastUpdate).toLocaleTimeString()}
+            Total: {transacoes.length} | Atualizado: {new Date(lastUpdate).toLocaleTimeString()}
           </p>
         </div>
-        <div className="flex gap-2">
-          <Button variant="outline" size="sm" onClick={refresh} disabled={isLoading}>
-            <RefreshCw className={`h-4 w-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
+        <div className="flex gap-2 w-full sm:w-auto">
+          <Button variant="outline" size="sm" onClick={refresh} disabled={isLoading} className="flex-1 sm:flex-initial text-xs sm:text-sm">
+            <RefreshCw className={`h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2 ${isLoading ? 'animate-spin' : ''}`} />
             Atualizar
           </Button>
           <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
             <DialogTrigger asChild>
-              <Button>
-                <Plus className="h-4 w-4 mr-2" />
-                Nova Transação
+              <Button size="sm" className="flex-1 sm:flex-initial text-xs sm:text-sm">
+                <Plus className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+                <span className="hidden sm:inline">Nova Transação</span>
+                <span className="sm:hidden">Nova</span>
               </Button>
             </DialogTrigger>
-            <DialogContent>
+            <DialogContent className="max-w-[95vw] sm:max-w-md">
               <DialogHeader>
-                <DialogTitle>Nova Transação</DialogTitle>
-                <DialogDescription>
+                <DialogTitle className="text-lg sm:text-xl">Nova Transação</DialogTitle>
+                <DialogDescription className="text-xs sm:text-sm">
                   Adicione uma nova receita ou despesa
                 </DialogDescription>
               </DialogHeader>
-              <div className="space-y-4">
+              <div className="space-y-3 sm:space-y-4">
                 <div>
                   <Label htmlFor="quando">Data</Label>
                   <Input
@@ -163,37 +164,37 @@ export default function Transacoes() {
       </div>
 
       {/* Cards de resumo */}
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
         <Card className="border-l-4 border-l-green-500">
-          <CardContent className="p-4">
+          <CardContent className="p-3 sm:p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600">Total Receitas</p>
-                <p className="text-2xl font-bold text-green-600">{format(totalReceitas)}</p>
+                <p className="text-xs sm:text-sm text-gray-600">Total Receitas</p>
+                <p className="text-lg sm:text-xl md:text-2xl font-bold text-green-600">{format(totalReceitas)}</p>
               </div>
-              <TrendingUp className="h-8 w-8 text-green-500" />
+              <TrendingUp className="h-6 w-6 sm:h-8 sm:w-8 text-green-500" />
             </div>
           </CardContent>
         </Card>
 
         <Card className="border-l-4 border-l-red-500">
-          <CardContent className="p-4">
+          <CardContent className="p-3 sm:p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600">Total Despesas</p>
-                <p className="text-2xl font-bold text-red-600">{format(totalDespesas)}</p>
+                <p className="text-xs sm:text-sm text-gray-600">Total Despesas</p>
+                <p className="text-lg sm:text-xl md:text-2xl font-bold text-red-600">{format(totalDespesas)}</p>
               </div>
-              <TrendingDown className="h-8 w-8 text-red-500" />
+              <TrendingDown className="h-6 w-6 sm:h-8 sm:w-8 text-red-500" />
             </div>
           </CardContent>
         </Card>
 
-        <Card className="border-l-4 border-l-blue-500">
-          <CardContent className="p-4">
+        <Card className="border-l-4 border-l-blue-500 sm:col-span-2 lg:col-span-1">
+          <CardContent className="p-3 sm:p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600">Saldo</p>
-                <p className={`text-2xl font-bold ${saldo >= 0 ? 'text-blue-600' : 'text-red-600'}`}>
+                <p className="text-xs sm:text-sm text-gray-600">Saldo</p>
+                <p className={`text-lg sm:text-xl md:text-2xl font-bold ${saldo >= 0 ? 'text-blue-600' : 'text-red-600'}`}>
                   {format(saldo)}
                 </p>
               </div>
@@ -204,21 +205,22 @@ export default function Transacoes() {
 
       {/* Filtros */}
       <Card>
-        <CardContent className="p-4">
-          <div className="grid gap-4 md:grid-cols-2">
+        <CardContent className="p-3 sm:p-4">
+          <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2">
             <div>
-              <Label htmlFor="search">Buscar</Label>
+              <Label htmlFor="search" className="text-xs sm:text-sm">Buscar</Label>
               <Input
                 id="search"
                 placeholder="Buscar por estabelecimento..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
+                className="text-xs sm:text-sm mt-1"
               />
             </div>
             <div>
-              <Label htmlFor="type">Tipo</Label>
+              <Label htmlFor="type" className="text-xs sm:text-sm">Tipo</Label>
               <Select value={typeFilter} onValueChange={setTypeFilter}>
-                <SelectTrigger>
+                <SelectTrigger className="text-xs sm:text-sm mt-1">
                   <SelectValue placeholder="Todos os tipos" />
                 </SelectTrigger>
                 <SelectContent>
@@ -234,26 +236,26 @@ export default function Transacoes() {
 
       {/* Lista de transações */}
       <Card>
-        <CardContent className="p-4">
-          <div className="space-y-4">
+        <CardContent className="p-3 sm:p-4">
+          <div className="space-y-3 sm:space-y-4">
             {filteredTransacoes.length === 0 ? (
-              <div className="text-center py-8">
-                <p className="text-gray-500">Nenhuma transação encontrada</p>
+              <div className="text-center py-6 sm:py-8">
+                <p className="text-sm sm:text-base text-gray-500">Nenhuma transação encontrada</p>
               </div>
             ) : (
               filteredTransacoes.map((transacao) => (
-                <div key={transacao.id} className="flex items-center justify-between p-4 border rounded-lg">
-                  <div className="flex items-center space-x-4">
-                    <div className={`p-2 rounded-full ${transacao.tipo === 'receita' ? 'bg-green-100' : 'bg-red-100'}`}>
+                <div key={transacao.id} className="flex flex-col sm:flex-row sm:items-center justify-between p-3 sm:p-4 border rounded-lg gap-3 sm:gap-4">
+                  <div className="flex items-center space-x-3 sm:space-x-4 flex-1">
+                    <div className={`p-1.5 sm:p-2 rounded-full ${transacao.tipo === 'receita' ? 'bg-green-100' : 'bg-red-100'}`}>
                       {transacao.tipo === 'receita' ? (
-                        <TrendingUp className="h-4 w-4 text-green-600" />
+                        <TrendingUp className="h-3 w-3 sm:h-4 sm:w-4 text-green-600" />
                       ) : (
-                        <TrendingDown className="h-4 w-4 text-red-600" />
+                        <TrendingDown className="h-3 w-3 sm:h-4 sm:w-4 text-red-600" />
                       )}
                     </div>
-                    <div>
-                      <p className="font-medium">{transacao.estabelecimento}</p>
-                      <div className="flex items-center gap-2 text-sm text-gray-600">
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-sm sm:text-base truncate">{transacao.estabelecimento}</p>
+                      <div className="flex flex-wrap items-center gap-1 sm:gap-2 text-xs sm:text-sm text-gray-600">
                         <span>{formatDate(transacao.quando)}</span>
                         {transacao.created_at && (
                           <>
@@ -263,15 +265,15 @@ export default function Transacoes() {
                         )}
                       </div>
                       {transacao.detalhes && (
-                        <p className="text-sm text-gray-500">{transacao.detalhes}</p>
+                        <p className="text-xs sm:text-sm text-gray-500 mt-1 line-clamp-2">{transacao.detalhes}</p>
                       )}
                     </div>
                   </div>
-                  <div className="text-right">
-                    <p className={`font-bold ${transacao.tipo === 'receita' ? 'text-green-600' : 'text-red-600'}`}>
+                  <div className="flex sm:flex-col items-end sm:text-right gap-2 sm:gap-1">
+                    <p className={`font-bold text-sm sm:text-base ${transacao.tipo === 'receita' ? 'text-green-600' : 'text-red-600'}`}>
                       {transacao.tipo === 'receita' ? '+' : '-'}{format(transacao.valor)}
                     </p>
-                    <Badge variant="outline" className="mt-1">
+                    <Badge variant="outline" className="text-xs">
                       {transacao.categorias?.nome || 'Sem categoria'}
                     </Badge>
                   </div>

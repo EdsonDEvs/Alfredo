@@ -17,70 +17,70 @@ export function DashboardStats({ stats }: DashboardStatsProps) {
   const { format } = useFormattedCurrency()
 
   return (
-    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+    <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
       <Card className="border-l-4 border-l-green-500">
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-3 sm:p-6">
+          <CardTitle className="text-xs sm:text-sm font-medium">
             Total de Receitas
           </CardTitle>
-          <TrendingUp className="h-4 w-4 text-green-600" />
+          <TrendingUp className="h-3 w-3 sm:h-4 sm:w-4 text-green-600" />
         </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold text-green-600 text-center">
+        <CardContent className="p-3 sm:p-6 pt-0">
+          <div className="text-lg sm:text-xl md:text-2xl font-bold text-green-600 text-center">
             {format(stats.totalReceitas)}
           </div>
-          <p className="text-xs text-muted-foreground text-center">
+          <p className="text-xs text-muted-foreground text-center mt-1">
             Mês atual
           </p>
         </CardContent>
       </Card>
 
       <Card className="border-l-4 border-l-red-500">
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-3 sm:p-6">
+          <CardTitle className="text-xs sm:text-sm font-medium">
             Total de Despesas
           </CardTitle>
-          <TrendingDown className="h-4 w-4 text-red-600" />
+          <TrendingDown className="h-3 w-3 sm:h-4 sm:w-4 text-red-600" />
         </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold text-red-600 text-center">
+        <CardContent className="p-3 sm:p-6 pt-0">
+          <div className="text-lg sm:text-xl md:text-2xl font-bold text-red-600 text-center">
             {format(stats.totalDespesas)}
           </div>
-          <p className="text-xs text-muted-foreground text-center">
+          <p className="text-xs text-muted-foreground text-center mt-1">
             Mês atual
           </p>
         </CardContent>
       </Card>
 
       <Card className="border-l-4 border-l-primary">
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-3 sm:p-6">
+          <CardTitle className="text-xs sm:text-sm font-medium">
             Saldo Atual
           </CardTitle>
-          <DollarSign className="h-4 w-4 text-primary" />
+          <DollarSign className="h-3 w-3 sm:h-4 sm:w-4 text-primary" />
         </CardHeader>
-        <CardContent>
-          <div className={`text-2xl font-bold text-center ${stats.saldo >= 0 ? 'text-primary' : 'text-red-600'}`}>
+        <CardContent className="p-3 sm:p-6 pt-0">
+          <div className={`text-lg sm:text-xl md:text-2xl font-bold text-center ${stats.saldo >= 0 ? 'text-primary' : 'text-red-600'}`}>
             {format(stats.saldo)}
           </div>
-          <p className="text-xs text-muted-foreground text-center">
+          <p className="text-xs text-muted-foreground text-center mt-1">
             Receitas - Despesas
           </p>
         </CardContent>
       </Card>
 
       <Card className="border-l-4 border-l-purple-500">
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-3 sm:p-6">
+          <CardTitle className="text-xs sm:text-sm font-medium">
             Lembretes Ativos
           </CardTitle>
-          <Calendar className="h-4 w-4 text-purple-600" />
+          <Calendar className="h-3 w-3 sm:h-4 sm:w-4 text-purple-600" />
         </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold text-purple-600 text-center">
+        <CardContent className="p-3 sm:p-6 pt-0">
+          <div className="text-lg sm:text-xl md:text-2xl font-bold text-purple-600 text-center">
             {stats.lembretesCount}
           </div>
-          <p className="text-xs text-muted-foreground text-center">
+          <p className="text-xs text-muted-foreground text-center mt-1">
             Este mês
           </p>
         </CardContent>

@@ -177,35 +177,35 @@ export default function Cadastro() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-muted/20 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gradient-to-b from-background to-muted/20 py-6 sm:py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto">
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <Button variant="ghost" onClick={() => navigate('/landing')}>
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Voltar
+        <div className="flex items-center justify-between mb-4 sm:mb-8">
+          <Button variant="ghost" size="sm" className="text-xs sm:text-sm px-2 sm:px-4" onClick={() => navigate('/landing')}>
+            <ArrowLeft className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4" />
+            <span className="hidden sm:inline">Voltar</span>
           </Button>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 sm:gap-2">
             <img 
               src="/lovable-uploads/d58baa4c-1273-42fb-83d0-950387ad313b.png" 
               alt="ALFREDO" 
-              className="h-6 w-auto" 
+              className="h-5 sm:h-6 w-auto" 
             />
-            <span className="font-bold">ALFREDO</span>
+            <span className="font-bold text-sm sm:text-base">ALFREDO</span>
           </div>
         </div>
 
-        <div className="grid lg:grid-cols-3 gap-6">
+        <div className="grid lg:grid-cols-3 gap-4 sm:gap-6">
           {/* Formulário */}
-          <div className="lg:col-span-2">
+          <div className="lg:col-span-2 order-2 lg:order-1">
             <Card>
-              <CardHeader>
-                <CardTitle>Complete seu cadastro</CardTitle>
-                <CardDescription>
+              <CardHeader className="p-4 sm:p-6">
+                <CardTitle className="text-lg sm:text-xl">Complete seu cadastro</CardTitle>
+                <CardDescription className="text-xs sm:text-sm">
                   Preencha seus dados para começar a usar o Alfredo
                 </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-6">
+              <CardContent className="space-y-4 sm:space-y-6 p-4 sm:p-6">
                 {/* Nome */}
                 <div>
                   <Label htmlFor="nome">Nome Completo *</Label>
@@ -273,7 +273,7 @@ export default function Cadastro() {
 
                 {/* Botão de Submit */}
                 <Button 
-                  className="w-full" 
+                  className="w-full text-sm sm:text-base" 
                   size="lg"
                   onClick={handleSubmit}
                   disabled={loading}
@@ -285,15 +285,16 @@ export default function Cadastro() {
                     </>
                   ) : (
                     <>
-                      Continuar para Pagamento
+                      <span className="hidden sm:inline">Continuar para Pagamento</span>
+                      <span className="sm:hidden">Continuar</span>
                       <CreditCard className="ml-2 h-4 w-4" />
                     </>
                   )}
                 </Button>
 
-                <Alert>
-                  <Shield className="h-4 w-4" />
-                  <AlertDescription>
+                <Alert className="text-xs sm:text-sm">
+                  <Shield className="h-3 w-3 sm:h-4 sm:w-4" />
+                  <AlertDescription className="text-xs sm:text-sm">
                     Seus dados estão seguros. Após o pagamento confirmado, sua conta será criada automaticamente.
                   </AlertDescription>
                 </Alert>
@@ -302,44 +303,44 @@ export default function Cadastro() {
           </div>
 
           {/* Resumo do Plano */}
-          <div className="lg:col-span-1">
-            <Card className="sticky top-4">
-              <CardHeader>
-                <CardTitle>Resumo do Plano</CardTitle>
+          <div className="lg:col-span-1 order-1 lg:order-2">
+            <Card className="lg:sticky lg:top-4">
+              <CardHeader className="p-4 sm:p-6">
+                <CardTitle className="text-lg sm:text-xl">Resumo do Plano</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="space-y-3 sm:space-y-4 p-4 sm:p-6">
                 <div>
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="font-semibold">{selectedPlan.name}</span>
-                    <span className="text-2xl font-bold">R$ {selectedPlan.price.toFixed(2)}</span>
+                  <div className="flex items-center justify-between mb-1 sm:mb-2">
+                    <span className="font-semibold text-sm sm:text-base">{selectedPlan.name}</span>
+                    <span className="text-xl sm:text-2xl font-bold">R$ {selectedPlan.price.toFixed(2)}</span>
                   </div>
-                  <p className="text-sm text-muted-foreground">por mês</p>
+                  <p className="text-xs sm:text-sm text-muted-foreground">por mês</p>
                 </div>
 
                 <div className="space-y-2">
-                  <p className="text-sm font-medium">Inclui:</p>
-                  <ul className="space-y-2">
+                  <p className="text-xs sm:text-sm font-medium">Inclui:</p>
+                  <ul className="space-y-1.5 sm:space-y-2">
                     {selectedPlan.features.map((feature, index) => (
-                      <li key={index} className="flex items-start gap-2 text-sm">
-                        <Check className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                      <li key={index} className="flex items-start gap-2 text-xs sm:text-sm">
+                        <Check className="h-3 w-3 sm:h-4 sm:w-4 text-primary mt-0.5 flex-shrink-0" />
                         <span>{feature}</span>
                       </li>
                     ))}
                   </ul>
                 </div>
 
-                <div className="pt-4 border-t">
-                  <div className="flex items-center justify-between text-sm mb-2">
+                <div className="pt-3 sm:pt-4 border-t">
+                  <div className="flex items-center justify-between text-xs sm:text-sm mb-1 sm:mb-2">
                     <span>Total</span>
-                    <span className="font-bold text-lg">R$ {selectedPlan.price.toFixed(2)}</span>
+                    <span className="font-bold text-base sm:text-lg">R$ {selectedPlan.price.toFixed(2)}</span>
                   </div>
                   <p className="text-xs text-muted-foreground">
                     Cobrança mensal • Cancele quando quiser
                   </p>
                 </div>
 
-                <Alert>
-                  <Shield className="h-4 w-4" />
+                <Alert className="text-xs">
+                  <Shield className="h-3 w-3 sm:h-4 sm:w-4" />
                   <AlertDescription className="text-xs">
                     7 dias de garantia. Se não gostar, devolvemos seu dinheiro.
                   </AlertDescription>
