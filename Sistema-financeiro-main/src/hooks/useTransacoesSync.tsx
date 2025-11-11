@@ -4,7 +4,6 @@
  */
 
 import { createContext, useContext, useCallback, useEffect, useState } from 'react'
-import { useLocation } from 'react-router-dom'
 import { useAuth } from './useAuth'
 import { TransacoesService } from '@/services/transacoes'
 import type { Transacao } from '@/lib/supabase'
@@ -20,7 +19,6 @@ const TransacoesSyncContext = createContext<TransacoesSyncContextType | undefine
 
 export function TransacoesSyncProvider({ children }: { children: React.ReactNode }) {
   const { user } = useAuth()
-  const location = useLocation()
   const [transacoes, setTransacoes] = useState<Transacao[]>([])
   const [loading, setLoading] = useState(true)
   const [lastUpdate, setLastUpdate] = useState(Date.now())
@@ -45,34 +43,13 @@ export function TransacoesSyncProvider({ children }: { children: React.ReactNode
     }
   }, [user?.id])
 
-  // Carregar dados inicialmente
+  // Carregar dados inicialmente apenas uma vez
   useEffect(() => {
     refresh()
-  }, [refresh])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id]) // Apenas quando o usuário mudar
 
-  // Recarregar quando a página recebe foco (usuário volta de outra aba/janela)
-  useEffect(() => {
-    const handleVisibilityChange = () => {
-      if (!document.hidden) {
-        // Página ficou visível, recarregar dados
-        refresh()
-      }
-    }
-
-    const handleFocus = () => {
-      refresh()
-    }
-
-    document.addEventListener('visibilitychange', handleVisibilityChange)
-    window.addEventListener('focus', handleFocus)
-
-    return () => {
-      document.removeEventListener('visibilitychange', handleVisibilityChange)
-      window.removeEventListener('focus', handleFocus)
-    }
-  }, [refresh])
-
-  // Escutar eventos customizados de atualização
+  // Escutar eventos customizados de atualização (apenas quando explicitamente chamado)
   useEffect(() => {
     const handleTransacoesUpdate = () => {
       refresh()
@@ -84,30 +61,6 @@ export function TransacoesSyncProvider({ children }: { children: React.ReactNode
       window.removeEventListener('transacoes:updated', handleTransacoesUpdate)
     }
   }, [refresh])
-
-  // Recarregar quando navegar para páginas que usam transações
-  useEffect(() => {
-    const pagesWithTransactions = ['/', '/dashboard', '/transacoes', '/relatorios']
-    if (pagesWithTransactions.includes(location.pathname)) {
-      // Delay maior para evitar múltiplos recarregamentos
-      const timeoutId = setTimeout(() => {
-        refresh()
-      }, 300)
-
-      return () => clearTimeout(timeoutId)
-    }
-  }, [location.pathname, refresh])
-
-  // Polling periódico para manter dados atualizados (a cada 30 segundos)
-  useEffect(() => {
-    if (!user?.id) return
-
-    const intervalId = setInterval(() => {
-      refresh()
-    }, 30000) // 30 segundos
-
-    return () => clearInterval(intervalId)
-  }, [user?.id, refresh])
 
   return (
     <TransacoesSyncContext.Provider value={{ transacoes, loading, refresh, lastUpdate }}>

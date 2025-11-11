@@ -73,13 +73,57 @@
     @apply border-border;
   }
   
+  html {
+    /* Prevenir zoom indesejado no iOS */
+    -webkit-text-size-adjust: 100%;
+    /* Garantir que a altura seja calculada corretamente */
+    height: 100%;
+    /* Prevenir scroll horizontal */
+    overflow-x: hidden;
+  }
+  
   body {
     @apply bg-background text-foreground;
     font-feature-settings: "rlig" 1, "calt" 1;
+    /* Garantir altura mínima */
+    min-height: 100vh;
+    min-height: -webkit-fill-available; /* iOS Safari */
+    /* Prevenir scroll horizontal */
+    overflow-x: hidden;
+    /* Melhorar renderização no mobile */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    /* Prevenir seleção de texto acidental no mobile */
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  #root {
+    /* Garantir que o root ocupe toda a altura */
+    min-height: 100vh;
+    min-height: -webkit-fill-available; /* iOS Safari */
+    /* Prevenir scroll horizontal */
+    overflow-x: hidden;
   }
 
   h1, h2, h3, h4, h5, h6 {
     color: hsl(var(--title-color));
+  }
+  
+  /* Melhorar renderização de imagens no mobile */
+  img {
+    max-width: 100%;
+    height: auto;
+  }
+  
+  /* Prevenir quebra de layout em inputs no mobile */
+  input, textarea, select {
+    font-size: 16px; /* Prevenir zoom automático no iOS */
+  }
+  
+  /* Garantir que containers não ultrapassem a largura */
+  .container, [class*="container"] {
+    max-width: 100%;
+    overflow-x: hidden;
   }
 }
 
