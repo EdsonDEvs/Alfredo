@@ -38,14 +38,8 @@ export function DashboardFilters({
         <div className="flex flex-col gap-3 sm:gap-4">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4">
             <div className="flex-1">
-              <h2 className="text-xl sm:text-2xl md:text-3xl font-bold tracking-tight">Dashboard</h2>
-              <p className="text-xs sm:text-sm text-muted-foreground mt-1">
-                Visão geral das suas finanças pessoais
-                {transactionCount > 0 && (
-                  <span className="block sm:inline">
-                    {transactionCount > 0 && ` • ${transactionCount} transações encontradas`}
-                  </span>
-                )}
+              <p className="text-xs sm:text-sm text-muted-foreground">
+                {transactionCount > 0 ? `${transactionCount} transações encontradas` : 'Nenhuma transação encontrada'}
               </p>
             </div>
             

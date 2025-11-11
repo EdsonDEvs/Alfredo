@@ -101,9 +101,12 @@ export default function Dashboard() {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4">
         <div className="flex-1">
           <h1 className="text-xl sm:text-2xl font-bold">Dashboard</h1>
-          <p className="text-sm sm:text-base text-gray-600">Visão geral das suas finanças</p>
+          <p className="text-sm sm:text-base text-gray-600">
+            Visão geral das suas finanças pessoais
+            {filteredTransacoes.length > 0 && ` • ${filteredTransacoes.length} transações encontradas`}
+          </p>
           <p className="text-xs text-gray-400 mt-1">
-            Total: {transacoes.length} | Atualizado: {new Date(lastUpdate).toLocaleTimeString()}
+            Total: {transacoes.length} transações | Atualizado: {new Date(lastUpdate).toLocaleTimeString()}
           </p>
         </div>
         <div className="flex gap-2 w-full sm:w-auto">
