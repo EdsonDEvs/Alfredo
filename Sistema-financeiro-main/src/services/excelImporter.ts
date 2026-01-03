@@ -97,13 +97,9 @@ const columnMappings: Record<string, string> = {
   'saldo': 'valor',
   'balance': 'valor',
   'importancia': 'valor',
-  'importância': 'valor',
-  'importancia': 'valor',
   'valor_transacao': 'valor',
-  'valor_transacão': 'valor',
   'valor_transaction': 'valor',
   'valor_operacao': 'valor',
-  'valor_operação': 'valor',
   'valor_operation': 'valor',
   
   // Tipo - muitas variações
