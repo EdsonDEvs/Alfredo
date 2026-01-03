@@ -129,8 +129,8 @@ npm run lint         # Linting
 ### Variáveis de Ambiente Necessárias
 
 ```env
-VITE_SUPABASE_URL=https://yjtsyuibemnkjfyonfjt.supabase.co
-VITE_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlqdHN5dWliZW1ua2pmeW9uZmp0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTUwMjEwMDAsImV4cCI6MjA3MDU5NzAwMH0.YTvf5T80OMwhZYgK0vnWULnalBvtGUd68Zg1LiI0kI
+VITE_SUPABASE_URL=https://qgyjfzsihoxtrvrheqvc.supabase.co
+VITE_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFneWpmenNpaG94dHJ2cmhlcXZjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI4MDY3MDUsImV4cCI6MjA3ODM4MjcwNX0.0EdiUK02c90KH_WGV6hIve7m1NgW8eMlD0GsNwZBMrQ
 ```
 
 ### ⚠️ Importante para Deploy

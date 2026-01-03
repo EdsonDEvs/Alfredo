@@ -16,14 +16,15 @@ import { supabase } from '@/lib/supabase'
 
 interface Lembrete {
   id: string
-  titulo: string
+  titulo?: string
   descricao?: string
   valor?: number
-  data_vencimento: string
-  status: 'pendente' | 'pago' | 'atrasado'
-  user_id: string
+  data?: string
+  data_vencimento?: string
+  status?: 'pendente' | 'pago' | 'atrasado'
+  userid: string
   created_at: string
-  updated_at: string
+  updated_at?: string
 }
 
 export default function Lembretes() {
@@ -54,8 +55,8 @@ export default function Lembretes() {
       const { data, error } = await supabase
         .from('lembretes')
         .select('*')
-        .eq('user_id', user.id)
-        .order('data_vencimento', { ascending: true })
+        .eq('userid', user.id)
+        .order('data', { ascending: true })
 
       if (error) {
         throw new Error(error.message)
@@ -82,10 +83,19 @@ export default function Lembretes() {
     }
   }, [user])
 
-  // Organizar lembretes por status
-  const lembretesPendentes = lembretes.filter(l => l.status === 'pendente')
-  const lembretesPagos = lembretes.filter(l => l.status === 'pago')
-  const lembretesAtrasados = lembretes.filter(l => l.status === 'atrasado')
+  // Organizar lembretes por status (calcular baseado na data)
+  const agora = new Date()
+  const lembretesPendentes = lembretes.filter(l => {
+    if (!l.data) return true
+    const dataVenc = new Date(l.data)
+    return dataVenc >= agora
+  })
+  const lembretesAtrasados = lembretes.filter(l => {
+    if (!l.data) return false
+    const dataVenc = new Date(l.data)
+    return dataVenc < agora
+  })
+  const lembretesPagos: Lembrete[] = [] // Não há status, então sempre vazio
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -100,12 +110,9 @@ export default function Lembretes() {
         const { error } = await supabase
           .from('lembretes')
           .update({
-            titulo: formData.titulo,
-            descricao: formData.descricao,
-            valor: formData.valor,
-            data_vencimento: formData.data_vencimento,
-            status: formData.status,
-            updated_at: new Date().toISOString()
+            descricao: formData.titulo || formData.descricao || '',
+            valor: formData.valor || null,
+            data: formData.data_vencimento ? new Date(formData.data_vencimento).toISOString() : null
           })
           .eq('id', editingLembrete.id)
 
@@ -122,12 +129,10 @@ export default function Lembretes() {
         const { error } = await supabase
           .from('lembretes')
           .insert({
-            titulo: formData.titulo,
-            descricao: formData.descricao,
-            valor: formData.valor,
-            data_vencimento: formData.data_vencimento,
-            status: formData.status,
-            user_id: user.id
+            descricao: formData.titulo || formData.descricao || '',
+            valor: formData.valor || null,
+            data: formData.data_vencimento ? new Date(formData.data_vencimento).toISOString() : null,
+            userid: user.id
           })
 
         if (error) {
@@ -158,11 +163,11 @@ export default function Lembretes() {
   const handleEdit = (lembrete: Lembrete) => {
     setEditingLembrete(lembrete)
     setFormData({
-      titulo: lembrete.titulo,
+      titulo: lembrete.titulo || lembrete.descricao || '',
       descricao: lembrete.descricao || '',
       valor: lembrete.valor || 0,
-      data_vencimento: lembrete.data_vencimento,
-      status: lembrete.status
+      data_vencimento: lembrete.data_vencimento || lembrete.data || '',
+      status: lembrete.status || 'pendente'
     })
     setDialogOpen(true)
   }
@@ -197,34 +202,8 @@ export default function Lembretes() {
     }
   }
 
-  const handleStatusChange = async (id: string, newStatus: 'pendente' | 'pago' | 'atrasado') => {
-    try {
-      const { error } = await supabase
-        .from('lembretes')
-        .update({ 
-          status: newStatus,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', id)
-
-      if (error) {
-        throw new Error(error.message)
-      }
-
-      toast({
-        title: "Status atualizado",
-        description: "Status do lembrete foi alterado!",
-      })
-      fetchData()
-    } catch (error: any) {
-      console.error('Erro ao atualizar status:', error)
-      toast({
-        title: "Erro ao atualizar status",
-        description: error.message,
-        variant: "destructive",
-      })
-    }
-  }
+  // Nota: A tabela lembretes não tem coluna status, então removemos esta função
+  // Se precisar de status, será necessário adicionar a coluna no banco de dados
 
 
 
@@ -316,24 +295,28 @@ export default function Lembretes() {
                 <div className="flex items-center justify-between">
                   <div className="flex-1">
                     <div className="flex items-center space-x-3 mb-2">
-                      <h3 className="font-medium">{lembrete.titulo}</h3>
-                      <Badge 
-                        variant={
-                          lembrete.status === 'pago' ? 'default' :
-                          lembrete.status === 'atrasado' ? 'destructive' : 'secondary'
-                        }
-                      >
-                        {lembrete.status}
-                      </Badge>
+                      <h3 className="font-medium">{lembrete.titulo || lembrete.descricao || 'Sem título'}</h3>
+                      {lembrete.data && new Date(lembrete.data) < new Date() && (
+                        <Badge variant="destructive">
+                          Atrasado
+                        </Badge>
+                      )}
+                      {lembrete.data && new Date(lembrete.data) >= new Date() && (
+                        <Badge variant="secondary">
+                          Pendente
+                        </Badge>
+                      )}
                     </div>
-                    {lembrete.descricao && (
+                    {lembrete.descricao && lembrete.titulo !== lembrete.descricao && (
                       <p className="text-sm text-gray-600 mb-2">{lembrete.descricao}</p>
                     )}
                     <div className="flex items-center space-x-4 text-sm text-gray-500">
-                      <span className="flex items-center">
-                        <Calendar className="h-4 w-4 mr-1" />
-                        {formatDate(lembrete.data_vencimento)}
-                      </span>
+                      {lembrete.data && (
+                        <span className="flex items-center">
+                          <Calendar className="h-4 w-4 mr-1" />
+                          {formatDate(lembrete.data)}
+                        </span>
+                      )}
                       {lembrete.valor && lembrete.valor > 0 && (
                         <span>{formatCurrency(lembrete.valor)}</span>
                       )}

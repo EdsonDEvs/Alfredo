@@ -16,6 +16,7 @@ export function RegisterForm({ onBackToLogin }: RegisterFormProps) {
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [fullName, setFullName] = useState('')
+  const [phone, setPhone] = useState('')
   const [loading, setLoading] = useState(false)
   const { signUp } = useAuth()
   const navigate = useNavigate()
@@ -47,18 +48,25 @@ export function RegisterForm({ onBackToLogin }: RegisterFormProps) {
 
     try {
       console.log('Attempting registration for:', email)
-      const { error } = await signUp(email, password, fullName)
+      const { error } = await signUp(email, password, fullName, phone)
 
       if (error) {
         console.error('Registration error:', error)
         let errorMessage = 'Erro ao criar conta'
         
-        if (error.includes('email-already-in-use')) {
+        // Tratar erro como objeto (pode ter .message ou ser uma string)
+        const errorString = error?.message || error?.toString() || String(error)
+        
+        if (errorString.includes('email-already-in-use') || errorString.includes('User already registered')) {
           errorMessage = 'Este email já está em uso'
-        } else if (error.includes('weak-password')) {
+        } else if (errorString.includes('weak-password')) {
           errorMessage = 'A senha é muito fraca'
-        } else if (error.includes('invalid-email')) {
+        } else if (errorString.includes('invalid-email')) {
           errorMessage = 'Email inválido'
+        } else if (errorString.includes('Failed to fetch') || error?.name === 'AuthRetryableFetchError') {
+          errorMessage = 'Erro de conexão. Verifique sua internet e tente novamente.'
+        } else {
+          errorMessage = errorString || 'Erro ao criar conta'
         }
         
         toast({
@@ -76,9 +84,10 @@ export function RegisterForm({ onBackToLogin }: RegisterFormProps) {
       }
     } catch (error: any) {
       console.error('Unexpected registration error:', error)
+      const errorMessage = error?.message || error?.toString() || 'Ocorreu um erro inesperado. Tente novamente.'
       toast({
         title: "Erro no registro",
-        description: "Ocorreu um erro inesperado. Tente novamente.",
+        description: errorMessage,
         variant: "destructive",
       })
     }
@@ -126,6 +135,24 @@ export function RegisterForm({ onBackToLogin }: RegisterFormProps) {
             required
             className="h-12 border-gray-300 focus:border-primary focus:ring-primary"
           />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="phone" className="text-sm font-medium" style={{ color: '#0d0f1a' }}>
+            Telefone
+          </Label>
+          <Input
+            id="phone"
+            type="tel"
+            placeholder="(31) 98765-4321"
+            value={phone}
+            onChange={(e) => setPhone(e.target.value)}
+            required
+            className="h-12 border-gray-300 focus:border-primary focus:ring-primary"
+          />
+          <p className="text-xs text-gray-500">
+            Digite seu número com DDD
+          </p>
         </div>
 
         <div className="space-y-2">

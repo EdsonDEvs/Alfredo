@@ -25,18 +25,23 @@ export function TransacoesSyncProvider({ children }: { children: React.ReactNode
 
   const refresh = useCallback(async () => {
     if (!user?.id) {
+      console.log('⚠️ useTransacoesSync: Usuário não autenticado, limpando transações')
       setTransacoes([])
       setLoading(false)
       return
     }
 
     try {
+      console.log('🔄 useTransacoesSync: Iniciando busca de transações para userId:', user.id)
       setLoading(true)
+      // Sempre buscar dados frescos do servidor (sem cache)
       const data = await TransacoesService.getTransacoes(user.id)
+      console.log('✅ useTransacoesSync: Transações carregadas:', data?.length || 0)
+      // Atualizar estado com dados frescos
       setTransacoes(data || [])
       setLastUpdate(Date.now())
     } catch (error) {
-      console.error('Erro ao carregar transações:', error)
+      console.error('❌ useTransacoesSync: Erro ao carregar transações:', error)
       setTransacoes([])
     } finally {
       setLoading(false)

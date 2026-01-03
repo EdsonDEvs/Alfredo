@@ -1,0 +1,60 @@
+===========================================
+EXPRESSÕES COM VERIFICAÇÃO DE EVENTO
+Node "Organiza Dados"
+===========================================
+
+Campo: whatsapp
+{{ $('InicioChat').item.json.body.event === 'messages.upsert' ? ($('InicioChat').item.json.body.data.key.remoteJid || '').toString().replace('@s.whatsapp.net', '').replace('@g.us', '') : '' }}
+
+Campo: mensagem
+{{ $('InicioChat').item.json.body.event === 'messages.upsert' ? ($('InicioChat').item.json.body.data.message.conversation || $('InicioChat').item.json.body.data.message.extendedTextMessage.text || '') : '' }}
+
+Campo: tipo
+{{ $('InicioChat').item.json.body.event === 'messages.upsert' ? ($('InicioChat').item.json.body.data.messageType || 'text') : 'presence' }}
+
+Campo: messageId
+{{ $('InicioChat').item.json.body.event === 'messages.upsert' ? ($('InicioChat').item.json.body.data.key.id || '') : '' }}
+
+Campo: firstname
+{{ $('InicioChat').item.json.body.event === 'messages.upsert' ? ($('InicioChat').item.json.body.data.pushName || 'Usuário') : 'Usuário' }}
+
+Campo: userId
+{{ $('Verifica Usuario').item.json.user_id || null }}
+
+===========================================
+EXPLICAÇÃO
+===========================================
+
+- Verifica se o evento é 'messages.upsert' (mensagem real)
+- Se for 'messages.upsert': Extrai os dados normalmente
+- Se for 'presence.update': Retorna valores vazios (normal, não é mensagem)
+
+===========================================
+COMPORTAMENTO
+===========================================
+
+messages.upsert:
+- whatsapp: 553172242378 ✅
+- mensagem: "Gastei 10 reais na sorveteria" ✅
+- tipo: "conversation" ✅
+- messageId: "3A8ED2A0AD056D5A6A14" ✅
+- firstname: "Edson" ✅
+
+presence.update:
+- whatsapp: "" (vazio - normal) ✅
+- mensagem: "" (vazio - normal) ✅
+- tipo: "presence" ✅
+- messageId: "" (vazio - normal) ✅
+- firstname: "Usuário" (padrão) ✅
+
+===========================================
+IMPORTANTE
+===========================================
+
+- Para presence.update, os campos ficarão vazios (normal)
+- O próximo node deve verificar se mensagem não está vazia
+- Ou processar apenas quando mensagem não estiver vazia
+
+
+
+

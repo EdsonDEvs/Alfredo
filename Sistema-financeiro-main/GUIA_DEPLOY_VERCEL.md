@@ -68,7 +68,7 @@ npm run dev
 **Variável 1 - Supabase URL:**
 ```
 Name: VITE_SUPABASE_URL
-Value: https://yjtsyuibemnkjfyonfjt.supabase.co
+Value: https://qgyjfzsihoxtrvrheqvc.supabase.co
 Environment: Production, Preview, Development
 ```
 

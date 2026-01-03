@@ -1,5 +1,5 @@
 
-import { supabase } from '@/integrations/supabase/client'
+import { supabase } from '@/lib/supabase'
 import type { SubscriptionData, ExternalSubscriptionData } from '@/types/subscription'
 
 export const fetchUserSubscriptionId = async (userId: string): Promise<string | null> => {

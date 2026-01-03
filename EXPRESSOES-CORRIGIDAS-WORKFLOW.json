@@ -1,0 +1,107 @@
+{
+  "node": "Organiza Dados",
+  "descricao": "Expressões corrigidas para o workflow funcionar com o novo número",
+  "problema_original": "Campo userId tenta acessar Auth antes de executar, e whatsapp não remove @s.whatsapp.net",
+  "solucao": "Remover campo userId e normalizar número do WhatsApp",
+  "campos": {
+    "whatsapp": {
+      "expressao_antiga": "={{ $('InicioChat').item.json.body.data.key.remoteJid }}",
+      "expressao_nova": "={{ ($('InicioChat').item.json.body.data.key.remoteJid || '').toString().replace('@s.whatsapp.net', '').replace('@g.us', '') }}",
+      "explicacao": "Remove @s.whatsapp.net e @g.us do número para corresponder ao formato salvo no Supabase",
+      "exemplo": "553172242378@s.whatsapp.net → 553172242378"
+    },
+    "mensagem": {
+      "expressao_antiga": "={{ $('InicioChat').item.json.body.data.message.conversation }}",
+      "expressao_nova": "={{ $('InicioChat').item.json.body.data.message.conversation || $('InicioChat').item.json.body.data.message.extendedTextMessage.text || '' }}",
+      "explicacao": "Suporta mensagens simples (conversation) e mensagens longas (extendedTextMessage)",
+      "exemplo": "Gastei 10 reais na sorveteria"
+    },
+    "tipo": {
+      "expressao_antiga": "={{ $('InicioChat').item.json.body.data.messageType }}",
+      "expressao_nova": "={{ $('InicioChat').item.json.body.data.messageType || 'text' }}",
+      "explicacao": "Usa messageType se existir, senão retorna 'text' como padrão",
+      "exemplo": "conversation"
+    },
+    "messageId": {
+      "expressao_antiga": "={{ $('InicioChat').item.json.body.data.key.id }}",
+      "expressao_nova": "={{ $('InicioChat').item.json.body.data.key.id || '' }}",
+      "explicacao": "Usa key.id se existir, senão retorna vazio",
+      "exemplo": "3A8ED2A0AD056D5A6A14"
+    },
+    "firstname": {
+      "expressao_antiga": "={{ $('InicioChat').item.json.body.data.pushName }}",
+      "expressao_nova": "={{ $('InicioChat').item.json.body.data.pushName || 'Usuário' }}",
+      "explicacao": "Usa pushName se existir, senão retorna 'Usuário' como padrão",
+      "exemplo": "Edson"
+    },
+    "userId": {
+      "expressao_antiga": "={{ $('Auth').item.json.id }}",
+      "expressao_nova": "REMOVER ESTE CAMPO",
+      "explicacao": "O userId deve vir do node Auth depois, não do Organiza Dados. Remover este campo completamente.",
+      "observacao": "O node 'Verifica Usuario' deve verificar $('Auth').item.json.id diretamente, não $json.userId"
+    }
+  },
+  "node_auth": {
+    "nome": "Auth",
+    "problema": "Busca whatsapp com @s.whatsapp.net, mas no Supabase pode estar sem",
+    "solucao": "Normalizar número no filtro do Auth",
+    "filtro_antigo": {
+      "keyName": "whatsapp",
+      "keyValue": "={{ $json.body.data.key.remoteJid }}"
+    },
+    "filtro_novo": {
+      "keyName": "whatsapp",
+      "keyValue": "={{ ($json.body.data.key.remoteJid || '').toString().replace('@s.whatsapp.net', '').replace('@g.us', '') }}"
+    },
+    "explicacao": "Normaliza o número antes de buscar no Supabase para garantir correspondência"
+  },
+  "node_verifica_usuario": {
+    "nome": "Verifica Usuario",
+    "problema": "Verifica $json.userId que vem do Organiza Dados, mas userId não existe mais lá",
+    "solucao": "Verificar diretamente do node Auth",
+    "condicao_antiga": {
+      "leftValue": "={{ $json.userId }}",
+      "operator": "notEmpty"
+    },
+    "condicao_nova": {
+      "leftValue": "={{ $('Auth').item.json.id }}",
+      "operator": "notEmpty"
+    },
+    "explicacao": "Verifica o userId diretamente do node Auth, não do Organiza Dados"
+  },
+  "fluxo_correto": {
+    "1": "InicioChat (Webhook) - Recebe dados da Evolution API",
+    "2": "Auth (Supabase) - Busca usuário por whatsapp normalizado",
+    "3": "Organiza Dados (Set) - Extrai dados (SEM campo userId)",
+    "4": "Verifica Usuario (IF) - Verifica $('Auth').item.json.id",
+    "5": "Continua workflow se usuário encontrado"
+  },
+  "verificacoes_supabase": {
+    "tabela": "profiles",
+    "campos_necessarios": [
+      "id (UUID)",
+      "whatsapp (VARCHAR) - Número normalizado (sem @s.whatsapp.net)",
+      "phone (VARCHAR) - Telefone (opcional)",
+      "ativo (BOOLEAN) - Status do usuário"
+    ],
+    "consulta_verificacao": "SELECT id, nome, whatsapp, phone, ativo FROM profiles WHERE whatsapp IS NOT NULL;",
+    "observacao": "Garantir que os números no Supabase estão normalizados (sem @s.whatsapp.net)"
+  },
+  "numero_bot": {
+    "numero": "553197599924",
+    "funcao": "Número do bot na Evolution API (quem recebe mensagens)",
+    "observacao": "NÃO usar para identificar clientes. Usar body.data.key.remoteJid (número que envia)"
+  },
+  "checklist_correcao": [
+    "Remover campo userId do node 'Organiza Dados'",
+    "Ajustar expressão whatsapp para remover @s.whatsapp.net",
+    "Ajustar filtro whatsapp no node 'Auth' para normalizar número",
+    "Ajustar condição no node 'Verifica Usuario' para verificar $('Auth').item.json.id",
+    "Verificar números no Supabase estão normalizados",
+    "Testar workflow com mensagem real"
+  ]
+}
+
+
+
+

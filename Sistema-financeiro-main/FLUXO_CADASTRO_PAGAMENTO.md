@@ -25,9 +25,11 @@ O cliente preenche:
 **O que acontece ao clicar em "Continuar para Pagamento":**
 
 1. **Validação dos dados** (nome, email, telefone, WhatsApp obrigatórios)
-2. **Salvar no Supabase** (tabela `profiles` com status `pending`)
-3. **Enviar para n8n** (webhook `createUser` - opcional neste momento)
-4. **Salvar no localStorage** (para uso após pagamento)
+2. **Salvar no Supabase** (tabela `leads` com status `pending` - **✅ AGORA FUNCIONA!**)
+   - Os dados são salvos na tabela `leads` que não requer autenticação
+   - Isso garante que os dados sejam persistidos mesmo antes do pagamento
+3. **Salvar no localStorage** (backup para uso após pagamento)
+4. **Enviar para n8n** (webhook `createUser` - opcional neste momento)
 5. **Redirecionar para gateway de pagamento** (Asaas ou outro)
 
 ### 3. **Gateway de Pagamento**
@@ -109,23 +111,52 @@ https://n8n.alfredoo.online/webhook-test/confirma-pagamento
 
 O workflow "Cria conta usuário" no n8n deve:
 
-1. **ConfirmaPagamento** (Webhook) - Recebe os dados
-2. **FiltraDados** - Processa e valida os dados
-3. **DadosCliente** - Prepara dados do cliente
-4. **VerificaNumeroWhats** - Valida número WhatsApp
-5. **GeraSenhaAleatoria** - Gera senha segura
-6. **CriaConta** - Cria conta no Supabase via API
-7. **AtualizaInfoUser** - Atualiza perfil do usuário
-8. **EnviaWhatsapp** - Envia credenciais via WhatsApp
-9. **EnviaEmail** - Envia credenciais via Email
+1. **ConfirmaPagamento** (Webhook) - Recebe os dados do pagamento
+2. **BuscaLead** (Opcional) - Busca dados na tabela `leads` do Supabase usando email
+3. **FiltraDados** - Processa e valida os dados
+4. **DadosCliente** - Prepara dados do cliente (do webhook ou da tabela `leads`)
+5. **VerificaNumeroWhats** - Valida número WhatsApp
+6. **GeraSenhaAleatoria** - Gera senha segura
+7. **CriaConta** - Cria conta no Supabase via API (auth.users)
+8. **AtualizaInfoUser** - Atualiza perfil do usuário na tabela `profiles`
+9. **AtualizaLead** - Atualiza o lead com `user_id` e `subscription_status = 'confirmed'`
+10. **EnviaWhatsapp** - Envia credenciais via WhatsApp
+11. **EnviaEmail** - Envia credenciais via Email
+
+**Nota:** O n8n pode buscar dados da tabela `leads` usando o email do webhook, garantindo que todos os dados do cadastro sejam usados na criação da conta.
 
 ## 📊 Estrutura de Dados
 
-### Tabela `profiles` (Supabase)
+### Tabela `leads` (Supabase) - Pré-cadastros
 
 ```sql
 {
   "id": "uuid",
+  "nome": "João Silva",
+  "email": "joao@email.com",
+  "phone": "(11) 99999-9999",
+  "whatsapp": "5511999999999",
+  "cpf": "000.000.000-00",
+  "plan": "premium",
+  "subscription_status": "pending",
+  "payment_id": null,
+  "user_id": null,
+  "created_at": "timestamp",
+  "updated_at": "timestamp",
+  "processed_at": null
+}
+```
+
+**Status possíveis:**
+- `pending`: Aguardando pagamento
+- `confirmed`: Pagamento confirmado, conta criada
+- `failed`: Pagamento falhou
+
+### Tabela `profiles` (Supabase) - Usuários criados após pagamento
+
+```sql
+{
+  "id": "uuid (auth.users.id)",
   "nome": "João Silva",
   "email": "joao@email.com",
   "phone": "(11) 99999-9999",
@@ -200,9 +231,13 @@ VITE_N8N_WEBHOOK_URL=https://n8n.alfredoo.online/webhook-test/confirma-pagamento
 ### Problema: Dados não são salvos no Supabase
 
 **Solução:**
-1. Verifique se a tabela `profiles` existe
-2. Verifique as permissões RLS (Row Level Security)
+1. Execute a migração SQL para criar a tabela `leads`:
+   ```sql
+   -- Execute o arquivo: supabase/migrations/20250111000000_create_leads_table.sql
+   ```
+2. Verifique se a tabela `leads` existe e tem as políticas RLS corretas
 3. Verifique os logs do console do navegador
+4. A tabela `leads` permite inserção sem autenticação (pública)
 
 ### Problema: Webhook n8n não é chamado
 

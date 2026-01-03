@@ -46,15 +46,16 @@ self.addEventListener('activate', (event) => {
 
 // Interceptação de requisições
 self.addEventListener('fetch', (event) => {
-  // Ignorar requisições que não são GET
-  if (event.request.method !== 'GET') {
-    return;
-  }
-
-  // Ignorar requisições para APIs externas (Supabase, etc)
+  // Ignorar TODAS as requisições para APIs externas (Supabase, etc) - incluindo POST, PUT, DELETE
   if (event.request.url.includes('supabase.co') || 
       event.request.url.includes('exchangerate-api.com') ||
-      event.request.url.includes('n8n')) {
+      event.request.url.includes('n8n') ||
+      event.request.url.includes('api.')) {
+    return; // Deixa a requisição passar sem interceptação
+  }
+
+  // Ignorar requisições que não são GET
+  if (event.request.method !== 'GET') {
     return;
   }
 

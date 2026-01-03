@@ -88,31 +88,54 @@ export default function Cadastro() {
 
     setLoading(true)
     try {
-      // 1. Tentar salvar dados no Supabase (opcional - pode falhar se RLS bloquear)
-      // Não é crítico, pois o n8n criará a conta após o pagamento
+      // 1. Salvar dados na tabela leads do Supabase (não requer autenticação)
+      // Isso garante que os dados sejam salvos mesmo antes do pagamento
       try {
-        const { error: leadError } = await supabase
-          .from('profiles')
+        const { data: leadData, error: leadError } = await supabase
+          .from('leads')
           .insert({
             nome: formData.nome,
             email: formData.email,
             phone: formData.phone,
             whatsapp: formData.whatsapp,
+            cpf: formData.cpf || null,
+            plan: formData.plan,
             subscription_status: 'pending',
           })
+          .select()
+          .single()
 
         if (leadError) {
-          // Ignorar erros de RLS ou duplicata - não é crítico
-          if (leadError.code !== '23505' && !leadError.message?.includes('RLS')) {
-            console.warn('Aviso ao salvar pré-cadastro:', leadError.message)
+          console.error('Erro ao salvar lead:', leadError)
+          toast({
+            title: 'Aviso',
+            description: 'Não foi possível salvar os dados. Continuando com o processo...',
+            variant: 'default',
+          })
+        } else {
+          console.log('✅ Lead salvo com sucesso:', leadData)
+          // Salvar ID do lead no localStorage para referência
+          if (leadData?.id) {
+            localStorage.setItem('alfredo_lead_id', leadData.id)
           }
         }
       } catch (error) {
-        // Ignorar erros ao salvar pré-cadastro - não é crítico
-        console.warn('Não foi possível salvar pré-cadastro (não crítico):', error)
+        console.error('Erro ao salvar lead:', error)
+        // Continuar mesmo se falhar - dados estão no localStorage
       }
 
-      // 2. Tentar enviar dados para n8n (opcional - pode não estar disponível)
+      // 2. Salvar dados no localStorage para uso após pagamento (backup)
+      localStorage.setItem('alfredo_cadastro_data', JSON.stringify({
+        nome: formData.nome,
+        email: formData.email,
+        phone: formData.phone,
+        whatsapp: formData.whatsapp,
+        cpf: formData.cpf,
+        plan: formData.plan,
+        timestamp: new Date().toISOString()
+      }))
+
+      // 3. Tentar enviar dados para n8n (opcional - pode não estar disponível)
       // Não é crítico, pois o n8n será chamado após o pagamento confirmado
       try {
         const n8nResponse = await n8nService.createUser({
@@ -131,20 +154,10 @@ export default function Cadastro() {
         console.log('n8n não disponível agora (será chamado após pagamento)')
       }
 
-      // 3. Salvar dados no localStorage para uso após pagamento
-      localStorage.setItem('alfredo_cadastro_data', JSON.stringify({
-        nome: formData.nome,
-        email: formData.email,
-        phone: formData.phone,
-        whatsapp: formData.whatsapp,
-        plan: formData.plan,
-        timestamp: new Date().toISOString()
-      }))
-
       // 4. Redirecionar para página de pagamento (Asaas ou outro gateway)
       toast({
         title: 'Cadastro realizado!',
-        description: 'Redirecionando para o pagamento...',
+        description: 'Seus dados foram salvos. Redirecionando para o pagamento...',
       })
 
       // Em produção, você redirecionaria para a URL real do gateway de pagamento

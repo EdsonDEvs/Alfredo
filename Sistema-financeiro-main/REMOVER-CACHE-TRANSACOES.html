@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Limpar Cache de Transações</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 { color: #d32f2f; }
+        button {
+            background: #1976d2;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 10px 5px;
+        }
+        button:hover { background: #1565c0; }
+        .success { color: #2e7d32; font-weight: bold; }
+        .error { color: #d32f2f; font-weight: bold; }
+        pre {
+            background: #f5f5f5;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔄 Limpar Cache de Transações</h1>
+        <p>Execute esta página para limpar todo o cache relacionado a transações.</p>
+        
+        <button onclick="limparCacheTransacoes()">🧹 LIMPAR CACHE DE TRANSAÇÕES</button>
+        <button onclick="verificar()">🔍 VERIFICAR CACHE</button>
+        
+        <div id="resultado" style="margin-top: 20px;"></div>
+    </div>
+
+    <script>
+        function limparCacheTransacoes() {
+            const resultado = document.getElementById('resultado');
+            resultado.innerHTML = '<p>Limpando cache...</p>';
+            
+            let limpezas = [];
+            let contador = 0;
+            
+            try {
+                // Limpar localStorage - tudo relacionado a transações
+                const keys = Object.keys(localStorage);
+                keys.forEach(key => {
+                    if (key.toLowerCase().includes('transac') || 
+                        key.toLowerCase().includes('transaction') ||
+                        key.toLowerCase().includes('cache') ||
+                        key.toLowerCase().includes('lastupdate')) {
+                        localStorage.removeItem(key);
+                        contador++;
+                        limpezas.push(`Removido: ${key}`);
+                    }
+                });
+                
+                // Limpar sessionStorage
+                const sessionKeys = Object.keys(sessionStorage);
+                sessionKeys.forEach(key => {
+                    if (key.toLowerCase().includes('transac') || 
+                        key.toLowerCase().includes('transaction')) {
+                        sessionStorage.removeItem(key);
+                        contador++;
+                        limpezas.push(`Removido (session): ${key}`);
+                    }
+                });
+                
+                // Limpar cache do navegador para a aplicação
+                if ('caches' in window) {
+                    caches.keys().then(cacheNames => {
+                        cacheNames.forEach(cacheName => {
+                            caches.delete(cacheName);
+                            contador++;
+                            limpezas.push(`Cache deletado: ${cacheName}`);
+                        });
+                        mostrarResultado(limpezas, contador);
+                    });
+                } else {
+                    mostrarResultado(limpezas, contador);
+                }
+            } catch(e) {
+                limpezas.push(`Erro: ${e.message}`);
+                mostrarResultado(limpezas, contador);
+            }
+        }
+        
+        function verificar() {
+            const resultado = document.getElementById('resultado');
+            let verificacoes = [];
+            let contador = 0;
+            
+            // Verificar localStorage
+            const keys = Object.keys(localStorage);
+            const cacheKeys = keys.filter(k => 
+                k.toLowerCase().includes('transac') || 
+                k.toLowerCase().includes('transaction') ||
+                k.toLowerCase().includes('cache') ||
+                k.toLowerCase().includes('lastupdate')
+            );
+            contador += cacheKeys.length;
+            verificacoes.push(`<strong>localStorage:</strong> ${cacheKeys.length} itens de cache encontrados`);
+            cacheKeys.forEach(key => {
+                verificacoes.push(`  - ${key}`);
+            });
+            
+            // Verificar sessionStorage
+            const sessionKeys = Object.keys(sessionStorage);
+            const sessionCacheKeys = sessionKeys.filter(k => 
+                k.toLowerCase().includes('transac') || 
+                k.toLowerCase().includes('transaction')
+            );
+            contador += sessionCacheKeys.length;
+            verificacoes.push(`<strong>sessionStorage:</strong> ${sessionCacheKeys.length} itens encontrados`);
+            
+            resultado.innerHTML = `<h3>Verificação:</h3><pre>${verificacoes.join('\n')}</pre><p><strong>Total de itens de cache: ${contador}</strong></p>`;
+        }
+        
+        function mostrarResultado(limpezas, contador) {
+            const resultado = document.getElementById('resultado');
+            if (contador > 0) {
+                resultado.innerHTML = `<h3 class="success">✅ Cache Limpo!</h3><pre>${limpezas.join('\n')}</pre><p class="success">${contador} itens removidos. Agora recarregue a página (F5).</p>`;
+            } else {
+                resultado.innerHTML = '<h3 class="success">✅ Nenhum cache de transações encontrado!</h3>';
+            }
+        }
+        
+        // Verificar ao carregar
+        window.onload = verificar;
+    </script>
+</body>
+</html>
+

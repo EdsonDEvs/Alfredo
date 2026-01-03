@@ -3,28 +3,79 @@ import { supabase, Transacao, Categoria } from '@/lib/supabase'
 export class TransacoesService {
   // Buscar todas as transações do usuário com categorias hierárquicas
   static async getTransacoes(userId: string): Promise<Transacao[]> {
-    const { data, error } = await supabase
-      .from('transacoes')
-      .select(`
-        *,
-        categorias (
-          id,
-          nome,
-          parent_id,
-          is_main_category,
-          icon,
-          color
-        )
-      `)
-      .eq('userid', userId)
-      .order('quando', { ascending: false })
+    console.log('📊 TransacoesService: Buscando transações para userId:', userId)
+    console.log('📊 TransacoesService: Tipo do userId:', typeof userId, 'Comprimento:', userId?.length)
+    
+    try {
+      // Buscar transações SEM CACHE - sempre buscar dados frescos do servidor
+      const { data: transacoesData, error: transacoesError } = await supabase
+        .from('transacoes')
+        .select('*')
+        .eq('userid', userId)
+        .order('created_at', { ascending: false })
+      
+      if (transacoesError) {
+        console.error('❌ TransacoesService: Erro ao buscar transações:', transacoesError)
+        console.error('❌ TransacoesService: Detalhes do erro:', {
+          message: transacoesError.message,
+          details: transacoesError.details,
+          hint: transacoesError.hint,
+          code: transacoesError.code
+        })
+        throw transacoesError
+      }
+      
+      console.log('📊 TransacoesService: Transações encontradas (sem join):', transacoesData?.length || 0)
+      
+      if (transacoesData && transacoesData.length > 0) {
+        console.log('📊 TransacoesService: Primeira transação (raw):', transacoesData[0])
+      }
+      
+      // Se não há transações, retornar vazio
+      if (!transacoesData || transacoesData.length === 0) {
+        console.log('⚠️ TransacoesService: Nenhuma transação encontrada para userId:', userId)
+        return []
+      }
+      
+      // Buscar categorias separadamente e fazer join manual
+      const categoryIds = [...new Set(transacoesData.map(t => t.category_id).filter(Boolean))]
+      console.log('📊 TransacoesService: Category IDs encontrados:', categoryIds)
+      
+      let categoriasMap: Record<string, { id: string; nome: string }> = {}
+      
+      if (categoryIds.length > 0) {
+        const { data: categoriasData, error: categoriasError } = await supabase
+          .from('categorias')
+          .select('id, nome')
+          .in('id', categoryIds)
+        
+        if (categoriasError) {
+          console.warn('⚠️ TransacoesService: Erro ao buscar categorias (continuando sem categorias):', categoriasError)
+        } else if (categoriasData) {
+          categoriasMap = categoriasData.reduce((acc, cat) => {
+            acc[cat.id] = { id: cat.id, nome: cat.nome }
+            return acc
+          }, {} as Record<string, { id: string; nome: string }>)
+          console.log('📊 TransacoesService: Categorias carregadas:', Object.keys(categoriasMap).length)
+        }
+      }
+      
+      // Adicionar categorias às transações
+      const data = transacoesData.map(transacao => ({
+        ...transacao,
+        categorias: transacao.category_id ? categoriasMap[transacao.category_id] : undefined
+      }))
 
-    if (error) {
-      console.error('Erro ao buscar transações:', error)
+      console.log('✅ TransacoesService: Transações processadas:', data?.length || 0)
+      if (data && data.length > 0) {
+        console.log('📊 TransacoesService: Primeira transação (final):', data[0])
+      }
+
+      return data || []
+    } catch (error: any) {
+      console.error('❌ TransacoesService: Erro inesperado:', error)
       throw error
     }
-
-    return data || []
   }
 
   // Buscar transações por período com categorias hierárquicas
@@ -39,17 +90,13 @@ export class TransacoesService {
         *,
         categorias (
           id,
-          nome,
-          parent_id,
-          is_main_category,
-          icon,
-          color
+          nome
         )
       `)
       .eq('userid', userId)
-      .gte('quando', dataInicio)
-      .lte('quando', dataFim)
-      .order('quando', { ascending: false })
+      .gte('created_at', dataInicio)
+      .lte('created_at', dataFim)
+      .order('created_at', { ascending: false })
 
     if (error) {
       console.error('Erro ao buscar transações por período:', error)

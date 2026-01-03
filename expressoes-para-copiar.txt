@@ -1,0 +1,89 @@
+===========================================
+EXPRESSÕES PARA NODE "ORGANIZA DADOS"
+===========================================
+
+Campo: whatsapp
+{{ ($('InicioChat').item.json.body.data.key.remoteJid || '').toString().replace('@s.whatsapp.net', '').replace('@g.us', '') }}
+
+⚠️ IMPORTANTE: 
+- Número do Bot (Evolution API): 553197599924 (quem recebe mensagens)
+- Esta expressão extrai o número do CLIENTE que ENVIOU (body.data.key.remoteJid)
+- NÃO usa body.sender pois pode conter o número do BOT
+- Para identificar clientes, processar APENAS eventos messages.upsert
+
+Campo: mensagem
+{{ $('InicioChat').item.json.body.data.message.conversation || $('InicioChat').item.json.body.data.message.extendedTextMessage.text || '' }}
+
+Campo: tipo
+{{ $('InicioChat').item.json.body.data.messageType || 'text' }}
+
+Campo: messageId
+{{ $('InicioChat').item.json.body.data.key.id || $('InicioChat').item.json.body.data.id || '' }}
+
+Campo: firstname
+{{ $('InicioChat').item.json.body.data.pushName || 'Usuário' }}
+
+Campo: userId
+{{ $('Verifica Usuario').item.json.user_id || null }}
+
+===========================================
+EXPLICAÇÃO
+===========================================
+
+whatsapp:
+- USA APENAS: body.data.key.remoteJid (messages.upsert) - número do CLIENTE que enviou
+- NÃO USA: body.sender (pode ser número do BOT 553197599924)
+- Remove: @s.whatsapp.net, @g.us
+- Fallback: '' (vazio)
+- IMPORTANTE: Número do Bot = 553197599924 (quem recebe). Sistema identifica pelo número que ENVIA.
+
+mensagem:
+- Tenta: body.data.message.conversation (mensagem simples)
+- Ou: body.data.message.extendedTextMessage.text (mensagem longa)
+- Fallback: '' (vazio - presence.update não tem mensagem)
+
+tipo:
+- Usa: body.data.messageType se existir
+- Fallback: 'text' (texto padrão)
+
+messageId:
+- Tenta: body.data.key.id (messages.upsert)
+- Ou: body.data.id (presence.update)
+- Fallback: '' (vazio)
+
+firstname:
+- Usa: body.data.pushName se existir
+- Fallback: 'Usuário' (nome padrão)
+
+userId:
+- Vem do node "Verifica Usuario"
+- Fallback: null
+
+===========================================
+COMPORTAMENTO ESPERADO
+===========================================
+
+messages.upsert:
+- whatsapp: 553172242378 ✅
+- mensagem: "Gastei 10 reais na sorveteria" ✅
+- tipo: "conversation" ✅
+- messageId: "3A8ED2A0AD056D5A6A14" ✅
+- firstname: "Edson" ✅
+
+presence.update:
+- whatsapp: 553197599924 ✅
+- mensagem: "" (vazio - normal) ✅
+- tipo: "text" (padrão) ✅
+- messageId: "100640277659847@lid" ✅
+- firstname: "Usuário" (padrão) ✅
+
+===========================================
+NOTA IMPORTANTE
+===========================================
+
+Para presence.update, a mensagem ficará vazia (normal, 
+é apenas status de digitação). O workflow deve processar 
+apenas quando mensagem não estiver vazia, ou adicionar 
+verificação no próximo node para pular quando mensagem 
+estiver vazia.
+

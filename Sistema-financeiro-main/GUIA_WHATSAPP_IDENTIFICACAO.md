@@ -43,7 +43,7 @@ WHERE full_name = 'Nome do Usuário';
 
 1. **Node HTTP Request** para buscar usuário:
    ```
-   URL: https://yjtsyuibemnkjfyonfjt.supabase.co/rest/v1/rpc/get_user_by_phone
+   URL: https://qgyjfzsihoxtrvrheqvc.supabase.co/rest/v1/rpc/get_user_by_phone
    Method: POST
    Headers: 
      - apikey: [SUA_CHAVE_ANON]

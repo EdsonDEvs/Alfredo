@@ -1,0 +1,257 @@
+{
+  "node": "Organiza Dados",
+  "descricao": "Expressões corrigidas para funcionar com messages.upsert e presence.update",
+  "numero_bot_evolution_api": "553197599924",
+  "instancia": "Alfredoo",
+  "observacao_importante": "O número 553197599924 é o número do BOT (quem recebe). O sistema identifica clientes pelo número que ENVIA mensagens (body.data.key.remoteJid), não pelo número que recebe (body.sender).",
+  "campos": {
+    "whatsapp": {
+      "expressao": "{{ ($('InicioChat').item.json.body.data.key.remoteJid || '').toString().replace('@s.whatsapp.net', '').replace('@g.us', '') }}",
+      "explicacao": "Extrai body.data.key.remoteJid (número do CLIENTE que enviou). NÃO usa body.sender pois pode conter o número do BOT. Remove @s.whatsapp.net e @g.us.",
+      "exemplo_messages_upsert": "553172242378",
+      "exemplo_presence_update": "vazio (presence.update não tem remoteJid)",
+      "numero_bot": "553197599924",
+      "observacao": "Para messages.upsert: body.data.key.remoteJid = número do cliente. Para presence.update: não usar body.sender (pode ser número do bot)."
+    },
+    "mensagem": {
+      "expressao": "{{ $('InicioChat').item.json.body.data.message.conversation || $('InicioChat').item.json.body.data.message.extendedTextMessage.text || '' }}",
+      "explicacao": "Extrai mensagem de conversation ou extendedTextMessage. Para presence.update retorna vazio (normal).",
+      "exemplo_messages_upsert": "Gastei 10 reais na sorveteria",
+      "exemplo_presence_update": ""
+    },
+    "tipo": {
+      "expressao": "{{ $('InicioChat').item.json.body.data.messageType || 'text' }}",
+      "explicacao": "Usa messageType se existir, senão retorna 'text' como padrão.",
+      "exemplo_messages_upsert": "conversation",
+      "exemplo_presence_update": "text"
+    },
+    "messageId": {
+      "expressao": "{{ $('InicioChat').item.json.body.data.key.id || $('InicioChat').item.json.body.data.id || '' }}",
+      "explicacao": "Tenta body.data.key.id (messages.upsert) ou body.data.id (presence.update).",
+      "exemplo_messages_upsert": "3A8ED2A0AD056D5A6A14",
+      "exemplo_presence_update": "100640277659847@lid"
+    },
+    "firstname": {
+      "expressao": "{{ $('InicioChat').item.json.body.data.pushName || 'Usuário' }}",
+      "explicacao": "Usa pushName se existir, senão retorna 'Usuário' como padrão.",
+      "exemplo_messages_upsert": "Edson",
+      "exemplo_presence_update": "Usuário"
+    },
+    "userId": {
+      "expressao": "{{ $('Verifica Usuario').item.json.user_id || null }}",
+      "explicacao": "Vem do node Verifica Usuario. Retorna null se não encontrar.",
+      "exemplo_messages_upsert": "uuid-do-usuario",
+      "exemplo_presence_update": null
+    }
+  },
+  "estruturas": {
+    "messages_upsert": {
+      "event": "messages.upsert",
+      "campos": {
+        "whatsapp": "body.data.key.remoteJid",
+        "mensagem": "body.data.message.conversation",
+        "tipo": "body.data.messageType",
+        "messageId": "body.data.key.id",
+        "firstname": "body.data.pushName"
+      },
+      "exemplo_completo_webhook": [
+        {
+          "headers": {
+            "host": "webhook.alfredoo.online",
+            "user-agent": "axios/1.10.0",
+            "content-length": "932",
+            "accept": "application/json, text/plain, */*",
+            "accept-encoding": "gzip, compress, deflate, br",
+            "content-type": "application/json",
+            "x-forwarded-for": "172.18.0.1",
+            "x-forwarded-host": "webhook.alfredoo.online",
+            "x-forwarded-port": "443",
+            "x-forwarded-proto": "https",
+            "x-forwarded-server": "647cbaa8cc02",
+            "x-real-ip": "172.18.0.1"
+          },
+          "params": {},
+          "query": {},
+          "body": {
+            "event": "messages.upsert",
+            "instance": "Alfredoo",
+            "data": {
+              "key": {
+                "remoteJid": "553172242378@s.whatsapp.net",
+                "fromMe": false,
+                "id": "3A8ED2A0AD056D5A6A14",
+                "senderLid": "100640277659847@lid"
+              },
+              "pushName": "Edson",
+              "status": "DELIVERY_ACK",
+              "message": {
+                "conversation": "Gastei 10 reais na sorveteria",
+                "messageContextInfo": {
+                  "deviceListMetadata": {
+                    "senderKeyHash": "w2uoKcAXs9QlOg==",
+                    "senderTimestamp": "1762182339",
+                    "recipientKeyHash": "scShI1W5d0IArQ==",
+                    "recipientTimestamp": "1761845429"
+                  },
+                  "deviceListMetadataVersion": 2,
+                  "messageSecret": "I0GboOM+bNURA0sV5mDix+31gd2xamI2zMN+6zp8c8Y="
+                }
+              },
+              "messageType": "conversation",
+              "messageTimestamp": 1762888108,
+              "instanceId": "ff2f21ac-667b-42ac-aa90-7aecfb7b26a3",
+              "source": "ios"
+            },
+            "destination": "https://webhook.alfredoo.online/webhook/agente-financeiro",
+            "date_time": "2025-11-11T16:08:29.330Z",
+            "sender": "553171935641@s.whatsapp.net",
+            "server_url": "https://api.alfredoo.online",
+            "apikey": "9262493C1311-4C8E-B6A1-84F123F1501B"
+          },
+          "webhookUrl": "https://webhook.alfredoo.online/webhook/agente-financeiro",
+          "executionMode": "production"
+        }
+      ]
+    },
+    "presence_update": {
+      "event": "presence.update",
+      "observacao": "Este evento NÃO deve ser usado para identificar clientes. É apenas status de digitação. O campo body.sender pode conter o número do BOT (553197599924), não o número do cliente.",
+      "campos": {
+        "whatsapp": "NÃO USAR - body.sender pode ser número do bot",
+        "mensagem": "não existe (vazio)",
+        "tipo": "text (padrão)",
+        "messageId": "body.data.id",
+        "firstname": "Usuário (padrão)"
+      },
+      "exemplo_completo_webhook": [
+        {
+          "headers": {
+            "host": "n8n.alfredoo.online",
+            "user-agent": "axios/1.10.0",
+            "content-length": "398",
+            "accept": "application/json, text/plain, */*",
+            "accept-encoding": "gzip, compress, deflate, br",
+            "content-type": "application/json",
+            "x-forwarded-for": "172.18.0.1",
+            "x-forwarded-host": "n8n.alfredoo.online",
+            "x-forwarded-port": "443",
+            "x-forwarded-proto": "https",
+            "x-forwarded-server": "647cbaa8cc02",
+            "x-real-ip": "172.18.0.1"
+          },
+          "params": {},
+          "query": {},
+          "body": {
+            "event": "presence.update",
+            "instance": "Alfredoo",
+            "data": {
+              "id": "100640277659847@lid",
+              "presences": {
+                "100640277659847@lid": {
+                  "lastKnownPresence": "composing"
+                }
+              }
+            },
+            "destination": "https://n8n.alfredoo.online/webhook-test/agente-financeiro",
+            "date_time": "2025-11-11T20:19:43.609Z",
+            "sender": "553197599924@s.whatsapp.net",
+            "server_url": "https://api.alfredoo.online",
+            "apikey": "9262493C1311-4C8E-B6A1-84F123F1501B"
+          },
+          "webhookUrl": "https://webhook.alfredoo.online/webhook-test/agente-financeiro",
+          "executionMode": "test"
+        }
+      ]
+    }
+  },
+  "comportamento_esperado": {
+    "messages_upsert": {
+      "whatsapp": "553172242378",
+      "mensagem": "Gastei 10 reais na sorveteria",
+      "tipo": "conversation",
+      "messageId": "3A8ED2A0AD056D5A6A14",
+      "firstname": "Edson",
+      "userId": "uuid-do-usuario-ou-null"
+    },
+    "presence_update": {
+      "whatsapp": "553197599924",
+      "mensagem": "",
+      "tipo": "text",
+      "messageId": "100640277659847@lid",
+      "firstname": "Usuário",
+      "userId": null
+    }
+  },
+  "comparacao_estruturas": {
+    "diferencas_principais": {
+      "whatsapp": {
+        "messages_upsert": "body.data.key.remoteJid (número do CLIENTE que enviou)",
+        "presence_update": "NÃO USAR - body.sender pode ser número do BOT (553197599924)",
+        "observacao": "IMPORTANTE: Para identificar clientes, usar APENAS body.data.key.remoteJid (messages.upsert). Não usar body.sender pois pode conter o número do bot."
+      },
+      "mensagem": {
+        "messages_upsert": "body.data.message.conversation",
+        "presence_update": "não existe (vazio)",
+        "observacao": "presence.update não tem mensagem, apenas status de digitação."
+      },
+      "messageId": {
+        "messages_upsert": "body.data.key.id",
+        "presence_update": "body.data.id",
+        "observacao": "Caminhos diferentes, mas ambos têm ID."
+      },
+      "firstname": {
+        "messages_upsert": "body.data.pushName",
+        "presence_update": "não existe (usa padrão 'Usuário')",
+        "observacao": "presence.update não tem pushName."
+      }
+    },
+    "semelhancas": {
+      "ambos_tem": [
+        "body.event (tipo de evento)",
+        "body.instance (nome da instância)",
+        "body.sender (número do remetente)",
+        "body.data (dados do evento)",
+        "body.date_time (data/hora)",
+        "body.server_url (URL do servidor)",
+        "body.apikey (chave da API)"
+      ]
+    }
+  },
+  "resumo_mudancas": {
+    "antes": {
+      "descricao": "Apenas eventos messages.upsert chegavam",
+      "estrutura": "body.data.key.remoteJid",
+      "problema": "Funcionava apenas para mensagens reais"
+    },
+    "depois": {
+      "descricao": "Agora também chegam eventos presence.update",
+      "estrutura": "body.sender (para presence.update)",
+      "solucao": "Expressões com fallbacks para ambos os eventos"
+    },
+    "expressoes_atualizadas": {
+      "whatsapp": "USA APENAS body.data.key.remoteJid (número do cliente). NÃO usar body.sender (pode ser número do bot 553197599924)",
+      "mensagem": "Apenas para messages.upsert (presence.update retorna vazio)",
+      "messageId": "Tenta body.data.key.id OU body.data.id",
+      "firstname": "Usa body.data.pushName OU 'Usuário' (padrão)"
+    },
+    "numero_bot": {
+      "numero": "553197599924",
+      "funcao": "Número do bot na Evolution API (quem recebe mensagens)",
+      "instancia": "Alfredoo",
+      "observacao": "Este número RECEBE mensagens dos clientes. O sistema identifica clientes pelo número que ENVIA (body.data.key.remoteJid), não pelo número que recebe."
+    }
+  },
+  "notas_importantes": [
+    "Para presence.update, a mensagem ficará vazia (normal, é apenas status de digitação)",
+    "O workflow deve processar apenas quando mensagem não estiver vazia",
+    "Ou adicionar verificação no próximo node para pular quando mensagem estiver vazia",
+    "As expressões usam fallbacks para funcionar com ambos os eventos",
+    "A estrutura do webhook inclui headers, params, query e body",
+    "O caminho para acessar os dados é: $('InicioChat').item.json.body.data...",
+    "Para messages.upsert: body.data.key.remoteJid (número do CLIENTE que enviou)",
+    "Para presence.update: NÃO usar body.sender (pode ser número do bot 553197599924)",
+    "Número do bot (Evolution API): 553197599924 (quem recebe mensagens)",
+    "Sistema identifica clientes pelo número que ENVIA (body.data.key.remoteJid), não pelo que recebe (body.sender)",
+    "IMPORTANTE: Para identificar clientes, processar APENAS eventos messages.upsert. Ignorar presence.update."
+  ]
+}

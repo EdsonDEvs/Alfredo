@@ -14,12 +14,12 @@ Este projeto já está configurado com o Supabase e funcionando. Aqui está um g
 
 ### URL do Projeto
 ```
-https://onezabszpxqdjqerrjxo.supabase.co
+https://qgyjfzsihoxtrvrheqvc.supabase.co
 ```
 
 ### Chave Anônima
 ```
-eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9uZXphYnN6cHhxZGpxZXJyanhvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQxOTk3NzcsImV4cCI6MjA2OTc3NTc3N30.t-yOutDCejVH45BBUl46NbG9I1PJzu5MOFeblEkwRbY
+eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFneWpmenNpaG94dHJ2cmhlcXZjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI4MDY3MDUsImV4cCI6MjA3ODM4MjcwNX0.0EdiUK02c90KH_WGV6hIve7m1NgW8eMlD0GsNwZBMrQ
 ```
 
 ## 🗄️ Estrutura do Banco de Dados
