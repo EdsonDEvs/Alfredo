@@ -1,5 +1,6 @@
+// VERSAO FINAL CORRIGIDA - FORCANDO UPDATE
 import { createClient } from '@supabase/supabase-js'
-
+// ... resto do código ...
 // LIMPEZA AUTOMÁTICA: Remover dados do banco antigo
 if (typeof window !== 'undefined') {
   const oldProjectIds = ['yjtsyuibemnkjfyonfjt', 'onezabszpxqdjqerrjxo']
