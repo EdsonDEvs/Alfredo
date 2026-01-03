@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Limpar Cache do Banco Antigo</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 { color: #d32f2f; }
+        button {
+            background: #d32f2f;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 10px 5px;
+        }
+        button:hover { background: #b71c1c; }
+        .success { color: #2e7d32; font-weight: bold; }
+        .error { color: #d32f2f; font-weight: bold; }
+        pre {
+            background: #f5f5f5;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔴 Limpeza Completa - Banco Antigo</h1>
+        <p>Execute esta página para limpar TODOS os dados do banco antigo do navegador.</p>
+        
+        <button onclick="limparTudo()">🧹 LIMPAR TUDO</button>
+        <button onclick="verificar()">🔍 VERIFICAR</button>
+        
+        <div id="resultado" style="margin-top: 20px;"></div>
+    </div>
+
+    <script>
+        function limparTudo() {
+            const resultado = document.getElementById('resultado');
+            resultado.innerHTML = '<p>Limpando...</p>';
+            
+            let limpezas = [];
+            
+            try {
+                // 1. Limpar localStorage
+                const keys = Object.keys(localStorage);
+                keys.forEach(key => {
+                    if (key.includes('supabase') || key.includes('yjtsyuibemnkjfyonfjt') || key.includes('onezabszpxqdjqerrjxo')) {
+                        localStorage.removeItem(key);
+                        limpezas.push(`Removido do localStorage: ${key}`);
+                    }
+                });
+                
+                // Limpar tudo relacionado a auth
+                keys.forEach(key => {
+                    if (key.toLowerCase().includes('auth') || key.toLowerCase().includes('session')) {
+                        localStorage.removeItem(key);
+                        limpezas.push(`Removido do localStorage (auth): ${key}`);
+                    }
+                });
+            } catch(e) {
+                limpezas.push(`Erro ao limpar localStorage: ${e.message}`);
+            }
+            
+            try {
+                // 2. Limpar sessionStorage
+                const sessionKeys = Object.keys(sessionStorage);
+                sessionKeys.forEach(key => {
+                    if (key.includes('supabase') || key.includes('yjtsyuibemnkjfyonfjt') || key.includes('onezabszpxqdjqerrjxo')) {
+                        sessionStorage.removeItem(key);
+                        limpezas.push(`Removido do sessionStorage: ${key}`);
+                    }
+                });
+            } catch(e) {
+                limpezas.push(`Erro ao limpar sessionStorage: ${e.message}`);
+            }
+            
+            try {
+                // 3. Limpar IndexedDB (Supabase pode usar)
+                if ('indexedDB' in window) {
+                    indexedDB.databases().then(databases => {
+                        databases.forEach(db => {
+                            if (db.name && (db.name.includes('supabase') || db.name.includes('yjtsyuibemnkjfyonfjt'))) {
+                                indexedDB.deleteDatabase(db.name);
+                                limpezas.push(`Removido IndexedDB: ${db.name}`);
+                            }
+                        });
+                    });
+                }
+            } catch(e) {
+                limpezas.push(`Erro ao limpar IndexedDB: ${e.message}`);
+            }
+            
+            // 4. Desregistrar Service Workers
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.getRegistrations().then(registrations => {
+                    registrations.forEach(registration => {
+                        registration.unregister();
+                        limpezas.push(`Service Worker desregistrado: ${registration.scope}`);
+                    });
+                    
+                    mostrarResultado(limpezas);
+                });
+            } else {
+                mostrarResultado(limpezas);
+            }
+        }
+        
+        function verificar() {
+            const resultado = document.getElementById('resultado');
+            let verificacoes = [];
+            
+            // Verificar localStorage
+            const keys = Object.keys(localStorage);
+            const supabaseKeys = keys.filter(k => k.toLowerCase().includes('supabase') || k.includes('yjtsyuibemnkjfyonfjt') || k.includes('onezabszpxqdjqerrjxo'));
+            verificacoes.push(`<strong>localStorage:</strong> ${supabaseKeys.length} chaves encontradas`);
+            supabaseKeys.forEach(key => {
+                verificacoes.push(`  - ${key}`);
+            });
+            
+            // Verificar sessionStorage
+            const sessionKeys = Object.keys(sessionStorage);
+            const supabaseSessionKeys = sessionKeys.filter(k => k.toLowerCase().includes('supabase') || k.includes('yjtsyuibemnkjfyonfjt'));
+            verificacoes.push(`<strong>sessionStorage:</strong> ${supabaseSessionKeys.length} chaves encontradas`);
+            
+            resultado.innerHTML = '<h3>Verificação:</h3><pre>' + verificacoes.join('\n') + '</pre>';
+        }
+        
+        function mostrarResultado(limpezas) {
+            const resultado = document.getElementById('resultado');
+            if (limpezas.length > 0) {
+                resultado.innerHTML = '<h3 class="success">✅ Limpeza Concluída!</h3><pre>' + limpezas.join('\n') + '</pre><p class="success">Agora feche TODAS as abas do site e abra novamente.</p>';
+            } else {
+                resultado.innerHTML = '<h3 class="success">✅ Nenhum dado do banco antigo encontrado!</h3>';
+            }
+        }
+        
+        // Verificar ao carregar
+        window.onload = verificar;
+    </script>
+</body>
+</html>
+

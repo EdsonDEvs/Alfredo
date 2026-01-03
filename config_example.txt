@@ -1,0 +1,46 @@
+# =====================================================
+# CONFIGURAÇÃO DO SEU SUPABASE
+# =====================================================
+# 
+# 1. Copie este arquivo para .env.local
+# 2. Substitua as variáveis pelos valores do seu projeto
+# 3. Reinicie o servidor (npm run dev)
+#
+# =====================================================
+
+# URL do seu projeto Supabase
+# Exemplo: https://abcdefghijklmnop.supabase.co
+VITE_SUPABASE_URL=https://SEU_PROJECT_ID.supabase.co
+
+# Chave anônima do seu projeto Supabase
+# Encontre em: Settings > API > anon public
+VITE_SUPABASE_ANON_KEY=sua_chave_anonima_aqui
+
+# =====================================================
+# CONFIGURAÇÃO DA APLICAÇÃO
+# =====================================================
+
+# Nome da aplicação
+VITE_APP_NAME=Poupe Agora
+
+# Versão da aplicação
+VITE_APP_VERSION=1.0.0
+
+# =====================================================
+# INSTRUÇÕES DE CONFIGURAÇÃO
+# =====================================================
+#
+# 1. Acesse https://supabase.com e faça login
+# 2. Selecione seu projeto (ou crie um novo)
+# 3. Vá para Settings > API
+# 4. Copie a Project URL e anon public key
+# 5. Substitua as variáveis acima
+# 6. Execute o script setup_database.sql no SQL Editor
+# 7. Configure as URLs de redirecionamento em Authentication > Settings
+#
+# URLs de redirecionamento para adicionar:
+# - http://localhost:8080/auth
+# - http://localhost:8080/dashboard
+# - http://localhost:8080/categorias
+#
+# =====================================================
