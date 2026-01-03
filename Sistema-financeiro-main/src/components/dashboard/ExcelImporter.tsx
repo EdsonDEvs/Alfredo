@@ -148,7 +148,7 @@ export function ExcelImporter({ onImportComplete }: ExcelImporterProps) {
             Importar Transações do Excel
           </DialogTitle>
           <DialogDescription>
-            Importe suas transações de uma planilha Excel. O sistema aceita qualquer formato e detecta automaticamente as colunas!
+            Importe suas transações de uma planilha Excel ou CSV. O sistema aceita qualquer formato e detecta automaticamente as colunas analisando o conteúdo dos dados!
           </DialogDescription>
         </DialogHeader>
 
@@ -240,16 +240,19 @@ export function ExcelImporter({ onImportComplete }: ExcelImporterProps) {
 
                   <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-md">
                     <p className="text-xs text-blue-600">
-                      <strong>✨ Sistema Inteligente:</strong> Aceita qualquer formato de planilha! O sistema detecta automaticamente as colunas.
+                      <strong>✨ Sistema Inteligente:</strong> Aceita qualquer formato de planilha! O sistema detecta automaticamente as colunas analisando o conteúdo.
                     </p>
                     <p className="text-xs text-blue-600 mt-1">
-                      <strong>Colunas necessárias:</strong> Data (qualquer formato), Estabelecimento (qualquer nome), Valor (número)
+                      <strong>Colunas necessárias:</strong> Data (DD/MM/YYYY, YYYY-MM-DD, ou qualquer formato), Estabelecimento (qualquer nome), Valor (R$, $, € ou número)
                     </p>
                     <p className="text-xs text-blue-600 mt-1">
-                      <strong>Colunas opcionais:</strong> Tipo (Receita/Despesa), Detalhes (observações)
+                      <strong>Colunas opcionais:</strong> Tipo (Receita/Despesa ou detectado automaticamente), Detalhes (observações)
                     </p>
                     <p className="text-xs text-blue-600 mt-1">
-                      <strong>Exemplos de nomes aceitos:</strong> Data/Date/Dia, Estabelecimento/Local/Loja/Descrição, Valor/Amount/Preço, Tipo/Type/Categoria
+                      <strong>Formatos aceitos:</strong> Excel (.xlsx, .xls) ou CSV. O sistema identifica automaticamente datas, valores monetários e tipos de transação.
+                    </p>
+                    <p className="text-xs text-blue-600 mt-1">
+                      <strong>Exemplos de nomes aceitos:</strong> Data/Date/Dia, Estabelecimento/Local/Loja/Descrição/Onde, Valor/Amount/Preço/R$/Total, Tipo/Type/Categoria
                     </p>
                   </div>
                 </div>

@@ -235,23 +235,45 @@ export class TransacoesService {
       } else {
         // Criar categoria padrão "Geral" se não existir nenhuma
         console.log('Nenhuma categoria encontrada, criando categoria padrão...')
+        console.log('🔍 Tentando criar categoria com userId:', userId, 'Tipo:', typeof userId)
+        
+        // Garantir que userId é string (RLS pode exigir tipo específico)
+        const userIdString = String(userId).trim()
+        
+        // Inserir apenas campos obrigatórios (userid e nome)
+        // Não incluir tags, parent_id, is_main_category, icon, color pois podem não existir no banco
         const { data: newCategory, error: createError } = await supabase
           .from('categorias')
           .insert({
-            userid: userId,
+            userid: userIdString,
             nome: 'Geral',
-            tags: 'importacao',
-            // is_main_category pode não existir na tabela, então não incluímos
           })
           .select()
           .single()
 
-        if (createError || !newCategory) {
+        if (createError) {
+          console.error('❌ Erro ao criar categoria:', createError)
+          console.error('❌ Detalhes do erro:', {
+            message: createError.message,
+            details: createError.details,
+            hint: createError.hint,
+            code: createError.code
+          })
+          
+          // Se for erro de RLS, fornecer mensagem mais clara
+          if (createError.message?.includes('row-level security') || createError.message?.includes('RLS')) {
+            throw new Error(`Erro de segurança: Não foi possível criar categoria. Verifique se as políticas RLS estão configuradas corretamente no Supabase. Erro: ${createError.message}`)
+          }
+          
           throw new Error(`Não foi possível criar categoria padrão: ${createError?.message || 'Erro desconhecido'}`)
         }
         
+        if (!newCategory) {
+          throw new Error('Categoria não foi criada (sem erro, mas sem dados retornados)')
+        }
+        
         defaultCategoryId = newCategory.id
-        console.log('Categoria padrão criada:', defaultCategoryId)
+        console.log('✅ Categoria padrão criada:', defaultCategoryId)
       }
     } catch (error: any) {
       console.error('Erro ao buscar/criar categoria padrão:', error)

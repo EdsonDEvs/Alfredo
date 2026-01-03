@@ -11,10 +11,11 @@ import { Badge } from '@/components/ui/badge'
 import { useTransacoesSync, notifyTransacoesUpdate } from '@/hooks/useTransacoesSync'
 import { TransacoesService } from '@/services/transacoes'
 import { toast } from '@/hooks/use-toast'
-import { Plus, Edit, Trash2, TrendingUp, TrendingDown, RefreshCw } from 'lucide-react'
+import { Plus, Edit, Trash2, TrendingUp, TrendingDown, RefreshCw, Download } from 'lucide-react'
 import { useFormattedCurrency } from '@/hooks/useFormattedCurrency'
 import { formatDate, formatTime } from '@/utils/date'
 import type { Transacao } from '@/lib/supabase'
+import { exportToExcel } from '@/services/excelImporter'
 
 export default function Transacoes() {
   const { transacoes, loading: isLoading, refresh, lastUpdate } = useTransacoesSync()
@@ -76,6 +77,30 @@ export default function Transacoes() {
           </p>
         </div>
         <div className="flex gap-2 w-full sm:w-auto">
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={() => {
+              try {
+                exportToExcel(filteredTransacoes)
+                toast({
+                  title: "Exportação concluída",
+                  description: `Planilha com ${filteredTransacoes.length} transação(ões) foi baixada com sucesso!`,
+                })
+              } catch (error: any) {
+                toast({
+                  title: "Erro ao exportar",
+                  description: error.message || "Ocorreu um erro ao exportar as transações",
+                  variant: "destructive",
+                })
+              }
+            }}
+            disabled={isLoading || filteredTransacoes.length === 0}
+            className="flex-1 sm:flex-initial text-xs sm:text-sm"
+          >
+            <Download className={`h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2`} />
+            Exportar Excel
+          </Button>
           <Button variant="outline" size="sm" onClick={refresh} disabled={isLoading} className="flex-1 sm:flex-initial text-xs sm:text-sm">
             <RefreshCw className={`h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2 ${isLoading ? 'animate-spin' : ''}`} />
             Atualizar

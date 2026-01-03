@@ -6,7 +6,9 @@ import { DashboardFilters } from '@/components/dashboard/DashboardFilters'
 import { ExcelImporter } from '@/components/dashboard/ExcelImporter'
 import { DashboardCharts } from '@/components/dashboard/DashboardCharts'
 import { Button } from '@/components/ui/button'
-import { RefreshCw } from 'lucide-react'
+import { RefreshCw, Download } from 'lucide-react'
+import { exportToExcel } from '@/services/excelImporter'
+import { toast } from '@/hooks/use-toast'
 
 export default function Dashboard() {
   const { transacoes, loading, refresh, lastUpdate } = useTransacoesSync()
@@ -110,6 +112,31 @@ export default function Dashboard() {
           </p>
         </div>
         <div className="flex gap-2 w-full sm:w-auto">
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={() => {
+              try {
+                exportToExcel(filteredTransacoes)
+                toast({
+                  title: "Exportação concluída",
+                  description: `Planilha com ${filteredTransacoes.length} transação(ões) foi baixada com sucesso!`,
+                })
+              } catch (error: any) {
+                toast({
+                  title: "Erro ao exportar",
+                  description: error.message || "Ocorreu um erro ao exportar as transações",
+                  variant: "destructive",
+                })
+              }
+            }}
+            disabled={loading || filteredTransacoes.length === 0}
+            className="flex-1 sm:flex-initial text-xs sm:text-sm"
+          >
+            <Download className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+            <span className="hidden sm:inline">Exportar</span>
+            <span className="sm:hidden">Exportar</span>
+          </Button>
           <Button variant="outline" size="sm" onClick={refresh} disabled={loading} className="flex-1 sm:flex-initial text-xs sm:text-sm">
             <RefreshCw className={`h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2 ${loading ? 'animate-spin' : ''}`} />
             <span className="hidden sm:inline">Atualizar</span>
