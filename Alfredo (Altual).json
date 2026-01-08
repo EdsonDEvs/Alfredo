@@ -1,0 +1,3353 @@
+{
+  "name": "Alfredo (Altual)",
+  "nodes": [
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://free.uazapi.com/send/text",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "token",
+              "value": "SEU_TOKEN_UAZAPI_AQUI"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"number\": \"{{ $('Organiza Dados').item.json.whatsapp }}\",\n  \"text\": \"{{ $json.output }}\"\n}",
+        "options": {
+          "timeout": 30000
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        5472,
+        -2080
+      ],
+      "id": "9c22171a-95f7-4487-b7b9-e11ea98b06da",
+      "name": "Responde o Cliente"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.tipo }}",
+                    "rightValue": "imageMessage",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "2be6f6b1-e607-49c4-980d-fd03c478279a"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "imagem"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "f20361f5-f595-45a3-bf24-1ed03108835c",
+                    "leftValue": "={{ $json.tipo }}",
+                    "rightValue": "conversation",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "texto"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "7969dbe1-785a-4853-bd58-3b89447bba1b",
+                    "leftValue": "={{ $json.tipo }}",
+                    "rightValue": "audioMessage",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "audio"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "d1762aef-3adf-47ce-9a7e-9ce8fd810ac0",
+                    "leftValue": "={{ $json.tipo }}",
+                    "rightValue": "audioMessage",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        992,
+        -1120
+      ],
+      "id": "8da0cfa9-1c88-4589-85b9-5743f7fc3404",
+      "name": "Verifica o Tipo de mensagem"
+    },
+    {
+      "parameters": {
+        "amount": 6
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        1552,
+        -1120
+      ],
+      "id": "034a2720-786a-47d4-a67b-92ce6fcf4adb",
+      "name": "Wait",
+      "webhookId": "7ade20f6-0cd0-4310-b46a-a7e0db015845"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        2192,
+        -992
+      ],
+      "id": "f91c66cb-0bac-4eb0-ad74-ff69e4b28e34",
+      "name": "No Operation, do nothing"
+    },
+    {
+      "parameters": {
+        "operation": "delete",
+        "key": "={{ $json.whatsapp }}"
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        2416,
+        -1216
+      ],
+      "id": "c8cc5ac6-0c52-49ff-8f9c-7a170e3a1415",
+      "name": "Redis",
+      "credentials": {
+        "redis": {
+          "id": "y0Dd4LFkBcHGT4ih",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "3cc229ad-229c-4b69-b868-afe3b2d6827b",
+              "leftValue": "={{ $json.mensagens.last() }}",
+              "rightValue": "={{ $('Wait').item.json.mensagem }}",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1952,
+        -1120
+      ],
+      "id": "1b1a42d0-3737-4ffb-9078-51d8d0a7de14",
+      "name": "If1"
+    },
+    {
+      "parameters": {
+        "resource": "image",
+        "operation": "analyze",
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-4O-MINI"
+        },
+        "text": "=Sua tarefa é analisar a imagem de um comprovante (como nota fiscal ou recibo) e extrair as seguintes informações financeiras:\n\n1.  **Valor Total:** O montante final pago. Procure por termos como \"Total\", \"Valor a Pagar\", etc.\n2.  **Estabelecimento:** O nome da loja, restaurante ou prestador de serviço. Geralmente localizado no topo do comprovante.\n3.  **Data e Hora:** A data e hora exatas da transação. Se não encontrar a data ou a hora na imagem, use a data e hora atual: {{ $now }}.\n4.  **Tipo de Movimentação:** Analise o contexto. A maioria dos recibos representa uma 'despesa'. Se for claramente um comprovante de entrada de dinheiro (ex: comprovante de depósito, salário), classifique como 'receita'. Na dúvida, use 'despesa'.\n5.  **Categoria:** Com base no nome do estabelecimento e nos itens (se visíveis), escolha a categoria *mais apropriada* da lista abaixo. Se nenhuma se encaixar perfeitamente, use 'Outros'.\n\n* **Lista de Categorias:**\n    * Alimentação (Restaurantes, Supermercados, Cafés)\n    * Transporte (Combustível, Uber, Passagem de Ônibus)\n    * Moradia (Aluguel, Contas de Luz/Água/Internet)\n    * Saúde (Farmácia, Consultas, Exames)\n    * Cuidados Pessoais (Salão de Beleza, Cosméticos)\n    * Compras (Roupas, Eletrônicos, Livros)\n    * Lazer (Cinema, Shows, Bares, Viagens)\n    * Educação (Cursos, Livros Didáticos)\n    * Outros (Qualquer outra despesa não listada)\n\n* **Formato da Resposta:**\n    * Se você não conseguir identificar *com confiança* pelo menos o **Valor Total** e o **Estabelecimento**, responda *apenas* com a palavra: `FALSE`.\n    * Caso contrário, formate a resposta em uma única frase, seguindo *exatamente* este modelo:\n        \"[Tipo de Movimentação]: R$ [Valor Total] em [Estabelecimento] no dia [Data] ([Categoria]) registrada com sucesso Alfred.\"\n\n* **Exemplo de Resposta Válida:**\n    \"Despesa: R$ 75,50 em Supermercado Pague Menos no dia 25/05/2025 (Alimentação) registrada com sucesso alfred.\"",
+        "inputType": "base64",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        2416,
+        -1456
+      ],
+      "id": "4f7c8543-6a00-4ee3-9eaf-84bfa2c5aece",
+      "name": "Analiza a Imagem",
+      "credentials": {
+        "openAiApi": {
+          "id": "WD5eNg4GM0hSfSdu",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "toBinary",
+        "sourceProperty": "data.base64",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        1856,
+        -1456
+      ],
+      "id": "c1a7d605-7fc7-419e-9359-f98ef90f56f3",
+      "name": "Converte o base64 em imagem"
+    },
+    {
+      "parameters": {
+        "operation": "toBinary",
+        "sourceProperty": "data.base64",
+        "options": {
+          "fileName": "audio.mp3",
+          "mimeType": "audio/mpeg"
+        }
+      },
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        1872,
+        -736
+      ],
+      "id": "d898c775-f2b0-4d5d-bb6b-c3848920b24c",
+      "name": "Converte o base64 em áudio"
+    },
+    {
+      "parameters": {
+        "resource": "audio",
+        "operation": "transcribe",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        2416,
+        -736
+      ],
+      "id": "a541d3e3-2080-4dea-8321-08cb3c990ded",
+      "name": "Transcreve o audio",
+      "credentials": {
+        "openAiApi": {
+          "id": "WD5eNg4GM0hSfSdu",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "=https://SEU_SERVIDOR_EVOLUTION_API/chat/getMedia/Alfredoo/{{ $json.body?.id || $json.body?.key?.id || $json.body?.data?.key?.id || $json.id || $json.messageId || '' }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "SUA_API_KEY_AQUI"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 60000
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1376,
+        -736
+      ],
+      "id": "42f07a52-dbd4-4e07-b68a-a8379f061366",
+      "name": "Caso não recebemos o Base64 consultamos no EVOAPI"
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "=https://SEU_SERVIDOR_EVOLUTION_API/chat/getMedia/Alfredoo/{{ $json.body?.id || $json.body?.key?.id || $json.body?.data?.key?.id || $json.id || $json.messageId || '' }}?convertToMp4=true",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "SUA_API_KEY_AQUI"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 60000
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1376,
+        -1456
+      ],
+      "id": "4097b21b-9a6c-4a40-a51e-aab0dc548c8b",
+      "name": "Caso não recebemos o Base64 consultamos no EVOAPI1"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "a7697a1b-0bcb-4078-87df-de2e161b3431",
+              "leftValue": "={{ $('Auth').item.json.id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        752,
+        -1088
+      ],
+      "id": "a1ec11e6-300f-4f1e-a0eb-f9246ae4eeee",
+      "name": "Verifica Usuario"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "5ce0dbad-71e3-4cca-b7d4-efd5cfb8888e",
+              "name": "whatsapp",
+              "value": "={{ ($json.body?.phone || $json.body?.from || $json.body?.data?.key?.remoteJid || $json.phone || $json.from || '').toString().replace('@s.whatsapp.net', '').replace('@g.us', '').replace('@c.us', '').trim() }}",
+              "type": "string"
+            },
+            {
+              "id": "e21377a9-256b-4738-b454-666ef5c1c2dc",
+              "name": "mensagem",
+              "value": "={{ $json.body?.message || $json.body?.text || $json.body?.data?.message?.conversation || $json.body?.data?.message?.extendedTextMessage?.text || $json.message || $json.text || '' }}",
+              "type": "string"
+            },
+            {
+              "id": "7c05d433-bd72-48a4-af77-bc746a2ddc92",
+              "name": "tipo",
+              "value": "={{ ($json.body?.type || $json.body?.messageType || $json.body?.data?.messageType || $json.type || $json.messageType || ($json.body?.image || $json.body?.data?.image || $json.image ? 'imageMessage' : ($json.body?.audio || $json.body?.data?.audio || $json.audio ? 'audioMessage' : ($json.body?.video || $json.body?.data?.video || $json.video ? 'videoMessage' : ($json.body?.document || $json.body?.data?.document || $json.document ? 'documentMessage' : 'conversation'))))).toString().toLowerCase() }}",
+              "type": "string"
+            },
+            {
+              "id": "509be248-4a4f-4c53-8165-1a015d9f6f6f",
+              "name": "messageId",
+              "value": "={{ $json.body?.id || $json.body?.key?.id || $json.body?.data?.key?.id || $json.id || $json.messageId || '' }}",
+              "type": "string"
+            },
+            {
+              "id": "af5f68d5-8d0d-40e1-8eff-5ff7209e36c9",
+              "name": "firstname",
+              "value": "={{ $json.body?.name || $json.body?.pushName || $json.body?.data?.pushName || $json.name || $json.pushName || 'Usuário' }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        544,
+        -1088
+      ],
+      "id": "29db2f7f-04ff-4207-804f-97b6c8f354a5",
+      "name": "Organiza Dados"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "confirma-pagamento",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        304,
+        96
+      ],
+      "id": "bc25bd4d-9d99-40b3-93a8-e2d1a5611d9d",
+      "name": "ConfirmaPagamento",
+      "webhookId": "1a643f5c-49e7-41a6-b41c-5fd8f7093585"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "8f748fe2-c181-4a81-8fe6-91cb462edc9f",
+              "name": "customerId",
+              "value": "={{ $json.body.payment.customer }}",
+              "type": "string"
+            },
+            {
+              "id": "6968c50e-f26f-4fe5-8da4-0c5beaa7095f",
+              "name": "subscriptionId",
+              "value": "={{ $json.body.payment.subscription }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        544,
+        96
+      ],
+      "id": "c64783c7-567f-43b5-a4ba-3a151c8a299f",
+      "name": "FiltraDados"
+    },
+    {
+      "parameters": {
+        "url": "=https://api-sandbox.asaas.com/v3/customers/{{ $json.customerId }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "accept",
+              "value": "application/json"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        768,
+        96
+      ],
+      "id": "e4220342-ba5c-45da-bd0b-1ce2e0155c12",
+      "name": "DadosCliente",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "I4sqFQJyKRTrVqxx",
+          "name": "Header Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://ljgfquyhfcfazdkbenbw.supabase.co/auth/v1/signup",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBearerAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apiKey",
+              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxqZ2ZxdXloZmNmYXpka2JlbmJ3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ2MTA1ODUsImV4cCI6MjA3MDE4NjU4NX0.ik_c8XbWqc5X4BUyE8MMTwfSzI1Httmh1Lm6dP32xI4"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "email",
+              "value": "={{ $json.email }}"
+            },
+            {
+              "name": "password",
+              "value": "={{ $json.senhaAleatoria }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1424,
+        96
+      ],
+      "id": "96c72585-68e8-43d6-8248-2036e3a0beee",
+      "name": "CriaConta",
+      "credentials": {
+        "httpBearerAuth": {
+          "id": "vd8iFmuWDgpJDMlw",
+          "name": "Chave Supabase"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "profiles",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "id",
+              "condition": "eq",
+              "keyValue": "={{ $json.identities[0].user_id }}"
+            }
+          ]
+        },
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "nome",
+              "fieldValue": "={{ $('DadosCliente').item.json.name }}"
+            },
+            {
+              "fieldId": "phone",
+              "fieldValue": "={{ $('VerificaNumeroWhats').item.json.data[0].jid.split('@').first() }}"
+            },
+            {
+              "fieldId": "whatsapp",
+              "fieldValue": "={{$('VerificaNumeroWhats').item.json.data[0].jid}}"
+            },
+            {
+              "fieldId": "customerid",
+              "fieldValue": "={{ $('DadosCliente').item.json.id }}"
+            },
+            {
+              "fieldId": "assinaturaid",
+              "fieldValue": "={{ $('ConfirmaPagamento').item.json.body.payment.subscription }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        1712,
+        96
+      ],
+      "id": "d75d0198-2c47-431a-a819-52e68b48592f",
+      "name": "AtualizaInfoUser",
+      "credentials": {
+        "supabaseApi": {
+          "id": "2iQ9TgoFLdVEDJ5K",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://SEU_SERVIDOR_EVOLUTION_API/chat/whatsappNumbers/Alfredoo",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "apikey",
+              "value": "SUA_API_KEY_AQUI"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "numbers",
+              "value": "=[\"55{{ $json.mobilePhone }}\"]"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 30000
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        992,
+        96
+      ],
+      "id": "9c87ba78-0aa3-452a-b102-3aefda00af5a",
+      "name": "VerificaNumeroWhats"
+    },
+    {
+      "parameters": {
+        "content": "## Cria conta usuário.\n**Após a confirmação do pagamento, criamos uma conta para o usuario no supabase.",
+        "height": 420,
+        "width": 1880,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        240,
+        -64
+      ],
+      "id": "654b8b9e-ddaf-4bd7-b0b1-43d7e2307d81",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "agente-financeiro",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        32,
+        -1088
+      ],
+      "id": "24fd62d4-4aa2-4235-b41c-36ee76f3a057",
+      "name": "InicioChat",
+      "webhookId": "23bb92a9-41a4-4b1b-9fb8-f028c324b367"
+    },
+    {
+      "parameters": {
+        "operation": "push",
+        "list": "={{ $json.whatsapp }}",
+        "messageData": "={{ $json.mensagem }}",
+        "tail": true
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        1360,
+        -1120
+      ],
+      "id": "54f20413-0439-4a25-82ff-38219f4ff86e",
+      "name": "InsereMSG",
+      "credentials": {
+        "redis": {
+          "id": "y0Dd4LFkBcHGT4ih",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "propertyName": "mensagens",
+        "key": "={{ $json.whatsapp }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        1760,
+        -1120
+      ],
+      "id": "815ea090-1c1e-4bd1-a3b9-b5907f61cf4f",
+      "name": "ListaMSGs",
+      "credentials": {
+        "redis": {
+          "id": "y0Dd4LFkBcHGT4ih",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "96833a1a-530e-43ac-87c6-ff3fe2635b9a",
+              "name": "mensagem",
+              "value": "={{ $('ListaMSGs').item.json.mensagens.join('\\n') }}",
+              "type": "string"
+            },
+            {
+              "id": "2c8e9f69-fa5c-42d1-ab15-cc315e85f82a",
+              "name": "whatsapp",
+              "value": "={{ $('Wait').item.json.whatsapp }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2192,
+        -1216
+      ],
+      "id": "15dd47d7-7829-4e10-a453-76323503b3ed",
+      "name": "MontaMSG"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $('CentralizaDados').item.json.content }}",
+        "hasOutputParser": true,
+        "messages": {
+          "messageValues": [
+            {
+              "message": "=Sua tarefa é classificar a intenção principal da mensagem do usuário em uma das seguintes intencoes:\n\nClassifique a intenção da seguinte mensagem do usuário em uma das opções abaixo:\n\nIntenções disponíveis:\n\n- transacaoFinanceira: Quando o usuário deseja registrar, editar ou excluir uma transação (despesa ou receita).\n  Exemplos:\n    - \"Gastei 50 reais no almoço\"\n    - \"Recebi meu salário\"\n    - \"Anote 100 de mercado\"\n    - \"Entrou 500 na conta\"\n    - \"Lançar despesa de R$30 com farmácia\"\n\n- consulta: Quando o usuário quer informações sobre sua situação financeira, como saldo, extratos, resumos, maiores gastos ou análises gerais.\n  Exemplos:\n    - \"Qual meu saldo?\"\n    - \"Quanto gastei com comida este mês?\"\n    - \"Me mostra minhas últimas transações\"\n    - \"Posso ver meu extrato?\"\n    - \"Como está minha situação financeira?\"\n    - \"Estou gastando muito?\"\n    - \"Quais foram meus maiores gastos este mês?\"\n\n- lembrete: Quando o usuário deseja criar ou consultar um lembrete financeiro.\n  Exemplos:\n    - \"Me lembre de pagar o aluguel dia 5\"\n    - \"Não esquecer da fatura do cartão\"\n    - \"Lembrete: Transferir dinheiro amanhã\"\n    - \"Quando vence minha conta de luz?\"\n    - \"Quais são os meus compromissos?\"\n    - \"O que preciso pagar mes que vem?\"\n\n- indefinido: Quando a mensagem não se encaixa claramente em nenhuma das categorias acima ou for apenas uma saudação ou conversa geral.\n  Exemplos:\n    - \"Olá\"\n    - \"Tudo bem?\"\n    - \"Obrigado\"\n    - \"Qual o seu nome?\"\n    - \"Isso é útil\"\n\nInstrução:\nClassifique a seguinte mensagem do usuário em uma única palavra correspondente à intenção principal:\ntransacaoFinanceira, consulta, lembrete ou indefinido.\n\n\n*ATENÇÃO*\nResponda apenas com o nome da intencao."
+            }
+          ]
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.6,
+      "position": [
+        3424,
+        -1040
+      ],
+      "id": "176e14da-e67f-45c9-bd02-1664e19525e4",
+      "name": "IdentificaIntencao",
+      "notesInFlow": false,
+      "notes": "Ajuda a identificar a intenção do usuário."
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "4b709d7e-6047-450d-b26c-e37907ec3061",
+              "name": "content",
+              "value": "={{ $json.content || $json.mensagem || $json.text }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2784,
+        -1136
+      ],
+      "id": "2a95fb60-b136-4257-8166-be26d2153483",
+      "name": "CentralizaDados"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.intencao }}",
+                    "rightValue": "transacaoFinanceira",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "45cb2c5d-a82b-4ebf-ad07-372f9736389a"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Transacao"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "8cac7d1f-246c-4127-85b7-23389cf9a0d9",
+                    "leftValue": "={{ $json.intencao }}",
+                    "rightValue": "consulta",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Consulta"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "e44d05b3-72d3-4e63-bb95-b243561541b0",
+                    "leftValue": "={{ $json.intencao }}",
+                    "rightValue": "lembrete",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Lembrete"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "7cd6481f-1957-4a1f-8ee1-385a2a8d00f8",
+                    "leftValue": "={{ $json.intencao }}",
+                    "rightValue": "indefinido",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Indefinido"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        4416,
+        -1168
+      ],
+      "id": "11466e0d-f338-474a-b463-b07f87a626b6",
+      "name": "RedirecionaUsuario"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "propertyName": "intencao",
+        "key": "={{ $('Organiza Dados').item.json.whatsapp }}_intencao",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        2976,
+        -1136
+      ],
+      "id": "a7abf89f-f6a3-4657-a3b2-089761aee331",
+      "name": "IntencaoEmAberto",
+      "credentials": {
+        "redis": {
+          "id": "y0Dd4LFkBcHGT4ih",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "019a828a-f117-4c63-9dae-e957aa6bd902",
+              "leftValue": "={{ $json.intencao }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        3184,
+        -1136
+      ],
+      "id": "6198b1cc-4ebf-40e3-a286-598008e4516c",
+      "name": "ExisteIntencao"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.1,
+      "position": [
+        4160,
+        -1136
+      ],
+      "id": "02b001e1-f75e-4756-a97c-2f27a19ee9ff",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n\t\"intencao\": \"dica\"\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.2,
+      "position": [
+        3616,
+        -848
+      ],
+      "id": "f591c040-a320-459a-958d-f645d7525def",
+      "name": "EstruturaResposta"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4o-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        3392,
+        -848
+      ],
+      "id": "02445584-3218-47eb-b3af-651a1986a8b6",
+      "name": "ModeloIA",
+      "credentials": {
+        "openAiApi": {
+          "id": "WD5eNg4GM0hSfSdu",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://free.uazapi.com/send/text",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "token",
+              "value": "SEU_TOKEN_UAZAPI_AQUI"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"number\": \"{{ $('Organiza Dados').item.json.whatsapp }}\",\n  \"text\": \"Oops! Não consegui entender, tente novamente.\"\n}",
+        "options": {
+          "timeout": 30000
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        5040,
+        -608
+      ],
+      "id": "564d30f2-fe07-4a83-b4fb-7d10daecb7fe",
+      "name": "MensagemErro"
+    },
+    {
+      "parameters": {
+        "operation": "delete",
+        "key": "={{ $('Organiza Dados').item.json.whatsapp }}_intencao"
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        5216,
+        -608
+      ],
+      "id": "f68c43ed-9593-40b3-9982-284541ad19ab",
+      "name": "LimpaIntencao",
+      "credentials": {
+        "redis": {
+          "id": "y0Dd4LFkBcHGT4ih",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        5376,
+        -608
+      ],
+      "id": "b5c3cc91-1f78-4f8e-ab7f-7e4ce236ff93",
+      "name": "Finaliza"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4o-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        4944,
+        -1312
+      ],
+      "id": "094ebf1a-835e-4f0b-82a3-8f9ae06c171a",
+      "name": "OpenAI Chat Model1",
+      "credentials": {
+        "openAiApi": {
+          "id": "WD5eNg4GM0hSfSdu",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.toolCalculator",
+      "typeVersion": 1,
+      "position": [
+        5504,
+        -1312
+      ],
+      "id": "13fcec19-9b64-4805-b72d-1cab202fe859",
+      "name": "calculadora"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4o-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        4912,
+        -848
+      ],
+      "id": "5bdcce19-7951-4eb6-9076-adbed7b38501",
+      "name": "Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "WD5eNg4GM0hSfSdu",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Organiza Dados').item.json.whatsapp }}_lembrete",
+        "sessionTTL": 180
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryRedisChat",
+      "typeVersion": 1.5,
+      "position": [
+        5040,
+        -848
+      ],
+      "id": "301be33d-42ec-4c64-a9d6-5a7ad392fe61",
+      "name": "Memory",
+      "credentials": {
+        "redis": {
+          "id": "y0Dd4LFkBcHGT4ih",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Utilize essa tool para salvar os lembretes.",
+        "useCustomSchema": true,
+        "tableId": "lembretes",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "userId",
+              "fieldValue": "={{ $('Auth').item.json.id }}"
+            },
+            {
+              "fieldId": "descricao",
+              "fieldValue": "={{ $fromAI('descricao') }}"
+            },
+            {
+              "fieldId": "data",
+              "fieldValue": "={{ $fromAI('data') }}"
+            },
+            {
+              "fieldId": "valor",
+              "fieldValue": "={{ $fromAI('valor') }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabaseTool",
+      "typeVersion": 1,
+      "position": [
+        5152,
+        -848
+      ],
+      "id": "6f456391-2225-402d-8dab-b90ccb20f114",
+      "name": "salvaLembrete",
+      "credentials": {
+        "supabaseApi": {
+          "id": "2iQ9TgoFLdVEDJ5K",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Utilize essa tool para limpar a intencao.",
+        "operation": "delete",
+        "key": "={{ $('Organiza Dados').item.json.whatsapp }}_intencao"
+      },
+      "type": "n8n-nodes-base.redisTool",
+      "typeVersion": 1,
+      "position": [
+        5440,
+        -848
+      ],
+      "id": "6e5c2f76-3e22-4d31-b79a-1842390a02b8",
+      "name": "apagaIntencao",
+      "credentials": {
+        "redis": {
+          "id": "y0Dd4LFkBcHGT4ih",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://free.uazapi.com/send/text",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "token",
+              "value": "SEU_TOKEN_UAZAPI_AQUI"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"number\": \"{{ $('Organiza Dados').item.json.whatsapp }}\",\n  \"text\": \"{{ $json.output }}\"\n}",
+        "options": {
+          "timeout": 30000
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        5472,
+        -1120
+      ],
+      "id": "6b06236b-74fb-4393-a593-b003ecff7b5a",
+      "name": "RespondeCliente"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $('CentralizaDados').item.json.content }}",
+        "options": {
+          "systemMessage": "=**Hora Atual:** `{{ $now }}`\n\n## Sua Tarefa como Assessor Financeiro IA\n\nVocê deve analisar a **Mensagem\\_Cliente** e fornecer **respostas, análises financeiras detalhadas e insights úteis**, como um assessor financeiro faria.\n\nInclua:\n\n* Maiores despesas\n* Resumos de gastos e receitas\n* Tendências financeiras\n* Respostas a perguntas específicas sobre finanças do usuário\n\n---\n\n## Guia de Utilização de Ferramentas\n\n### `transacoes`\n\n* **Use para:** Acessar o histórico completo de transações financeiras (despesas, receitas).\n* **Como usar:** Obtenha os dados brutos. Você é responsável por realizar as análises, como:\n\n  * Identificar a \"maior despesa\"\n  * Calcular totais por período ou categoria\n  * Comparar gastos entre períodos\n\n---\n\n### `lembrete`\n\n* **Use para:** Consultar lembretes financeiros registrados.\n* **Como usar:** Utilize esta ferramenta se a **Mensagem\\_Cliente** tratar de:\n\n  * Datas de pagamento\n  * Lembretes financeiros\n  * Compromissos financeiros agendados\n\n---\n\n### `consultaCategorias`\n\n* **Use para:** Obter informações sobre categorias de transações.\n* **Como usar:** Ative esta ferramenta se a **Mensagem\\_Cliente**:\n\n  * Pedir detalhes sobre categorias disponíveis\n  * Solicitar um resumo por categoria\n  * Tiver dúvidas sobre como categorizar transações\n\n---\n\n### `calculadora`\n\n* **Use para:** Realizar cálculos matemáticos precisos.\n* **Como usar:** Aplique quando precisar:\n\n  * Somar valores\n  * Calcular médias, percentuais ou projeções\n  * Analisar variações com base nos dados obtidos\n\n---\n\n### `apagaIntencaoConsulta`\n\n* **Use para:** Encerrar a consulta atual.\n* **Como usar:** Utilize quando a **Mensagem\\_Cliente** indicar:\n\n  * Que a dúvida foi resolvida\n  * Que não há mais solicitações abertas\n\n---\n\n## Processo Recomendado\n\n1. **Analise a Mensagem\\_Cliente**\n   Identifique a dúvida ou análise solicitada.\n\n2. **Selecione Ferramenta(s)**\n   Determine quais ferramentas utilizar para obter os dados necessários.\n\n3. **Execute e Processe**\n   Use as ferramentas e analise os dados retornados por conta própria.\n\n4. **Formule a Resposta**\n   Redija uma resposta clara, útil e precisa com base nos dados.\n\n5. **Gerencie a Conversa**\n   Se aplicável, utilize `apagaIntencaoConsulta` para encerrar o tópico.\n\n---\n\nSe quiser, posso transformar esse conteúdo em um bloco de markdown exportável para documentação ou sistemas externos. Deseja isso também?\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.9,
+      "position": [
+        5072,
+        -1552
+      ],
+      "id": "18e977fd-9b7a-402f-99c8-5907a98211e2",
+      "name": "Agente de Consulta"
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "transacoes",
+        "returnAll": true,
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "userId",
+              "condition": "eq",
+              "keyValue": "={{ $('Auth').item.json.id }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabaseTool",
+      "typeVersion": 1,
+      "position": [
+        5104,
+        -1312
+      ],
+      "id": "d0fe124f-9c83-4956-8f6d-8dd0088368c9",
+      "name": "transacoes",
+      "credentials": {
+        "supabaseApi": {
+          "id": "2iQ9TgoFLdVEDJ5K",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "lembretes",
+        "limit": 10,
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "userid",
+              "condition": "eq",
+              "keyValue": "={{ $('Auth').item.json.id }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabaseTool",
+      "typeVersion": 1,
+      "position": [
+        5232,
+        -1312
+      ],
+      "id": "53155c53-ec9f-4b91-bb5a-9de56bbd3077",
+      "name": "lembretes",
+      "credentials": {
+        "supabaseApi": {
+          "id": "2iQ9TgoFLdVEDJ5K",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        5744,
+        -1120
+      ],
+      "id": "705fc1d8-5bba-4ced-aa52-1b825dbfaf2c",
+      "name": "FinalizaLembrete"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        5696,
+        -2080
+      ],
+      "id": "84d4c742-0562-41c0-97a8-8540d99a8ccb",
+      "name": "FinalizaTransacao"
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Utilize essa tool para limpar a intencao.",
+        "operation": "delete",
+        "key": "={{ $('Organiza Dados').item.json.whatsapp }}_intencao"
+      },
+      "type": "n8n-nodes-base.redisTool",
+      "typeVersion": 1,
+      "position": [
+        5632,
+        -1312
+      ],
+      "id": "66865c1b-3c3a-4f27-b1ef-704fe45238eb",
+      "name": "apagaIntencaoConsulta",
+      "credentials": {
+        "redis": {
+          "id": "y0Dd4LFkBcHGT4ih",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://free.uazapi.com/send/text",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "token",
+              "value": "SEU_TOKEN_UAZAPI_AQUI"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"number\": \"{{ $('Organiza Dados').item.json.whatsapp }}\",\n  \"text\": \"{{ $json.output }}\"\n}",
+        "options": {
+          "timeout": 30000
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        5472,
+        -1552
+      ],
+      "id": "667b00e7-fd25-41a4-8b80-fb23431027d3",
+      "name": "RespondeClienteConsulta"
+    },
+    {
+      "parameters": {
+        "tableId": "transacoes",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "estabelecimento",
+              "fieldValue": "={{ $fromAI('estabelecimento') }}"
+            },
+            {
+              "fieldId": "valor",
+              "fieldValue": "={{ $fromAI('valor') }}"
+            },
+            {
+              "fieldId": "tipo",
+              "fieldValue": "={{ $fromAI('tipo') }}"
+            },
+            {
+              "fieldId": "category_id",
+              "fieldValue": "={{ $fromAI('categoria') }}"
+            },
+            {
+              "fieldId": "userid",
+              "fieldValue": "={{ $('Auth').item.json.id }}"
+            },
+            {
+              "fieldId": "detalhes",
+              "fieldValue": "={{ $fromAI('detalhes') }}"
+            },
+            {
+              "fieldId": "quando",
+              "fieldValue": "={{ $fromAI('quando') }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabaseTool",
+      "typeVersion": 1,
+      "position": [
+        5232,
+        -1776
+      ],
+      "id": "cbaadf50-b1f4-431d-bd8f-4dd32c813d2a",
+      "name": "add",
+      "credentials": {
+        "supabaseApi": {
+          "id": "2iQ9TgoFLdVEDJ5K",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "categorias",
+        "limit": 1,
+        "matchType": "allFilters",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "userid",
+              "condition": "eq",
+              "keyValue": "={{ $('Auth').item.json.id }}"
+            },
+            {
+              "keyName": "nome",
+              "condition": "like",
+              "keyValue": "={{ $fromAI('nome_categoria') }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabaseTool",
+      "typeVersion": 1,
+      "position": [
+        5744,
+        -1776
+      ],
+      "id": "4ac8aa17-2995-4824-83ad-87ff7a4ce007",
+      "name": "categorias",
+      "credentials": {
+        "supabaseApi": {
+          "id": "2iQ9TgoFLdVEDJ5K",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Utilize essa tool para limpar a intencao.",
+        "operation": "delete",
+        "key": "={{ $('Organiza Dados').item.json.whatsapp }}_intencao"
+      },
+      "type": "n8n-nodes-base.redisTool",
+      "typeVersion": 1,
+      "position": [
+        6016,
+        -1776
+      ],
+      "id": "6e5dfac1-50ab-4027-9117-73972530c125",
+      "name": "limparIntencaoTransacao",
+      "credentials": {
+        "redis": {
+          "id": "y0Dd4LFkBcHGT4ih",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $('CentralizaDados').item.json.content }}",
+        "options": {
+          "systemMessage": "=Hora atual: {{ $now }}\nMensagem do Cliente: {{ $('CentralizaDados').item.json.content }}\nuserId: {{ $('Auth').item.json.id }}\n\nVocê é um assistente financeiro. Sua tarefa é identificar se a mensagem do cliente contém uma intenção de adicionar, editar ou remover uma transação financeira.\n\nExtraia os seguintes dados da transação:\n\n\n- categoria:\nAo identificar uma categoria mencionada pelo usuário, siga os passos abaixo:\n1. Pesquise na tool 'categorias' usando o nome da categoria identificada.\n2. Se a categoria for encontrada, utilize o ID correspondente.\n3. Se não for encontrada, utilize a tool 'addCategoria' para criar uma nova categoria com o nome mencionado pelo usuário e utilize o ID da nova categoria criada.\n\nImportante: Sempre utilize o ID da categoria nas transações, nunca o nome.\n\n- valor: Montante da transação. Procure por termos como \"total\", \"valor pago\", \"valor recebido\", etc.\n- categoria: Identifique a categoria mencionada, pesquise pelo nome usando a ferramenta \"categorias\" e utilize o ID correspondente. Caso não encontre, pesquise na tool 'categorias' a categoria outros.\n- tipo: Classifique como \"despesa\" ou \"receita\" com base no contexto. Na dúvida, considere como \"despesa\".\n- data: Use a data informada pelo cliente. Se não houver, utilize a data e hora atual: {{ $now }}.\n- descrição: Gere uma descrição amigável com até 200 caracteres.\n\nAções:\n\n- Para adicionar: use a ferramenta \"add\"\n- Para editar: use a ferramenta \"edit\"\n- Para remover: use a ferramenta \"delete\"\n\nSe a intenção for editar ou remover, sempre confirme com o cliente antes de executar:\n\"Você confirma que deseja [editar/remover] essa transação?\"\n\nApós a ação, utilize a ferramenta \"limparIntencaoTransacao\" e informe ao cliente que a operação foi concluída com sucesso de forma simples e objetiva.\n\nCaso precise localizar uma transação, utilize a ferramenta \"infoTransacoes\".\n\n*ATENÇÃO*: \n- Execute cada ferramenta de ação (add, edit, delete) apenas uma vez por solicitação. \n- Exectute a tool \"limparIntencaoTransacao\" sempre que utilizar uma das ações: add, edit ou delete.\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.9,
+      "position": [
+        5072,
+        -2080
+      ],
+      "id": "0c6b1be3-48b9-4b9c-bc9c-b9360d8c288e",
+      "name": "Assistente Financeiro"
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Organiza Dados').item.json.whatsapp }}_transacao",
+        "sessionTTL": 660,
+        "contextWindowLength": 15
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryRedisChat",
+      "typeVersion": 1.5,
+      "position": [
+        5104,
+        -1776
+      ],
+      "id": "334c9154-a58b-4e0f-ba5b-969bc5c87b0e",
+      "name": "memoriaTransacao",
+      "credentials": {
+        "redis": {
+          "id": "y0Dd4LFkBcHGT4ih",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4o-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        4944,
+        -1776
+      ],
+      "id": "8d242a5b-1caa-46c2-8de1-6c06c48a61e4",
+      "name": "ModeloTransacao",
+      "credentials": {
+        "openAiApi": {
+          "id": "WD5eNg4GM0hSfSdu",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "transacoes",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "id",
+              "condition": "eq",
+              "keyValue": "={{ $fromAI('transacaoId') }}"
+            }
+          ]
+        },
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "estabelecimento",
+              "fieldValue": "={{ $fromAI('estabelecimento') }}"
+            },
+            {
+              "fieldId": "valor",
+              "fieldValue": "={{ $fromAI('valor') }}"
+            },
+            {
+              "fieldId": "tipo",
+              "fieldValue": "={{ $fromAI('tipo') }}"
+            },
+            {
+              "fieldId": "category_id",
+              "fieldValue": "={{ $fromAI('categoria') }}"
+            },
+            {
+              "fieldId": "userid",
+              "fieldValue": "={{ $('Auth').item.json.id }}"
+            },
+            {
+              "fieldId": "detalhes",
+              "fieldValue": "={{ $fromAI('detalhes') }}"
+            },
+            {
+              "fieldId": "quando",
+              "fieldValue": "={{ $fromAI('quando') }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabaseTool",
+      "typeVersion": 1,
+      "position": [
+        5360,
+        -1776
+      ],
+      "id": "af1e66e6-6a0c-4b62-a8df-09b9d566f6ad",
+      "name": "edit",
+      "credentials": {
+        "supabaseApi": {
+          "id": "2iQ9TgoFLdVEDJ5K",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "transacoes",
+        "limit": 10,
+        "matchType": "allFilters"
+      },
+      "type": "n8n-nodes-base.supabaseTool",
+      "typeVersion": 1,
+      "position": [
+        5600,
+        -1776
+      ],
+      "id": "845d5200-9c1f-47a9-93a7-acc910ea257e",
+      "name": "infoTransacoes",
+      "credentials": {
+        "supabaseApi": {
+          "id": "2iQ9TgoFLdVEDJ5K",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "delete",
+        "tableId": "transacoes",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "id",
+              "condition": "eq",
+              "keyValue": "={{ $fromAI('transacaoId') }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabaseTool",
+      "typeVersion": 1,
+      "position": [
+        5472,
+        -1776
+      ],
+      "id": "c5056080-af3c-4209-9bfb-190e7a8a86c6",
+      "name": "delete",
+      "credentials": {
+        "supabaseApi": {
+          "id": "2iQ9TgoFLdVEDJ5K",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "categorias",
+        "limit": 10,
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "userid",
+              "condition": "eq",
+              "keyValue": "={{ $('Auth').item.json.id }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabaseTool",
+      "typeVersion": 1,
+      "position": [
+        5360,
+        -1312
+      ],
+      "id": "cc6a4811-2dc3-43ec-b3d6-479edef97ff8",
+      "name": "consultaCategorias",
+      "credentials": {
+        "supabaseApi": {
+          "id": "2iQ9TgoFLdVEDJ5K",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "tableId": "categorias",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "userid",
+              "fieldValue": "={{ $('Auth').item.json.id }}"
+            },
+            {
+              "fieldId": "nome",
+              "fieldValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('fieldValues1_Field_Value', ``, 'string') }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabaseTool",
+      "typeVersion": 1,
+      "position": [
+        5856,
+        -1776
+      ],
+      "id": "07185581-ba6f-4761-b8df-86a4182da06a",
+      "name": "addCategoria",
+      "credentials": {
+        "supabaseApi": {
+          "id": "2iQ9TgoFLdVEDJ5K",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "lembretes",
+        "limit": 10,
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "userId",
+              "condition": "eq",
+              "keyValue": "={{ $('Auth').item.json.id }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabaseTool",
+      "typeVersion": 1,
+      "position": [
+        5296,
+        -848
+      ],
+      "id": "51020f93-fae5-47e3-bf59-50b6eebe7849",
+      "name": "consultaLembretes",
+      "credentials": {
+        "supabaseApi": {
+          "id": "2iQ9TgoFLdVEDJ5K",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "verifica-zap",
+        "authentication": "basicAuth",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        3568,
+        112
+      ],
+      "id": "f74c0778-067c-4efe-8909-b6c371ffa391",
+      "name": "Webhook",
+      "webhookId": "4533000b-25ba-425a-935f-d4c16cfbac37",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "e747675e-e7ae-4a83-bef1-090eb58b2c18",
+              "name": "data[0].exists",
+              "value": "={{ $json.data[0].exists }}",
+              "type": "boolean"
+            },
+            {
+              "id": "1d300520-6990-4172-9f57-91fc659aba0c",
+              "name": "data[0].jid",
+              "value": "={{ $json.data[0].jid }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        4000,
+        112
+      ],
+      "id": "ea45186a-2442-4428-8978-10231253853b",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"exists\": \"{{ $json.data[0].exists }}\",\n\"whatsapp\": \"{{ $json.data[0].jid }}\"\n} ",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.2,
+      "position": [
+        4224,
+        112
+      ],
+      "id": "0c97d5ee-ad9b-49d8-9087-ff00146e4242",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "content": "## Valida whatsapp\n** Endpoint para verificação do número de whatsapp",
+        "height": 420,
+        "width": 960,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        3504,
+        -64
+      ],
+      "id": "e3079af8-1364-4306-b657-661b6cca6b9a",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Fonte única dos dados (evita múltiplos $('DadosCliente')...):\nconst dados = $('DadosCliente').first()?.json ?? {};\n\n// Captura e normaliza e-mail (aceita \"e-mail\" ou \"email\"):\nconst rawEmail = (dados['e-mail'] ?? dados.email ?? '')\n  .toString()\n  .trim()\n  .toLowerCase();\n\n// Gera 7 dígitos numéricos (rápido e legível):\nconst senhaAleatoria = Array.from({ length: 7 }, () => (Math.random() * 10) | 0).join('');\n\n// Opcional: validação simples de e-mail (comente se não precisar)\nconst email = (/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(rawEmail)) ? rawEmail : '';\n\n// Saída única\nreturn { senhaAleatoria, email };\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1200,
+        96
+      ],
+      "id": "e2e41241-49c4-4078-8c8d-849bc580ff62",
+      "name": "GeraSenhaAleatoria"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.email }}",
+        "subject": "Conta Criada com Sucesso!",
+        "message": "=<table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" bgcolor=\"#f5f7fa\" style=\"font-family: Arial, sans-serif; padding: 40px 0;\">\n  <tr>\n    <td align=\"center\">\n      <table width=\"600\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" bgcolor=\"#ffffff\" style=\"border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);\">\n        <tr>\n          <td align=\"center\" style=\"padding: 30px 20px 10px;\">\n            <img src=\"https://poupeagora.com.br/lovable-uploads/b679a5ba-8a42-42cc-bc36-ccf4569fa05f.png\" alt=\"Poupe-agora Logo\" width=\"180\" style=\"display: block;\" />\n          </td>\n        </tr>\n        <tr>\n          <td style=\"padding: 20px 30px; color: #333333;\">\n            <h1 style=\"font-size: 24px; margin: 0 0 15px;\">🎉 Bem-vindo(a), {{ $json.nome }}!</h1>\n            <p style=\"font-size: 16px; line-height: 1.6; margin: 0 0 15px;\">\n              Estamos felizes em ter você com a gente! A partir de agora, você conta com uma plataforma completa para organizar suas finanças de forma prática e inteligente.\n            </p>\n\n            <table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" bgcolor=\"#f0f8ff\" style=\"border-radius: 6px; padding: 15px; margin: 20px 0;\">\n              <tr>\n                <td style=\"font-size: 16px; line-height: 1.6;\">\n                  <strong>💼 Com o seu plano Poupe Agora, você poderá:</strong><br/>\n                  ✅ Registrar receitas e despesas automaticamente<br/>\n                  ✅ Receber lembretes de contas e metas<br/>\n                  ✅ Contar com um assistente financeiro sempre disponível\n                </td>\n              </tr>\n            </table>\n\n            <p style=\"font-size: 16px; line-height: 1.6; margin: 25px 0 10px;\">\n              🔐 <strong>Dados de Acesso:</strong>\n            </p>\n            <p style=\"font-size: 16px; background-color: #f8f8f8; padding: 12px 20px; border-radius: 6px; border: 1px solid #ddd;\">\n              <strong>Email:</strong> {{ $json.email }}<br/>\n              <strong>Senha:</strong> {{ $('GeraSenhaAleatoria').item.json.senhaAleatoria }}\n            </p>\n\n            <p style=\"font-size: 14px; color: #cc0000; margin: 10px 0 20px;\">\n              ⚠️ Por segurança, recomendamos que você altere sua senha assim que acessar a plataforma pela primeira vez.\n            </p>\n\n            <p style=\"font-size: 16px; line-height: 1.6;\">\n              Se precisar de ajuda, estamos por aqui para o que for necessário.\n            </p>\n\n            <p style=\"font-size: 16px; line-height: 1.6; margin-top: 30px;\">\n              Forte abraço,<br/>\n              <strong>Equipe Poupe Agora</strong>\n            </p>\n          </td>\n        </tr>\n        <tr>\n          <td align=\"center\" style=\"font-size: 14px; color: #777777; padding: 20px;\">\n            © {{$now.format('yyyy')}} Poupe Agora. Todos os direitos reservados.\n          </td>\n        </tr>\n      </table>\n    </td>\n  </tr>\n</table>\n",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        1936,
+        208
+      ],
+      "id": "9f18f86e-6b45-491e-87ef-42f05b57fdc2",
+      "name": "EnviaEmail",
+      "webhookId": "e641ec5c-6b92-42ed-9ba3-3f33f8d9ec0f",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "wOWVjvn0RzWgOHBa",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://free.uazapi.com/send/text",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "token",
+              "value": "SEU_TOKEN_UAZAPI_AQUI"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"number\": \"{{ $json.whatsapp }}\",\n  \"text\": \"{{ $json.nome.split(' ').first() }} Parabéns! 🎉\\nSua conta foi criada com sucesso. Agora confira a caixa de entrada do e-mail {{ $json.username }} e verifique sua senha de acesso.\"\n}",
+        "options": {
+          "timeout": 30000
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1952,
+        -16
+      ],
+      "id": "81fa30f8-71c0-4558-b222-960deefb6ccc",
+      "name": "EnviaWhatsapp"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "assinatura/info",
+        "authentication": "basicAuth",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        2272,
+        112
+      ],
+      "id": "697cf909-3546-43b2-b7c6-82fafdcc75c5",
+      "name": "InfoAssinatura",
+      "webhookId": "6355fb13-e13b-448a-a72b-456aa343f6c8",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "url": "=https://api-sandbox.asaas.com/v3/subscriptions/{{ $json.subscriptionId }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "accept",
+              "value": "application/json"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2704,
+        112
+      ],
+      "id": "c35c6f98-137b-472a-b725-624c55d082c7",
+      "name": "RecuperadadosAssinatura",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "I4sqFQJyKRTrVqxx",
+          "name": "Header Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "5b5a0f51-6a58-4851-b748-d37b61f89ea0",
+              "name": "id",
+              "value": "={{ $json.id }}",
+              "type": "string"
+            },
+            {
+              "id": "37aead77-33dd-4b0c-8f26-b0816ee48b1b",
+              "name": "dataAssinatura",
+              "value": "={{ $json.dateCreated }}",
+              "type": "string"
+            },
+            {
+              "id": "36f9a800-59bf-4fd8-8ed9-7c7489b08130",
+              "name": "valor",
+              "value": "={{ $json.value }}",
+              "type": "number"
+            },
+            {
+              "id": "9f36767d-9383-4b28-8a1d-3ac60ce1c4cc",
+              "name": "ciclo",
+              "value": "={{ $json.cycle }}",
+              "type": "string"
+            },
+            {
+              "id": "620e5370-9f27-443a-b7dd-f671c9f2aef1",
+              "name": "status",
+              "value": "={{ $json.status }}",
+              "type": "string"
+            },
+            {
+              "id": "22833287-8e04-4eb7-8838-0197f43a5ed9",
+              "name": "creditCard",
+              "value": "={{ $json.creditCard }}",
+              "type": "object"
+            },
+            {
+              "id": "16a6e602-6237-4b59-a1b0-3b46d1c16276",
+              "name": "proimoPagamento",
+              "value": "={{ $json.nextDueDate }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2944,
+        112
+      ],
+      "id": "2b33412f-fded-4499-a077-9c2c0d6c86a7",
+      "name": "OrganizaInfoAssinatura"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.2,
+      "position": [
+        3168,
+        112
+      ],
+      "id": "5ac001eb-b45e-4973-8234-67841a16ba71",
+      "name": "RespostaInfoAssinatura"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "36a07511-f2f5-41ed-8514-3b2f8ad30f82",
+              "name": "subscriptionId",
+              "value": "={{ $json.body.subscription }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2464,
+        112
+      ],
+      "id": "a92bc542-09c9-44af-ad20-508de16147e3",
+      "name": "OrganizaDadosRequisicao"
+    },
+    {
+      "parameters": {
+        "content": "## Informações Assinatura\n**Fluxo para retornar os dados da assinatura do usuario.",
+        "height": 420,
+        "width": 1300,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2160,
+        -64
+      ],
+      "id": "189aad3c-d6c8-46f5-a9d8-1a962f0505cd",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "content": "#               #",
+        "height": 2120,
+        "width": 6400,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -128,
+        -2240
+      ],
+      "id": "9e709356-9296-4f85-a391-0aaba2625497",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 7
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        4608,
+        80
+      ],
+      "id": "3916d56f-789a-4f61-bd24-e7081872a498",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "lembretes",
+        "returnAll": true,
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "data",
+              "condition": "lte",
+              "keyValue": "={{ $now }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        4800,
+        80
+      ],
+      "id": "7b029ff0-47cd-40c3-b2ab-65a5afbdfcd7",
+      "name": "ConsultaLembretes",
+      "credentials": {
+        "supabaseApi": {
+          "id": "2iQ9TgoFLdVEDJ5K",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "tableId": "profiles",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "id",
+              "keyValue": "={{ $json.userid }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        5280,
+        96
+      ],
+      "id": "335cea61-2b4b-4cd9-b3c4-37d8f2632ebe",
+      "name": "DadosUsuario",
+      "credentials": {
+        "supabaseApi": {
+          "id": "2iQ9TgoFLdVEDJ5K",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        4992,
+        80
+      ],
+      "id": "194de065-73a2-4776-8350-4b633c668682",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "amount": 1
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        5504,
+        96
+      ],
+      "id": "1e22029d-b3e7-4406-91ee-c319eba21b29",
+      "name": "Wait1",
+      "webhookId": "f2fc0bc7-36de-4aa1-803a-ab64f49c1730"
+    },
+    {
+      "parameters": {
+        "content": "## Envia lembretes\nWorkflow para envio dos lembretes diarios para os usuarios.",
+        "height": 420,
+        "width": 1380,
+        "color": 2
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        4528,
+        -64
+      ],
+      "id": "a8129ab4-1fff-4867-afdc-88d66f98c295",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://free.uazapi.com/send/text",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "token",
+              "value": "SEU_TOKEN_UAZAPI_AQUI"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"number\": \"{{ $json.whatsapp }}\",\n  \"text\": \"Notamos que você ainda não possui cadastro. Acesse o link para adquirir assinar um \\nplano:\\nhttps://alfredoo.online\"\n}",
+        "options": {
+          "timeout": 30000
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        992,
+        -880
+      ],
+      "id": "bb7e6e0d-164b-43d0-9927-1b2168dbb417",
+      "name": "Enviar texto"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://free.uazapi.com/send/text",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "token",
+              "value": "SEU_TOKEN_UAZAPI_AQUI"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"number\": \"{{ $json.whatsapp }}\",\n  \"text\": \"Você tem um lembrete para hoje:\\n{{ $('ConsultaLembretes').item.json.descricao }}\\nno valor de {{ $('ConsultaLembretes').item.json.valor }}\"\n}",
+        "options": {
+          "timeout": 30000
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        5728,
+        96
+      ],
+      "id": "90f525f3-8cbc-43a1-9d11-dbc40ef1f9ad",
+      "name": "Enviar texto1"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://SEU_SERVIDOR_EVOLUTION_API/chat/whatsappNumbers/Alfredoo",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "apikey",
+              "value": "SUA_API_KEY_AQUI"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "numbers",
+              "value": "=[\"{{ $json.body.number }}\"]"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 30000
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        3792,
+        112
+      ],
+      "id": "02fdac3c-e8bd-4257-824a-1cad2bbb7c2e",
+      "name": "Verificar n mero no whats app"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $('CentralizaDados').item.json.content }}",
+        "options": {
+          "systemMessage": "=Hora atual: {{ $now }}\n\nSua tarefa é identificar as informações do lembrete com o usuário e registrar na tool **salvaLembrete**. Após salvar o lembrete, execute a tool **apagaIntencao** para concluir a tarefa.\n\nCaso precise consultar algum lembrete, utilize a tool 'consultaLembretes'\n\nCampos a serem salvos:\n\n- **userId**: {{ $('Auth').item.json.id }}\n- **descricao**: Detalhes do lembrete.\n- **valor**: Preencha este campo apenas se o usuário informar um valor (esse campo deve ser no formato de número).\n- **data**: Use o formato **yyyy/mm/dd**. Se a data não estiver clara, pergunte ao usuário.\n\n**ATENÇÃO**:\n- Se faltarem informações obrigatórias como **data** ou **descrição**, pergunte ao usuário de forma direta e amigável.\n- Não repita ferramentas. Após salvar com sucesso, execute **apagaIntencao** apenas uma vez e siga com o fluxo.\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.9,
+      "position": [
+        5056,
+        -1120
+      ],
+      "id": "32b2b846-e8c9-4554-934b-9599fc52ff44",
+      "name": "Assistente de Compromissos"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "fcc8cae0-62c3-4d6a-bad9-e5ebc21d4ab6",
+              "name": "intencao",
+              "value": "={{ $json.output.intencao }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        3952,
+        -1040
+      ],
+      "id": "d5e54230-f382-4605-a1cd-a8668832a098",
+      "name": "Ajustar dados de Intenção"
+    },
+    {
+      "parameters": {
+        "operation": "set",
+        "key": "={{ $('Organiza Dados').item.json.whatsapp }}_intencao",
+        "value": "={{ $json.output.intencao }}",
+        "expire": true,
+        "ttl": 180
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        3760,
+        -1040
+      ],
+      "id": "7b33192a-8edc-4f99-bdd2-67c0d2764a28",
+      "name": "Registrar Intenção",
+      "credentials": {
+        "redis": {
+          "id": "y0Dd4LFkBcHGT4ih",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "tableId": "profiles",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "whatsapp",
+              "keyValue": "={{ ($('Organiza Dados').item.json.whatsapp || $json.body?.phone || $json.body?.from || $json.body?.data?.key?.remoteJid || $json.phone || $json.from || '').toString().replace('@s.whatsapp.net', '').replace('@g.us', '').replace('@c.us', '').trim() }}"
+            },
+            {
+              "keyName": "ativo",
+              "keyValue": "TRUE"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        256,
+        -1088
+      ],
+      "id": "ded942ed-a01b-427f-ad96-f9ca32366036",
+      "name": "Auth",
+      "notesInFlow": true,
+      "alwaysOutputData": true,
+      "credentials": {
+        "supabaseApi": {
+          "id": "2iQ9TgoFLdVEDJ5K",
+          "name": "Supabase account"
+        }
+      },
+      "notes": "Verifica se o usuário existe ou está ativo."
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Verifica o Tipo de mensagem": {
+      "main": [
+        [
+          {
+            "node": "Caso não recebemos o Base64 consultamos no EVOAPI1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "InsereMSG",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Caso não recebemos o Base64 consultamos no EVOAPI",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "ListaMSGs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If1": {
+      "main": [
+        [
+          {
+            "node": "MontaMSG",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "No Operation, do nothing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Redis": {
+      "main": [
+        [
+          {
+            "node": "CentralizaDados",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Analiza a Imagem": {
+      "main": [
+        [
+          {
+            "node": "CentralizaDados",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Converte o base64 em imagem": {
+      "main": [
+        [
+          {
+            "node": "Analiza a Imagem",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Converte o base64 em áudio": {
+      "main": [
+        [
+          {
+            "node": "Transcreve o audio",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Transcreve o audio": {
+      "main": [
+        [
+          {
+            "node": "CentralizaDados",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Caso não recebemos o Base64 consultamos no EVOAPI": {
+      "main": [
+        [
+          {
+            "node": "Converte o base64 em áudio",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Caso não recebemos o Base64 consultamos no EVOAPI1": {
+      "main": [
+        [
+          {
+            "node": "Converte o base64 em imagem",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Verifica Usuario": {
+      "main": [
+        [
+          {
+            "node": "Verifica o Tipo de mensagem",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Enviar texto",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Organiza Dados": {
+      "main": [
+        [
+          {
+            "node": "Verifica Usuario",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "ConfirmaPagamento": {
+      "main": [
+        [
+          {
+            "node": "FiltraDados",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "FiltraDados": {
+      "main": [
+        [
+          {
+            "node": "DadosCliente",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "DadosCliente": {
+      "main": [
+        [
+          {
+            "node": "VerificaNumeroWhats",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "CriaConta": {
+      "main": [
+        [
+          {
+            "node": "AtualizaInfoUser",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "VerificaNumeroWhats": {
+      "main": [
+        [
+          {
+            "node": "GeraSenhaAleatoria",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AtualizaInfoUser": {
+      "main": [
+        [
+          {
+            "node": "EnviaWhatsapp",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "EnviaEmail",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "InicioChat": {
+      "main": [
+        [
+          {
+            "node": "Auth",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "InsereMSG": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "ListaMSGs": {
+      "main": [
+        [
+          {
+            "node": "If1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MontaMSG": {
+      "main": [
+        [
+          {
+            "node": "Redis",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "CentralizaDados": {
+      "main": [
+        [
+          {
+            "node": "IntencaoEmAberto",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IdentificaIntencao": {
+      "main": [
+        [
+          {
+            "node": "Registrar Intenção",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IntencaoEmAberto": {
+      "main": [
+        [
+          {
+            "node": "ExisteIntencao",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "ExisteIntencao": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "IdentificaIntencao",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RedirecionaUsuario": {
+      "main": [
+        [
+          {
+            "node": "Assistente Financeiro",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Agente de Consulta",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Assistente de Compromissos",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "MensagemErro",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "RedirecionaUsuario",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "EstruturaResposta": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "IdentificaIntencao",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "ModeloIA": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "IdentificaIntencao",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MensagemErro": {
+      "main": [
+        [
+          {
+            "node": "LimpaIntencao",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LimpaIntencao": {
+      "main": [
+        [
+          {
+            "node": "Finaliza",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Responde o Cliente": {
+      "main": [
+        [
+          {
+            "node": "FinalizaTransacao",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Agente de Consulta",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "calculadora": {
+      "ai_tool": [
+        [
+          {
+            "node": "Agente de Consulta",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Assistente de Compromissos",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "Assistente de Compromissos",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "salvaLembrete": {
+      "ai_tool": [
+        [
+          {
+            "node": "Assistente de Compromissos",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "apagaIntencao": {
+      "ai_tool": [
+        [
+          {
+            "node": "Assistente de Compromissos",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "transacoes": {
+      "ai_tool": [
+        [
+          {
+            "node": "Agente de Consulta",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "lembretes": {
+      "ai_tool": [
+        [
+          {
+            "node": "Agente de Consulta",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RespondeCliente": {
+      "main": [
+        [
+          {
+            "node": "FinalizaLembrete",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "apagaIntencaoConsulta": {
+      "ai_tool": [
+        [
+          {
+            "node": "Agente de Consulta",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Agente de Consulta": {
+      "main": [
+        [
+          {
+            "node": "RespondeClienteConsulta",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "add": {
+      "ai_tool": [
+        [
+          {
+            "node": "Assistente Financeiro",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "categorias": {
+      "ai_tool": [
+        [
+          {
+            "node": "Assistente Financeiro",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "limparIntencaoTransacao": {
+      "ai_tool": [
+        [
+          {
+            "node": "Assistente Financeiro",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Assistente Financeiro": {
+      "main": [
+        [
+          {
+            "node": "Responde o Cliente",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "memoriaTransacao": {
+      "ai_memory": [
+        [
+          {
+            "node": "Assistente Financeiro",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "ModeloTransacao": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Assistente Financeiro",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "edit": {
+      "ai_tool": [
+        [
+          {
+            "node": "Assistente Financeiro",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "infoTransacoes": {
+      "ai_tool": [
+        [
+          {
+            "node": "Assistente Financeiro",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "delete": {
+      "ai_tool": [
+        [
+          {
+            "node": "Assistente Financeiro",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "consultaCategorias": {
+      "ai_tool": [
+        [
+          {
+            "node": "Agente de Consulta",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "addCategoria": {
+      "ai_tool": [
+        [
+          {
+            "node": "Assistente Financeiro",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "consultaLembretes": {
+      "ai_tool": [
+        [
+          {
+            "node": "Assistente de Compromissos",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Verificar n mero no whats app",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GeraSenhaAleatoria": {
+      "main": [
+        [
+          {
+            "node": "CriaConta",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "InfoAssinatura": {
+      "main": [
+        [
+          {
+            "node": "OrganizaDadosRequisicao",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RecuperadadosAssinatura": {
+      "main": [
+        [
+          {
+            "node": "OrganizaInfoAssinatura",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OrganizaInfoAssinatura": {
+      "main": [
+        [
+          {
+            "node": "RespostaInfoAssinatura",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OrganizaDadosRequisicao": {
+      "main": [
+        [
+          {
+            "node": "RecuperadadosAssinatura",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "ConsultaLembretes",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "ConsultaLembretes": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "DadosUsuario": {
+      "main": [
+        [
+          {
+            "node": "Wait1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [],
+        [
+          {
+            "node": "DadosUsuario",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait1": {
+      "main": [
+        [
+          {
+            "node": "Enviar texto1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Verificar n mero no whats app": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Assistente de Compromissos": {
+      "main": [
+        [
+          {
+            "node": "RespondeCliente",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ajustar dados de Intenção": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Registrar Intenção": {
+      "main": [
+        [
+          {
+            "node": "Ajustar dados de Intenção",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Auth": {
+      "main": [
+        [
+          {
+            "node": "Organiza Dados",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "b004e106-62a6-416f-a36d-570d1d101b5a",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "14b06340f3dd2188c7a295c7e3bea48b2fcb70bfc1c03e7ded43aecf2ad49bb0"
+  },
+  "id": "EyAp9t3CtuQjjVJr",
+  "tags": []
+}

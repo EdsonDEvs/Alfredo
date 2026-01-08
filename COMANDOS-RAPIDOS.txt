@@ -1,0 +1,55 @@
+========================================
+  COMANDOS RAPIDOS - PROJETO ALFREDO
+========================================
+
+⚠️ IMPORTANTE: NUNCA use "npm" diretamente na raiz!
+   Use os scripts abaixo:
+
+✅ FORMA CORRETA (PowerShell):
+   .\npm.ps1 install
+   .\npm.ps1 run dev
+   .\npm.ps1 run build
+
+✅ FORMA CORRETA (CMD):
+   npm.bat install
+   npm.bat run dev
+   npm.bat run build
+
+❌ FORMA ERRADA:
+   npm install          <- Isso vai dar erro!
+   npm run dev          <- Isso vai dar erro!
+
+========================================
+  COMANDOS MAIS USADOS
+========================================
+
+Instalar dependências:
+   .\npm.ps1 install
+
+Iniciar desenvolvimento:
+   .\npm.ps1 run dev
+
+Criar build:
+   .\npm.ps1 run build
+
+Ver vulnerabilidades:
+   .\npm.ps1 audit
+
+Corrigir vulnerabilidades:
+   .\npm.ps1 audit fix
+
+========================================
+  NAVEGAR PARA O PROJETO
+========================================
+
+PowerShell:
+   .\go-to-project.ps1
+   ou
+   alfredo (se o perfil estiver carregado)
+
+Depois pode usar npm normalmente:
+   cd Sistema-financeiro-main
+   npm install
+
+========================================
+

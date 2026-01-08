@@ -1,0 +1,44 @@
+===========================================
+EXPRESSÕES FINAIS PARA NODE "ORGANIZA DADOS"
+===========================================
+
+Campo: whatsapp
+{{ $('InicioChat').item.json.body.event === 'messages.upsert' ? ($('InicioChat').item.json.body.data.key.remoteJid || '').toString().replace('@s.whatsapp.net', '').replace('@g.us', '') : '' }}
+
+Campo: mensagem
+{{ $('InicioChat').item.json.body.event === 'messages.upsert' ? ($('InicioChat').item.json.body.data.message.conversation || $('InicioChat').item.json.body.data.message.extendedTextMessage.text || '') : '' }}
+
+Campo: tipo
+{{ $('InicioChat').item.json.body.event === 'messages.upsert' ? ($('InicioChat').item.json.body.data.messageType || 'text') : 'presence' }}
+
+Campo: messageId
+{{ $('InicioChat').item.json.body.event === 'messages.upsert' ? ($('InicioChat').item.json.body.data.key.id || '') : '' }}
+
+Campo: firstname
+{{ $('InicioChat').item.json.body.event === 'messages.upsert' ? ($('InicioChat').item.json.body.data.pushName || 'Usuário') : 'Usuário' }}
+
+Campo: userId
+null
+
+===========================================
+IMPORTANTE
+===========================================
+
+- Campo userId deve ser null (não acessar Verifica Usuario)
+- Se precisar do userId, adicione depois do Verifica Usuario
+- Expressões verificam evento antes de extrair dados
+- Para presence.update: campos ficam vazios (normal)
+- Para messages.upsert: campos são preenchidos (correto)
+
+===========================================
+PRÓXIMO PASSO
+===========================================
+
+Adicionar node IF após "Organiza Dados" para verificar se há mensagem:
+- Condição: {{ $json.mensagem && $json.mensagem !== '' }}
+- Quando TRUE: Processa (tem mensagem)
+- Quando FALSE: Não processa (presence.update)
+
+
+
+
