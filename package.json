@@ -9,6 +9,8 @@
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
     "preview": "vite preview",
+    "check:env": "node verificar-env.js",
+    "check:env:ps": "powershell -ExecutionPolicy Bypass -File testar-env.ps1",
     "n8n:setup": "node scripts/setup-n8n.js",
     "n8n:start": "n8n start --port 5678",
     "n8n:install": "npm install -g n8n"
@@ -63,6 +65,7 @@
     "react-day-picker": "^8.10.1",
     "react-dom": "^18.3.1",
     "react-hook-form": "^7.53.0",
+    "react-pluggy-connect": "^2.12.0",
     "react-resizable-panels": "^2.1.3",
     "react-router-dom": "^6.26.2",
     "recharts": "^2.15.3",

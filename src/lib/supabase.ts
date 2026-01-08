@@ -1,5 +1,6 @@
+// VERSAO FINAL CORRIGIDA - FORCANDO UPDATE
 import { createClient } from '@supabase/supabase-js'
-
+// ... resto do código ..........
 // LIMPEZA AUTOMÁTICA: Remover dados do banco antigo
 if (typeof window !== 'undefined') {
   const oldProjectIds = ['yjtsyuibemnkjfyonfjt', 'onezabszpxqdjqerrjxo']
@@ -123,6 +124,7 @@ export interface Transacao {
   userid: string;
   category_id: string;
   categoria: string;
+  external_id?: string | null; // ID externo da transação (da API do agregador) para evitar duplicatas
   categorias?: { // Updated to include joined category data with new fields
     id: string;
     nome: string;
@@ -144,6 +146,7 @@ export interface Profile {
   subscription_end_date?: string | null;
   currency?: 'BRL' | 'USD' | 'EUR'; // Moeda preferida do usuário
   locale?: string; // Locale preferido do usuário
+  bank_connection_id?: string | null; // ID da conexão bancária (Pluggy itemId)
   created_at: string;
   updated_at: string;
 }

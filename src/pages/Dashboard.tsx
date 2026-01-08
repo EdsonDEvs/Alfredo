@@ -5,6 +5,7 @@ import { DashboardStats } from '@/components/dashboard/DashboardStats'
 import { DashboardFilters } from '@/components/dashboard/DashboardFilters'
 import { ExcelImporter } from '@/components/dashboard/ExcelImporter'
 import { DashboardCharts } from '@/components/dashboard/DashboardCharts'
+import { BankConnector } from '@/components/dashboard/BankConnector'
 import { Button } from '@/components/ui/button'
 import { RefreshCw, Download } from 'lucide-react'
 import { exportToExcel } from '@/services/excelImporter'
@@ -184,6 +185,9 @@ export default function Dashboard() {
       )}
       
       <DashboardStats stats={stats} />
+
+      {/* Conectar Conta Bancária */}
+      <BankConnector />
 
       {/* Gráficos do período */}
       <DashboardCharts transacoes={filteredTransacoes} />
