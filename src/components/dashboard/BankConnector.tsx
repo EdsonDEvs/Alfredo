@@ -101,6 +101,15 @@ export function BankConnector() {
       return
     }
 
+    if (!hasPluggyCredentials()) {
+      toast({
+        title: 'Configuração necessária',
+        description: 'As credenciais Pluggy não estão configuradas. Configure as variáveis de ambiente no Vercel.',
+        variant: 'destructive',
+      })
+      return
+    }
+
     setIsConnecting(true)
 
     try {
@@ -242,6 +251,27 @@ export function BankConnector() {
     }
   }
 
+  // Verificar se as credenciais Pluggy estão configuradas
+  const hasPluggyCredentials = () => {
+    const apiKey = import.meta.env.VITE_PLUGGY_API_KEY
+    const clientId = import.meta.env.VITE_PLUGGY_CLIENT_ID
+    const clientSecret = import.meta.env.VITE_PLUGGY_CLIENT_SECRET
+    
+    // Verificar se API Key está configurada e não é placeholder
+    if (apiKey && apiKey !== 'pk_test_sua_chave_aqui' && apiKey.trim() !== '') {
+      return true
+    }
+    
+    // Verificar se Client ID e Secret estão configurados
+    if (clientId && clientSecret && clientId.trim() !== '' && clientSecret.trim() !== '') {
+      return true
+    }
+    
+    return false
+  }
+
+  const credentialsConfigured = hasPluggyCredentials()
+
   if (!user) {
     return null
   }
@@ -285,7 +315,25 @@ export function BankConnector() {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          {!hasConnection ? (
+          {!credentialsConfigured ? (
+            <div className="space-y-2">
+              <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4">
+                <p className="text-sm text-yellow-800 dark:text-yellow-200 font-medium mb-2">
+                  ⚠️ Integração Pluggy não configurada
+                </p>
+                <p className="text-xs text-yellow-700 dark:text-yellow-300">
+                  Para usar a integração com bancos, configure as variáveis de ambiente no Vercel:
+                </p>
+                <ul className="text-xs text-yellow-700 dark:text-yellow-300 mt-2 list-disc list-inside space-y-1">
+                  <li><code className="bg-yellow-100 dark:bg-yellow-900 px-1 rounded">VITE_PLUGGY_CLIENT_ID</code></li>
+                  <li><code className="bg-yellow-100 dark:bg-yellow-900 px-1 rounded">VITE_PLUGGY_CLIENT_SECRET</code></li>
+                </ul>
+                <p className="text-xs text-yellow-700 dark:text-yellow-300 mt-2">
+                  Consulte a documentação em <code className="bg-yellow-100 dark:bg-yellow-900 px-1 rounded">COMO-CONFIGURAR-PLUGGY-OFICIAL.md</code>
+                </p>
+              </div>
+            </div>
+          ) : !hasConnection ? (
             <>
               <p className="text-sm text-gray-600 dark:text-gray-400">
                 Conecte sua conta bancária de forma segura usando Open Finance. 
@@ -293,7 +341,7 @@ export function BankConnector() {
               </p>
               <Button
                 onClick={handleOpenConnect}
-                disabled={isConnecting}
+                disabled={isConnecting || !credentialsConfigured}
                 className="w-full"
               >
                 <Landmark className="h-4 w-4 mr-2" />
