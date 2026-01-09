@@ -272,7 +272,19 @@ export function BankConnector() {
 
   const credentialsConfigured = hasPluggyCredentials()
 
+  // Debug: verificar estado do componente
+  useEffect(() => {
+    console.log('🔍 BankConnector: Renderizando componente', {
+      user: user ? '✅ Logado' : '❌ Não logado',
+      userId: user?.id,
+      credentialsConfigured,
+      hasConnection,
+    })
+  }, [user, credentialsConfigured, hasConnection])
+
+  // Se não tiver usuário, não renderizar (correto)
   if (!user) {
+    console.log('⚠️ BankConnector: Usuário não encontrado, componente não será renderizado')
     return null
   }
 

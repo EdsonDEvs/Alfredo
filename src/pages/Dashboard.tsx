@@ -183,11 +183,11 @@ export default function Dashboard() {
           </p>
         </div>
       )}
+
+      {/* Conectar Conta Bancária - Movido para antes das estatísticas para maior visibilidade */}
+      <BankConnector />
       
       <DashboardStats stats={stats} />
-
-      {/* Conectar Conta Bancária */}
-      <BankConnector />
 
       {/* Gráficos do período */}
       <DashboardCharts transacoes={filteredTransacoes} />
