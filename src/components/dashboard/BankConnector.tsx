@@ -19,8 +19,19 @@ import {
 } from '@/components/ui/alert-dialog'
 
 export function BankConnector() {
+  // LOG INICIAL - Sempre executar para verificar se o componente está sendo chamado
+  console.log('🔍 BankConnector: Componente iniciado')
+
   const { user } = useAuth()
   const { refresh } = useTransacoesSync()
+  
+  // LOG após pegar user do useAuth
+  console.log('🔍 BankConnector: useAuth retornou', { 
+    user: user ? '✅ Existe' : '❌ null/undefined',
+    userId: user?.id,
+    email: user?.email 
+  })
+  
   const [connectToken, setConnectToken] = useState<string | null>(null)
   const [isConnecting, setIsConnecting] = useState(false)
   const [hasConnection, setHasConnection] = useState(false)
@@ -272,9 +283,17 @@ export function BankConnector() {
 
   const credentialsConfigured = hasPluggyCredentials()
 
+  // LOG antes da verificação final
+  console.log('🔍 BankConnector: Antes da verificação final', {
+    user: user ? '✅ Existe' : '❌ null/undefined',
+    userId: user?.id,
+    credentialsConfigured,
+    hasConnection,
+  })
+
   // Debug: verificar estado do componente
   useEffect(() => {
-    console.log('🔍 BankConnector: Renderizando componente', {
+    console.log('🔍 BankConnector: useEffect executado', {
       user: user ? '✅ Logado' : '❌ Não logado',
       userId: user?.id,
       credentialsConfigured,
@@ -284,9 +303,11 @@ export function BankConnector() {
 
   // Se não tiver usuário, não renderizar (correto)
   if (!user) {
-    console.log('⚠️ BankConnector: Usuário não encontrado, componente não será renderizado')
+    console.log('⚠️ BankConnector: RETORNANDO NULL - Usuário não encontrado')
     return null
   }
+
+  console.log('✅ BankConnector: Renderizando componente (usuário encontrado)')
 
   return (
     <>

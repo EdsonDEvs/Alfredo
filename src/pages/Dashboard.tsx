@@ -185,7 +185,10 @@ export default function Dashboard() {
       )}
 
       {/* Conectar Conta Bancária - Movido para antes das estatísticas para maior visibilidade */}
-      <BankConnector />
+      {(() => {
+        console.log('🔍 Dashboard: Tentando renderizar BankConnector')
+        return <BankConnector />
+      })()}
       
       <DashboardStats stats={stats} />
 
