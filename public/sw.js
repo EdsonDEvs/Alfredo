@@ -1,7 +1,7 @@
 // Service Worker para ALFREDO
 // Versão do cache
-const CACHE_NAME = 'alfredo-v1';
-const RUNTIME_CACHE = 'alfredo-runtime-v1';
+const CACHE_NAME = 'alfredo-v2';
+const RUNTIME_CACHE = 'alfredo-runtime-v2';
 
 // Arquivos essenciais para cachear
 const STATIC_ASSETS = [
@@ -56,6 +56,23 @@ self.addEventListener('fetch', (event) => {
 
   // Ignorar requisições que não são GET
   if (event.request.method !== 'GET') {
+    return;
+  }
+
+  // Para navegação, usar network-first para evitar página antiga
+  if (event.request.mode === 'navigate') {
+    event.respondWith(
+      fetch(event.request)
+        .then((response) => {
+          const responseToCache = response.clone();
+          caches.open(RUNTIME_CACHE)
+            .then((cache) => {
+              cache.put('/index.html', responseToCache);
+            });
+          return response;
+        })
+        .catch(() => caches.match('/index.html'))
+    );
     return;
   }
 

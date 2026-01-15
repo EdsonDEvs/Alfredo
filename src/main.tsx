@@ -6,8 +6,8 @@ import { installTooltipErrorHandler } from './utils/tooltipErrorHandler'
 // Instalar handler de erros de tooltip antes de renderizar
 installTooltipErrorHandler()
 
-// Registrar Service Worker para PWA
-if ('serviceWorker' in navigator) {
+// Registrar Service Worker apenas em produção para evitar cache no dev
+if (import.meta.env.PROD && 'serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('/sw.js')
       .then((registration) => {
@@ -16,6 +16,11 @@ if ('serviceWorker' in navigator) {
       .catch((error) => {
         console.log('❌ Falha ao registrar Service Worker:', error)
       })
+  })
+} else if (import.meta.env.DEV && 'serviceWorker' in navigator) {
+  // Garantir que não exista SW ativo durante o desenvolvimento
+  navigator.serviceWorker.getRegistrations().then((registrations) => {
+    registrations.forEach((registration) => registration.unregister())
   })
 }
 
