@@ -19,7 +19,10 @@ export function AppLayout() {
                 </h1>
               </div>
             </div>
-            <ThemeToggle />
+            <div className="flex items-center gap-3">
+              <span className="text-xs text-muted-foreground">build 254421d</span>
+              <ThemeToggle />
+            </div>
           </header>
           <div className="flex-1 p-6 bg-background">
             <Outlet />

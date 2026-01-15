@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { LoginForm } from '@/components/auth/LoginForm';
 import { RegisterForm } from '@/components/auth/RegisterForm';
@@ -30,6 +29,9 @@ export default function Auth() {
         {/* Header with Theme Toggle */}
         <div className="absolute top-6 right-6">
           <ThemeToggle />
+        </div>
+        <div className="absolute bottom-4 right-6 text-xs text-muted-foreground">
+          build 254421d
         </div>
 
         <div className="w-full max-w-md space-y-6">
