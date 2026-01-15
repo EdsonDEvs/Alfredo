@@ -14,11 +14,6 @@ export function AppLayout() {
             <div className="flex items-center gap-4">
               <SidebarTrigger />
               <div className="flex items-center gap-3">
-                <img 
-                  src="/lovable-uploads/d58baa4c-1273-42fb-83d0-950387ad313b.png" 
-                  alt="ALFREDO" 
-                  className="h-8 w-auto" 
-                />
                 <h1 className="text-lg font-semibold title-color hidden sm:block">
                   ALFREDO - Seu Assistente Financeiro
                 </h1>
