@@ -31,6 +31,9 @@ export default function Auth() {
         <div className="absolute top-6 right-6">
           <ThemeToggle />
         </div>
+        <div className="absolute bottom-4 right-6 text-xs text-muted-foreground">
+          build b7d8c3e
+        </div>
 
         <div className="w-full max-w-md space-y-6">
           {/* Mobile Logo */}

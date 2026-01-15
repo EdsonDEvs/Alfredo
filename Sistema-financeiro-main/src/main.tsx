@@ -6,16 +6,19 @@ import { installTooltipErrorHandler } from './utils/tooltipErrorHandler'
 // Instalar handler de erros de tooltip antes de renderizar
 installTooltipErrorHandler()
 
-// Registrar Service Worker para PWA
+// Desativar Service Worker para evitar cache antigo em produção/dev
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js')
-      .then((registration) => {
-        console.log('✅ Service Worker registrado com sucesso:', registration.scope)
+    navigator.serviceWorker.getRegistrations().then((registrations) => {
+      registrations.forEach((registration) => registration.unregister())
+    })
+    if ('caches' in window) {
+      caches.keys().then((cacheNames) => {
+        cacheNames
+          .filter((name) => name.startsWith('alfredo-'))
+          .forEach((name) => caches.delete(name))
       })
-      .catch((error) => {
-        console.log('❌ Falha ao registrar Service Worker:', error)
-      })
+    }
   })
 }
 
