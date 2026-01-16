@@ -15,6 +15,7 @@ import {
   useSidebar,
 } from '@/components/ui/sidebar'
 import { useAuth } from '@/hooks/useAuth'
+import { usePlanAccess } from '@/hooks/usePlanAccess'
 import { Button } from '@/components/ui/button'
 import { UserProfile } from './UserProfile'
 
@@ -22,9 +23,9 @@ const items = [
   { title: 'Dashboard', url: '/dashboard', icon: Home },
   { title: 'Transações', url: '/transacoes', icon: CreditCard },
   { title: 'Categorias', url: '/categorias', icon: Tag },
-  { title: 'Relatórios', url: '/relatorios', icon: FileText },
-  { title: 'Lembretes', url: '/lembretes', icon: Calendar },
-  { title: 'Metas', url: '/metas', icon: Target },
+  { title: 'Relatórios', url: '/relatorios', icon: FileText, plan: 'pro' as const },
+  { title: 'Lembretes', url: '/lembretes', icon: Calendar, plan: 'pro' as const },
+  { title: 'Metas', url: '/metas', icon: Target, plan: 'pro' as const },
   { title: 'Perfil', url: '/perfil', icon: User },
 ]
 
@@ -32,6 +33,7 @@ export function AppSidebar() {
   const { state } = useSidebar()
   const location = useLocation()
   const { signOut } = useAuth()
+  const { hasAccess, loading } = usePlanAccess()
   const currentPath = location.pathname
 
   const isActive = (path: string) => currentPath === path
@@ -57,7 +59,9 @@ export function AppSidebar() {
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {items.map((item) => (
+              {items
+                .filter((item) => !item.plan || loading || hasAccess(item.plan))
+                .map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton
                     asChild

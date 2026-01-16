@@ -7,7 +7,7 @@ export interface Subscription {
   id: string;
   userId: string;
   status: 'active' | 'inactive' | 'cancelled' | 'pending';
-  plan: 'premium';
+  plan: 'basic' | 'pro' | 'premium';
   startDate: string;
   endDate: string;
   paymentMethod: string;

@@ -10,9 +10,11 @@ import { Button } from '@/components/ui/button'
 import { RefreshCw, Download } from 'lucide-react'
 import { exportToExcel } from '@/services/excelImporter'
 import { toast } from '@/hooks/use-toast'
+import { usePlanAccess } from '@/hooks/usePlanAccess'
 
 export default function Dashboard() {
   const { transacoes, loading, refresh, lastUpdate } = useTransacoesSync()
+  const { hasAccess } = usePlanAccess()
   
   // Estados dos filtros - Usar mês e ano atual por padrão
   const now = new Date()
@@ -131,7 +133,7 @@ export default function Dashboard() {
                 })
               }
             }}
-            disabled={loading || filteredTransacoes.length === 0}
+            disabled={loading || filteredTransacoes.length === 0 || !hasAccess('premium')}
             className="flex-1 sm:flex-initial text-xs sm:text-sm"
           >
             <Download className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
@@ -143,7 +145,13 @@ export default function Dashboard() {
             <span className="hidden sm:inline">Atualizar</span>
             <span className="sm:hidden">Atualizar</span>
           </Button>
-          <ExcelImporter onImportComplete={refresh} />
+          {hasAccess('premium') ? (
+            <ExcelImporter onImportComplete={refresh} />
+          ) : (
+            <Button variant="outline" size="sm" disabled className="flex-1 sm:flex-initial text-xs sm:text-sm">
+              Importar Planilha (Premium)
+            </Button>
+          )}
         </div>
       </div>
 
@@ -185,7 +193,13 @@ export default function Dashboard() {
       )}
       
       {/* Conectar Conta Bancária - Open Finance */}
-      <BankConnector />
+      {hasAccess('premium') ? (
+        <BankConnector />
+      ) : (
+        <div className="bg-muted/50 border border-dashed border-muted-foreground/30 rounded-lg p-4 text-sm text-muted-foreground">
+          Open Finance disponível apenas no plano Premium.
+        </div>
+      )}
 
       <DashboardStats stats={stats} />
 

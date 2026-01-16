@@ -23,6 +23,7 @@ import Lembretes from '@/pages/Lembretes'
 import Metas from '@/pages/Metas'
 import Perfil from '@/pages/Perfil'
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute'
+import { SubscriptionRequired } from '@/components/auth/SubscriptionRequired'
 import { InstallPrompt } from '@/components/pwa/InstallPrompt'
 
 function App() {
@@ -51,9 +52,30 @@ function App() {
                       <Route path="dashboard" element={<Dashboard />} />
                       <Route path="transacoes" element={<Transacoes />} />
                       <Route path="categorias" element={<Categorias />} />
-                      <Route path="relatorios" element={<Relatorios />} />
-                      <Route path="lembretes" element={<Lembretes />} />
-                      <Route path="metas" element={<Metas />} />
+                      <Route
+                        path="relatorios"
+                        element={
+                          <SubscriptionRequired requiredPlan="pro">
+                            <Relatorios />
+                          </SubscriptionRequired>
+                        }
+                      />
+                      <Route
+                        path="lembretes"
+                        element={
+                          <SubscriptionRequired requiredPlan="pro">
+                            <Lembretes />
+                          </SubscriptionRequired>
+                        }
+                      />
+                      <Route
+                        path="metas"
+                        element={
+                          <SubscriptionRequired requiredPlan="pro">
+                            <Metas />
+                          </SubscriptionRequired>
+                        }
+                      />
                       <Route path="perfil" element={<Perfil />} />
                     </Route>
                     <Route path="/dashboard" element={<Navigate to="/" replace />} />

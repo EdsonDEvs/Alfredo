@@ -1,4 +1,4 @@
-import { useSubscription } from '@/hooks/useSubscription';
+import { usePlanAccess, type PlanTier } from '@/hooks/usePlanAccess';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -7,11 +7,12 @@ import { useNavigate } from 'react-router-dom';
 
 interface SubscriptionRequiredProps {
   children: React.ReactNode;
+  requiredPlan?: PlanTier;
 }
 
-export function SubscriptionRequired({ children }: SubscriptionRequiredProps) {
+export function SubscriptionRequired({ children, requiredPlan = 'basic' }: SubscriptionRequiredProps) {
   const { user } = useAuth();
-  const { isSubscribed, loading } = useSubscription();
+  const { hasAccess, loading } = usePlanAccess();
   const navigate = useNavigate();
 
   // Se não está logado, redireciona para login
@@ -33,7 +34,7 @@ export function SubscriptionRequired({ children }: SubscriptionRequiredProps) {
   }
 
   // Se tem assinatura ativa, mostra o conteúdo
-  if (isSubscribed) {
+  if (hasAccess(requiredPlan)) {
     return <>{children}</>;
   }
 
@@ -45,9 +46,9 @@ export function SubscriptionRequired({ children }: SubscriptionRequiredProps) {
           <div className="mx-auto w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mb-4">
             <Shield className="h-6 w-6 text-primary" />
           </div>
-          <CardTitle>Assinatura Necessária</CardTitle>
+          <CardTitle>Plano {requiredPlan === 'basic' ? 'Básico' : requiredPlan === 'pro' ? 'Pro' : 'Premium'} necessário</CardTitle>
           <CardDescription>
-            Para acessar esta funcionalidade, você precisa de uma assinatura ativa
+            Para acessar esta funcionalidade, você precisa do plano {requiredPlan === 'basic' ? 'Básico' : requiredPlan === 'pro' ? 'Pro' : 'Premium'}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
