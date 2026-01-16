@@ -96,7 +96,7 @@ serve(async (req) => {
       });
     }
 
-    const connectToken = data.connectToken || data.connect_token || data.token;
+    const connectToken = data.connectToken || data.connect_token || data.token || data.accessToken;
     if (!connectToken) {
       return new Response(JSON.stringify({ error: "connectToken ausente na resposta", keys: Object.keys(data || {}) }), {
         status: 500,
