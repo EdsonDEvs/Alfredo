@@ -142,6 +142,10 @@ export class PluggyService {
         throw error
       }
 
+      if (data?.error) {
+        throw new Error(data.error)
+      }
+
       if (!data?.connectToken) {
         throw new Error('Resposta inválida da função pluggy-connect-token')
       }
