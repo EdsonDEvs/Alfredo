@@ -134,8 +134,17 @@ export class PluggyService {
 
   static async generateConnectToken(userId: string): Promise<string> {
     try {
+      const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
+      if (!anonKey || anonKey.includes('SUBSTITUA_PELA_CHAVE')) {
+        throw new Error('VITE_SUPABASE_ANON_KEY não configurada no frontend')
+      }
+
       const { data, error } = await supabase.functions.invoke('pluggy-connect-token', {
         body: { userId },
+        headers: {
+          apikey: anonKey,
+          Authorization: `Bearer ${anonKey}`,
+        },
       })
 
       if (error) {
