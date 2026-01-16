@@ -14,7 +14,17 @@ serve(async (req) => {
   }
 
   try {
-    const { userId } = await req.json();
+    let payload: { userId?: string } = {};
+    try {
+      payload = await req.json();
+    } catch {
+      return new Response(JSON.stringify({ error: "Body JSON inválido" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const { userId } = payload;
     if (!userId) {
       return new Response(JSON.stringify({ error: "userId é obrigatório" }), {
         status: 400,
@@ -68,16 +78,33 @@ serve(async (req) => {
       body: JSON.stringify({ clientUserId: userId }),
     });
 
+    const responseText = await response.text();
     if (!response.ok) {
-      const text = await response.text();
-      return new Response(JSON.stringify({ error: text || "Erro ao gerar connect token" }), {
+      return new Response(JSON.stringify({ error: responseText || "Erro ao gerar connect token" }), {
         status: response.status,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    const data = await response.json();
-    return new Response(JSON.stringify({ connectToken: data.connectToken }), {
+    let data: any = {};
+    try {
+      data = responseText ? JSON.parse(responseText) : {};
+    } catch {
+      return new Response(JSON.stringify({ error: "Resposta da Pluggy não é JSON" }), {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const connectToken = data.connectToken || data.connect_token || data.token;
+    if (!connectToken) {
+      return new Response(JSON.stringify({ error: "connectToken ausente na resposta", keys: Object.keys(data || {}) }), {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    return new Response(JSON.stringify({ connectToken }), {
       status: 200,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
