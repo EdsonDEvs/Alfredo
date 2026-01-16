@@ -133,26 +133,44 @@ export class PluggyService {
   }
 
   static async generateConnectToken(userId: string): Promise<string> {
-    const authHeader = await this.getAuthHeader()
+    try {
+      const { data, error } = await supabase.functions.invoke('pluggy-connect-token', {
+        body: { userId },
+      })
 
-    const response = await fetch(`${this.PLUGGY_API_URL}/connect_token`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-API-KEY': authHeader,
-      },
-      body: JSON.stringify({
-        clientUserId: userId,
-      }),
-    })
+      if (error) {
+        throw error
+      }
 
-    if (!response.ok) {
-      const error = await response.json()
-      throw new Error(`Erro ao gerar connect token: ${error.message || response.statusText}`)
+      if (!data?.connectToken) {
+        throw new Error('Resposta inválida da função pluggy-connect-token')
+      }
+
+      return data.connectToken
+    } catch (error: any) {
+      console.warn('Falha na Edge Function, tentando direto na Pluggy:', error)
+
+      const authHeader = await this.getAuthHeader()
+
+      const response = await fetch(`${this.PLUGGY_API_URL}/connect_token`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-API-KEY': authHeader,
+        },
+        body: JSON.stringify({
+          clientUserId: userId,
+        }),
+      })
+
+      if (!response.ok) {
+        const errorBody = await response.json().catch(() => ({}))
+        throw new Error(`Erro ao gerar connect token: ${errorBody?.message || response.statusText}`)
+      }
+
+      const data = await response.json()
+      return data.connectToken
     }
-
-    const data = await response.json()
-    return data.connectToken
   }
 
   static async saveConnectionId(userId: string, itemId: string): Promise<void> {
