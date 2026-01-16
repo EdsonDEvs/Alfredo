@@ -37,6 +37,50 @@ export default function Plano() {
     }
   ];
 
+  const plans = [
+    {
+      name: 'Básico',
+      price: '30 dias grátis',
+      subtitle: 'Depois R$ 19,90/mês',
+      description: 'Ideal para começar e organizar o básico',
+      highlight: false,
+      features: [
+        'Lançar dados básicos',
+        'Registro via WhatsApp',
+        'Visão simples de entradas e saídas'
+      ],
+      cta: 'Começar teste grátis'
+    },
+    {
+      name: 'Pro',
+      price: 'R$ 49,90/mês',
+      subtitle: 'Controle total do seu dia e do seu dinheiro',
+      description: 'Para quem quer mais clareza e produtividade',
+      highlight: true,
+      features: [
+        'Controle total de gastos e receitas',
+        'Agenda e compromissos',
+        'Metas financeiras inteligentes',
+        'Relatórios visuais completos'
+      ],
+      cta: 'Assinar Pro'
+    },
+    {
+      name: 'Premium',
+      price: 'R$ 79,90/mês',
+      subtitle: 'Experiência completa',
+      description: 'Tudo para automatizar sua vida financeira',
+      highlight: false,
+      features: [
+        'Tudo do plano Pro',
+        'Open Finance integrado',
+        'Importar e exportar planilhas',
+        'Cálculo de imposto de renda'
+      ],
+      cta: 'Assinar Premium'
+    }
+  ];
+
   // Array de fotos de usuários para simular perfis
   const userProfiles = [
     'https://images.unsplash.com/photo-1535268647677-300dbf3d78d1?w=100&h=100&fit=crop&crop=face',
@@ -143,6 +187,63 @@ export default function Plano() {
                     </div>
                   </div>
                 ))}
+              </div>
+
+              {/* Planos */}
+              <div className="space-y-4 mb-6 sm:mb-8">
+                <h2 className="text-lg sm:text-xl font-semibold text-foreground">
+                  Planos de assinatura
+                </h2>
+                <div className="grid gap-4">
+                  {plans.map((plan) => (
+                    <div
+                      key={plan.name}
+                      className={`rounded-xl border p-4 sm:p-5 ${
+                        plan.highlight
+                          ? 'border-primary bg-primary/5 shadow-sm'
+                          : 'border-border bg-card'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between mb-2">
+                        <h3 className="text-base sm:text-lg font-semibold text-foreground">
+                          {plan.name}
+                        </h3>
+                        {plan.highlight && (
+                          <span className="text-xs font-semibold text-primary bg-primary/10 px-2 py-1 rounded-full">
+                            Mais popular
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-lg sm:text-xl font-bold text-foreground">
+                        {plan.price}
+                      </p>
+                      <p className="text-sm text-muted-foreground mb-2">
+                        {plan.subtitle}
+                      </p>
+                      <p className="text-sm text-muted-foreground mb-4">
+                        {plan.description}
+                      </p>
+                      <ul className="space-y-2 mb-4">
+                        {plan.features.map((feature) => (
+                          <li key={feature} className="flex items-start gap-2 text-sm text-foreground">
+                            <Check className="h-4 w-4 text-green-500 mt-0.5" />
+                            <span>{feature}</span>
+                          </li>
+                        ))}
+                      </ul>
+                      <Button
+                        className={`w-full h-11 ${
+                          plan.highlight
+                            ? 'bg-primary text-primary-foreground hover:bg-primary/90'
+                            : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
+                        }`}
+                        onClick={user ? handleGoToDashboard : handleBackToLogin}
+                      >
+                        {plan.cta}
+                      </Button>
+                    </div>
+                  ))}
+                </div>
               </div>
 
               {/* Garantia */}
