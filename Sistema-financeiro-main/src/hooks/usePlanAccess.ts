@@ -44,7 +44,7 @@ export function usePlanAccess() {
       try {
         const { data, error } = await supabase
           .from('subscriptions')
-          .select('plan_name, status, end_date, start_date')
+          .select('plan_name, status, next_payment_date, start_date')
           .eq('user_id', user.id)
           .order('created_at', { ascending: false })
           .limit(1)
@@ -55,8 +55,8 @@ export function usePlanAccess() {
         }
 
         if (data?.status === 'active') {
-          const endDate = data.end_date ? new Date(data.end_date) : null
-          const isValid = !endDate || endDate.getTime() > Date.now()
+          const nextPaymentDate = data.next_payment_date ? new Date(data.next_payment_date) : null
+          const isValid = !nextPaymentDate || nextPaymentDate.getTime() > Date.now()
           if (isValid) {
             if (isMounted) {
               setPlan(normalizePlanName(data.plan_name))
