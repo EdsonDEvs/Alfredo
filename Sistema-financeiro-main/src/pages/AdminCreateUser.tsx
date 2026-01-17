@@ -62,7 +62,6 @@ export default function AdminCreateUser() {
           id: form.userId,
           email: form.email,
           nome: form.nome,
-          subscription_status: form.status,
           updated_at: now,
         })
 

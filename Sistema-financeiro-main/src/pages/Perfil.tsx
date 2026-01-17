@@ -42,8 +42,7 @@ export default function Perfil() {
   const [formData, setFormData] = useState({
     nome: '',
     phone: '',
-    whatsapp: '',
-    subscription_status: 'active'
+    whatsapp: ''
   })
 
   useEffect(() => {
@@ -75,8 +74,7 @@ export default function Perfil() {
         setFormData({
           nome: data.nome || '',
           phone: data.phone || '',
-          whatsapp: data.whatsapp || '',
-          subscription_status: data.subscription_status || 'active'
+          whatsapp: data.whatsapp || ''
         })
       }
     } catch (error: any) {
@@ -183,7 +181,6 @@ export default function Perfil() {
           nome: formData.nome,
           phone: formData.phone,
           whatsapp: formData.whatsapp,
-          subscription_status: formData.subscription_status,
           updated_at: new Date().toISOString()
         })
         .eq('id', user.id)
@@ -457,8 +454,8 @@ export default function Perfil() {
               <div className="space-y-2">
                 <div className="flex justify-between items-center">
                   <span className="text-xs sm:text-sm text-gray-600">Status:</span>
-                  <Badge variant={profile?.subscription_status === 'active' ? 'default' : 'secondary'} className="text-xs">
-                    {profile?.subscription_status || 'active'}
+                  <Badge variant="secondary" className="text-xs">
+                    Confira na tabela subscriptions
                   </Badge>
                 </div>
                 <div className="flex justify-between items-center">
