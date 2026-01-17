@@ -27,6 +27,7 @@ export default function PublicCreateUser() {
 
     setCreating(true)
     try {
+      const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
       const { data, error } = await supabase.functions.invoke('create-user-simple', {
         body: {
           nome: form.nome,
@@ -34,6 +35,12 @@ export default function PublicCreateUser() {
           password: form.password,
           whatsapp: form.whatsapp,
         },
+        headers: anonKey
+          ? {
+              apikey: anonKey,
+              Authorization: `Bearer ${anonKey}`,
+            }
+          : undefined,
       })
 
       if (error) {
