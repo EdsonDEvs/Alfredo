@@ -1,6 +1,6 @@
 
 import { NavLink, useLocation } from 'react-router-dom'
-import { Home, CreditCard, Calendar, User, LogOut, Tag, FileText, Target } from 'lucide-react'
+import { Home, CreditCard, Calendar, User, LogOut, Tag, FileText, Target, UserPlus } from 'lucide-react'
 import {
   Sidebar,
   SidebarContent,
@@ -29,11 +29,21 @@ const items = [
   { title: 'Perfil', url: '/perfil', icon: User },
 ]
 
+const getAllowedAdmins = () => {
+  const adminEmails = (import.meta.env.VITE_ADMIN_EMAILS || '')
+    .split(',')
+    .map((email) => email.trim().toLowerCase())
+    .filter(Boolean)
+  const fallbackAdmins = ['edsons@gmail.com', 'edson@gmail.com']
+  return adminEmails.length ? adminEmails : fallbackAdmins
+}
+
 export function AppSidebar() {
   const { state } = useSidebar()
   const location = useLocation()
-  const { signOut } = useAuth()
+  const { signOut, user } = useAuth()
   const { hasAccess, loading } = usePlanAccess()
+  const isAdmin = !!user?.email && getAllowedAdmins().includes(user.email.toLowerCase())
   const currentPath = location.pathname
 
   const isActive = (path: string) => currentPath === path
@@ -78,6 +88,16 @@ export function AppSidebar() {
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
+              {isAdmin && (
+                <SidebarMenuItem key="admin-create-user">
+                  <SidebarMenuButton asChild className="hover:bg-accent">
+                    <NavLink to="/admin/criar-usuario" end>
+                      <UserPlus className="h-4 w-4" />
+                      <span>Criar usuário</span>
+                    </NavLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              )}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>

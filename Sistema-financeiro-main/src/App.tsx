@@ -22,6 +22,7 @@ import Relatorios from '@/pages/Relatorios'
 import Lembretes from '@/pages/Lembretes'
 import Metas from '@/pages/Metas'
 import Perfil from '@/pages/Perfil'
+import AdminCreateUser from '@/pages/AdminCreateUser'
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute'
 import { SubscriptionRequired } from '@/components/auth/SubscriptionRequired'
 import { InstallPrompt } from '@/components/pwa/InstallPrompt'
@@ -77,6 +78,7 @@ function App() {
                         }
                       />
                       <Route path="perfil" element={<Perfil />} />
+                      <Route path="admin/criar-usuario" element={<AdminCreateUser />} />
                     </Route>
                     <Route path="/dashboard" element={<Navigate to="/" replace />} />
                   </Routes>
