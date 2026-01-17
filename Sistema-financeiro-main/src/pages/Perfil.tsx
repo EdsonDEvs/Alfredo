@@ -14,13 +14,6 @@ import { supabase } from '@/lib/supabase'
 import type { Profile } from '@/lib/supabase'
 import { Badge } from '@/components/ui/badge'
 import { CurrencySelector } from '@/components/profile/CurrencySelector'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
 
 export default function Perfil() {
   const { user, signOut } = useAuth()
@@ -29,15 +22,6 @@ export default function Perfil() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [deleting, setDeleting] = useState(false)
-  const [creatingUser, setCreatingUser] = useState(false)
-  const [newUser, setNewUser] = useState({
-    userId: '',
-    email: '',
-    nome: '',
-    plan: 'basic',
-    status: 'active',
-    endDate: '',
-  })
 
   const [formData, setFormData] = useState({
     nome: '',
@@ -340,104 +324,7 @@ export default function Perfil() {
           {/* Seletor de Moeda */}
           <CurrencySelector />
 
-          {/* Admin: criação simples de usuário */}
-          {isAdmin && (
-            <Card>
-              <CardHeader className="p-4 sm:p-6">
-                <CardTitle className="text-base sm:text-lg">
-                  Admin - Criar usuário simples
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-4 sm:p-6 pt-0 space-y-4">
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <div>
-                    <Label htmlFor="newUserId" className="text-xs sm:text-sm">User ID (Auth)</Label>
-                    <Input
-                      id="newUserId"
-                      value={newUser.userId}
-                      onChange={(e) => setNewUser({ ...newUser, userId: e.target.value })}
-                      placeholder="uuid do usuário"
-                      className="text-xs sm:text-sm mt-1"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="newUserEmail" className="text-xs sm:text-sm">Email</Label>
-                    <Input
-                      id="newUserEmail"
-                      type="email"
-                      value={newUser.email}
-                      onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
-                      placeholder="email@dominio.com"
-                      className="text-xs sm:text-sm mt-1"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="newUserNome" className="text-xs sm:text-sm">Nome</Label>
-                    <Input
-                      id="newUserNome"
-                      value={newUser.nome}
-                      onChange={(e) => setNewUser({ ...newUser, nome: e.target.value })}
-                      placeholder="Nome completo"
-                      className="text-xs sm:text-sm mt-1"
-                    />
-                  </div>
-                  <div>
-                    <Label className="text-xs sm:text-sm">Plano</Label>
-                    <Select
-                      value={newUser.plan}
-                      onValueChange={(value) => setNewUser({ ...newUser, plan: value })}
-                    >
-                      <SelectTrigger className="text-xs sm:text-sm mt-1">
-                        <SelectValue placeholder="Selecione o plano" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="basic">Básico</SelectItem>
-                        <SelectItem value="pro">Pro</SelectItem>
-                        <SelectItem value="premium">Premium</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div>
-                    <Label className="text-xs sm:text-sm">Status</Label>
-                    <Select
-                      value={newUser.status}
-                      onValueChange={(value) => setNewUser({ ...newUser, status: value })}
-                    >
-                      <SelectTrigger className="text-xs sm:text-sm mt-1">
-                        <SelectValue placeholder="Status" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="active">Ativo</SelectItem>
-                        <SelectItem value="inactive">Inativo</SelectItem>
-                        <SelectItem value="cancelled">Cancelado</SelectItem>
-                        <SelectItem value="pending">Pendente</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div>
-                    <Label htmlFor="newUserEndDate" className="text-xs sm:text-sm">Fim da assinatura (opcional)</Label>
-                    <Input
-                      id="newUserEndDate"
-                      type="date"
-                      value={newUser.endDate}
-                      onChange={(e) => setNewUser({ ...newUser, endDate: e.target.value })}
-                      className="text-xs sm:text-sm mt-1"
-                    />
-                  </div>
-                </div>
-                <Button
-                  onClick={handleCreateSimpleUser}
-                  disabled={creatingUser}
-                  className="w-full sm:w-auto text-sm sm:text-base"
-                >
-                  {creatingUser ? 'Criando...' : 'Criar usuário'}
-                </Button>
-                <p className="text-xs text-muted-foreground">
-                  Esse formulário cria/atualiza o perfil e registra a assinatura do usuário.
-                </p>
-              </CardContent>
-            </Card>
-          )}
+          {/* Removido: criação simples de usuário */}
         </div>
 
         {/* Sidebar */}

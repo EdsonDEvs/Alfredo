@@ -15,7 +15,6 @@ import Auth from '@/pages/Auth'
 import Landing from '@/pages/Landing'
 import Cadastro from '@/pages/Cadastro'
 import PaymentSuccess from '@/pages/PaymentSuccess'
-import PublicCreateUser from '@/pages/PublicCreateUser'
 import Dashboard from '@/pages/Dashboard'
 import Transacoes from '@/pages/Transacoes'
 import Categorias from '@/pages/Categorias'
@@ -23,7 +22,6 @@ import Relatorios from '@/pages/Relatorios'
 import Lembretes from '@/pages/Lembretes'
 import Metas from '@/pages/Metas'
 import Perfil from '@/pages/Perfil'
-import AdminCreateUser from '@/pages/AdminCreateUser'
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute'
 import { SubscriptionRequired } from '@/components/auth/SubscriptionRequired'
 import { InstallPrompt } from '@/components/pwa/InstallPrompt'
@@ -41,7 +39,6 @@ function App() {
                     <Route path="/landing" element={<Landing />} />
                     <Route path="/cadastro" element={<Cadastro />} />
                     <Route path="/payment-success" element={<PaymentSuccess />} />
-                    <Route path="/criar-usuario" element={<PublicCreateUser />} />
                     <Route path="/auth" element={<Auth />} />
                     <Route
                       path="/"
@@ -80,7 +77,6 @@ function App() {
                         }
                       />
                       <Route path="perfil" element={<Perfil />} />
-                      <Route path="admin/criar-usuario" element={<AdminCreateUser />} />
                     </Route>
                     <Route path="/dashboard" element={<Navigate to="/" replace />} />
                   </Routes>
