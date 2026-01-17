@@ -15,6 +15,7 @@ import Auth from '@/pages/Auth'
 import Landing from '@/pages/Landing'
 import Cadastro from '@/pages/Cadastro'
 import PaymentSuccess from '@/pages/PaymentSuccess'
+import PublicCreateUser from '@/pages/PublicCreateUser'
 import Dashboard from '@/pages/Dashboard'
 import Transacoes from '@/pages/Transacoes'
 import Categorias from '@/pages/Categorias'
@@ -40,6 +41,7 @@ function App() {
                     <Route path="/landing" element={<Landing />} />
                     <Route path="/cadastro" element={<Cadastro />} />
                     <Route path="/payment-success" element={<PaymentSuccess />} />
+                    <Route path="/criar-usuario" element={<PublicCreateUser />} />
                     <Route path="/auth" element={<Auth />} />
                     <Route
                       path="/"
