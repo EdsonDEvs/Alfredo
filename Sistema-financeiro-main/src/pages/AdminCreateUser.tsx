@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -36,6 +36,12 @@ export default function AdminCreateUser() {
   })
 
   const isAdmin = !!user?.email && getAllowedAdmins().includes(user.email.toLowerCase())
+
+  useEffect(() => {
+    if (!form.userId) {
+      setForm((prev) => ({ ...prev, userId: crypto.randomUUID() }))
+    }
+  }, [form.userId])
 
   const handleCreate = async () => {
     if (!form.userId || !form.email || !form.nome) {
@@ -131,12 +137,21 @@ export default function AdminCreateUser() {
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
               <Label htmlFor="userId">User ID (Auth)</Label>
-              <Input
-                id="userId"
-                value={form.userId}
-                onChange={(e) => setForm({ ...form, userId: e.target.value })}
-                placeholder="uuid do usuário"
-              />
+              <div className="flex gap-2">
+                <Input
+                  id="userId"
+                  value={form.userId}
+                  onChange={(e) => setForm({ ...form, userId: e.target.value })}
+                  placeholder="uuid do usuário"
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setForm({ ...form, userId: crypto.randomUUID() })}
+                >
+                  Gerar ID
+                </Button>
+              </div>
             </div>
             <div>
               <Label htmlFor="email">Email</Label>
