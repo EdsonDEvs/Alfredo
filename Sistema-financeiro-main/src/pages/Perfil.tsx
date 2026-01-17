@@ -95,7 +95,7 @@ export default function Perfil() {
     .split(',')
     .map((email) => email.trim().toLowerCase())
     .filter(Boolean)
-  const fallbackAdmins = ['edsons@gmail.com']
+  const fallbackAdmins = ['edsons@gmail.com', 'edson@gmail.com']
   const allowedAdmins = adminEmails.length ? adminEmails : fallbackAdmins
   const isAdmin = !!user?.email && allowedAdmins.includes(user.email.toLowerCase())
 
