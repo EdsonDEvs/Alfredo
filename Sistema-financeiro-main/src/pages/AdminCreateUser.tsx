@@ -6,13 +6,6 @@ import { Button } from '@/components/ui/button'
 import { useAuth } from '@/hooks/useAuth'
 import { supabase } from '@/lib/supabase'
 import { toast } from '@/hooks/use-toast'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
 
 const getAllowedAdmins = () => {
   const adminEmails = (import.meta.env.VITE_ADMIN_EMAILS || '')
@@ -30,9 +23,8 @@ export default function AdminCreateUser() {
     userId: '',
     email: '',
     nome: '',
-    plan: 'basic',
-    status: 'active',
-    endDate: '',
+    password: '',
+    whatsapp: '',
   })
 
   const isAdmin = !!user?.email && getAllowedAdmins().includes(user.email.toLowerCase())
@@ -44,10 +36,10 @@ export default function AdminCreateUser() {
   }, [form.userId])
 
   const handleCreate = async () => {
-    if (!form.userId || !form.email || !form.nome) {
+    if (!form.email || !form.nome || !form.password || !form.whatsapp) {
       toast({
         title: 'Preencha todos os campos',
-        description: 'userId, email e nome são obrigatórios.',
+        description: 'Nome, email, senha e WhatsApp são obrigatórios.',
         variant: 'destructive',
       })
       return
@@ -55,50 +47,33 @@ export default function AdminCreateUser() {
 
     setCreating(true)
     try {
-      const now = new Date().toISOString()
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .upsert({
-          id: form.userId,
-          email: form.email,
+      const { data, error } = await supabase.functions.invoke('create-user-simple', {
+        body: {
           nome: form.nome,
-          updated_at: now,
-        })
+          email: form.email,
+          password: form.password,
+          whatsapp: form.whatsapp,
+        },
+      })
 
-      if (profileError) {
-        throw new Error(profileError.message)
+      if (error) {
+        throw error
       }
 
-      const endDate = form.endDate ? new Date(form.endDate).toISOString() : null
-      const { error: subscriptionError } = await supabase
-        .from('subscriptions')
-        .insert({
-          id: crypto.randomUUID(),
-          user_id: form.userId,
-          status: form.status,
-          plan_name: form.plan,
-          start_date: now,
-          end_date: endDate,
-          created_at: now,
-          updated_at: now,
-        })
-
-      if (subscriptionError) {
-        throw new Error(subscriptionError.message)
+      if (data?.error) {
+        throw new Error(data.error)
       }
 
       toast({
         title: 'Usuário criado',
-        description: 'Perfil e assinatura salvos com sucesso.',
+        description: 'Usuário criado no Auth e perfil salvo.',
       })
 
       setForm({
-        userId: '',
         email: '',
         nome: '',
-        plan: 'basic',
-        status: 'active',
-        endDate: '',
+        password: '',
+        whatsapp: '',
       })
     } catch (error: any) {
       toast({
@@ -135,24 +110,6 @@ export default function AdminCreateUser() {
         <CardContent className="space-y-4">
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
-              <Label htmlFor="userId">User ID (Auth)</Label>
-              <div className="flex gap-2">
-                <Input
-                  id="userId"
-                  value={form.userId}
-                  onChange={(e) => setForm({ ...form, userId: e.target.value })}
-                  placeholder="uuid do usuário"
-                />
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => setForm({ ...form, userId: crypto.randomUUID() })}
-                >
-                  Gerar ID
-                </Button>
-              </div>
-            </div>
-            <div>
               <Label htmlFor="email">Email</Label>
               <Input
                 id="email"
@@ -172,45 +129,22 @@ export default function AdminCreateUser() {
               />
             </div>
             <div>
-              <Label>Plano</Label>
-              <Select
-                value={form.plan}
-                onValueChange={(value) => setForm({ ...form, plan: value })}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione o plano" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="basic">Básico</SelectItem>
-                  <SelectItem value="pro">Pro</SelectItem>
-                  <SelectItem value="premium">Premium</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <Label>Status</Label>
-              <Select
-                value={form.status}
-                onValueChange={(value) => setForm({ ...form, status: value })}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="active">Ativo</SelectItem>
-                  <SelectItem value="inactive">Inativo</SelectItem>
-                  <SelectItem value="cancelled">Cancelado</SelectItem>
-                  <SelectItem value="pending">Pendente</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <Label htmlFor="endDate">Fim da assinatura (opcional)</Label>
+              <Label htmlFor="password">Senha</Label>
               <Input
-                id="endDate"
-                type="date"
-                value={form.endDate}
-                onChange={(e) => setForm({ ...form, endDate: e.target.value })}
+                id="password"
+                type="password"
+                value={form.password}
+                onChange={(e) => setForm({ ...form, password: e.target.value })}
+                placeholder="Senha do usuário"
+              />
+            </div>
+            <div>
+              <Label htmlFor="whatsapp">WhatsApp</Label>
+              <Input
+                id="whatsapp"
+                value={form.whatsapp}
+                onChange={(e) => setForm({ ...form, whatsapp: e.target.value })}
+                placeholder="5511999999999"
               />
             </div>
           </div>
