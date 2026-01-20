@@ -7,20 +7,35 @@ import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog'
 import { Badge } from '@/components/ui/badge'
 import { useTransacoesSync, notifyTransacoesUpdate } from '@/hooks/useTransacoesSync'
 import { TransacoesService } from '@/services/transacoes'
+import { useAuth } from '@/hooks/useAuth'
 import { toast } from '@/hooks/use-toast'
 import { Plus, Edit, Trash2, TrendingUp, TrendingDown, RefreshCw, Download } from 'lucide-react'
 import { useFormattedCurrency } from '@/hooks/useFormattedCurrency'
 import { formatDate, formatTime } from '@/utils/date'
 import type { Transacao } from '@/lib/supabase'
 import { exportToExcel } from '@/services/excelImporter'
+import { HierarchicalCategorySelector } from '@/components/transactions/HierarchicalCategorySelector'
 
 export default function Transacoes() {
   const { transacoes, loading: isLoading, refresh, lastUpdate } = useTransacoesSync()
+  const { user } = useAuth()
   const { format } = useFormattedCurrency()
   const [dialogOpen, setDialogOpen] = useState(false)
+  const [editingTransacao, setEditingTransacao] = useState<Transacao | null>(null)
   
   // Filtros
   const [searchTerm, setSearchTerm] = useState('')
@@ -34,6 +49,120 @@ export default function Transacoes() {
     tipo: '',
     category_id: '',
   })
+
+  const resetForm = () => {
+    setFormData({
+      quando: '',
+      estabelecimento: '',
+      valor: 0,
+      detalhes: '',
+      tipo: '',
+      category_id: '',
+    })
+  }
+
+  const openCreateDialog = () => {
+    setEditingTransacao(null)
+    resetForm()
+    setDialogOpen(true)
+  }
+
+  const openEditDialog = (transacao: Transacao) => {
+    setEditingTransacao(transacao)
+    setFormData({
+      quando: transacao.quando ? transacao.quando.split('T')[0] : '',
+      estabelecimento: transacao.estabelecimento || '',
+      valor: transacao.valor || 0,
+      detalhes: transacao.detalhes || '',
+      tipo: transacao.tipo || '',
+      category_id: transacao.category_id || '',
+    })
+    setDialogOpen(true)
+  }
+
+  const handleSave = async () => {
+    try {
+      if (!formData.estabelecimento || !formData.tipo) {
+        toast({
+          title: 'Preencha os campos obrigatórios',
+          description: 'Estabelecimento e tipo são obrigatórios.',
+          variant: 'destructive',
+        })
+        return
+      }
+      if (!formData.category_id) {
+        toast({
+          title: 'Selecione a categoria',
+          description: 'A categoria é obrigatória para salvar a transação.',
+          variant: 'destructive',
+        })
+        return
+      }
+
+      if (editingTransacao) {
+        await TransacoesService.updateTransacao(editingTransacao.id, {
+          quando: formData.quando || null,
+          estabelecimento: formData.estabelecimento.trim(),
+          valor: Number(formData.valor),
+          detalhes: formData.detalhes?.trim() || null,
+          tipo: formData.tipo,
+          category_id: formData.category_id,
+        })
+
+        toast({
+          title: 'Transação atualizada',
+          description: 'A transação foi atualizada com sucesso.',
+        })
+      } else {
+        if (!user?.id) {
+          throw new Error('Usuário não autenticado')
+        }
+
+        await TransacoesService.addTransacao({
+          quando: formData.quando || null,
+          estabelecimento: formData.estabelecimento.trim(),
+          valor: Number(formData.valor),
+          detalhes: formData.detalhes?.trim() || null,
+          tipo: formData.tipo,
+          category_id: formData.category_id,
+          userid: user.id,
+        })
+
+        toast({
+          title: 'Transação criada',
+          description: 'A transação foi criada com sucesso.',
+        })
+      }
+
+      setDialogOpen(false)
+      setEditingTransacao(null)
+      resetForm()
+      notifyTransacoesUpdate()
+    } catch (error: any) {
+      toast({
+        title: 'Erro ao salvar transação',
+        description: error.message || 'Ocorreu um erro ao salvar a transação.',
+        variant: 'destructive',
+      })
+    }
+  }
+
+  const handleDelete = async (transacaoId: number) => {
+    try {
+      await TransacoesService.deleteTransacao(transacaoId)
+      toast({
+        title: 'Transação excluída',
+        description: 'A transação foi removida do banco de dados.',
+      })
+      notifyTransacoesUpdate()
+    } catch (error: any) {
+      toast({
+        title: 'Erro ao excluir transação',
+        description: error.message || 'Ocorreu um erro ao excluir a transação.',
+        variant: 'destructive',
+      })
+    }
+  }
 
   // Transações filtradas
   const filteredTransacoes = transacoes.filter(transacao => {
@@ -107,7 +236,7 @@ export default function Transacoes() {
           </Button>
           <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
             <DialogTrigger asChild>
-              <Button size="sm" className="flex-1 sm:flex-initial text-xs sm:text-sm">
+              <Button size="sm" className="flex-1 sm:flex-initial text-xs sm:text-sm" onClick={openCreateDialog}>
                 <Plus className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
                 <span className="hidden sm:inline">Nova Transação</span>
                 <span className="sm:hidden">Nova</span>
@@ -115,9 +244,13 @@ export default function Transacoes() {
             </DialogTrigger>
             <DialogContent className="max-w-[95vw] sm:max-w-md">
               <DialogHeader>
-                <DialogTitle className="text-lg sm:text-xl">Nova Transação</DialogTitle>
+                <DialogTitle className="text-lg sm:text-xl">
+                  {editingTransacao ? 'Editar Transação' : 'Nova Transação'}
+                </DialogTitle>
                 <DialogDescription className="text-xs sm:text-sm">
-                  Adicione uma nova receita ou despesa
+                  {editingTransacao
+                    ? 'Atualize os dados da transação'
+                    : 'Adicione uma nova receita ou despesa'}
                 </DialogDescription>
               </DialogHeader>
               <div className="space-y-3 sm:space-y-4">
@@ -161,6 +294,14 @@ export default function Transacoes() {
                   </Select>
                 </div>
                 <div>
+                  <Label htmlFor="categoria">Categoria</Label>
+                  <HierarchicalCategorySelector
+                    value={formData.category_id}
+                    onValueChange={(value) => setFormData({ ...formData, category_id: value })}
+                    placeholder="Selecione a categoria"
+                  />
+                </div>
+                <div>
                   <Label htmlFor="detalhes">Detalhes</Label>
                   <Textarea
                     id="detalhes"
@@ -172,15 +313,7 @@ export default function Transacoes() {
                   <Button variant="outline" onClick={() => setDialogOpen(false)}>
                     Cancelar
                   </Button>
-                  <Button onClick={() => {
-                    toast({
-                      title: "Funcionalidade em desenvolvimento",
-                      description: "Criação de transações será implementada em breve",
-                    })
-                    setDialogOpen(false)
-                  }}>
-                    Salvar
-                  </Button>
+                  <Button onClick={handleSave}>Salvar</Button>
                 </div>
               </div>
             </DialogContent>
@@ -301,6 +434,43 @@ export default function Transacoes() {
                     <Badge variant="outline" className="text-xs">
                       {transacao.categorias?.nome || 'Sem categoria'}
                     </Badge>
+                    <div className="flex items-center gap-1 pt-1">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-7 w-7"
+                        onClick={() => openEditDialog(transacao)}
+                        aria-label="Editar transação"
+                      >
+                        <Edit className="h-3.5 w-3.5" />
+                      </Button>
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-7 w-7 text-destructive"
+                            aria-label="Excluir transação"
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Excluir transação</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              Tem certeza que deseja excluir esta transação? Esta ação não pode ser desfeita.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                            <AlertDialogAction onClick={() => handleDelete(transacao.id)}>
+                              Excluir
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    </div>
                   </div>
                 </div>
               ))
