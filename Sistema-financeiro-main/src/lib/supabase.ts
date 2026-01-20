@@ -1,90 +1,23 @@
 // VERSAO FINAL CORRIGIDA - FORCANDO UPDATE
 import { createClient } from '@supabase/supabase-js'
-// ... resto do código ..........
-// LIMPEZA AUTOMÁTICA: Remover dados do banco antigo
-if (typeof window !== 'undefined') {
-  const oldProjectIds = ['yjtsyuibemnkjfyonfjt', 'onezabszpxqdjqerrjxo']
-  const keys = Object.keys(localStorage)
-  let cleaned = false
-  
-  keys.forEach(key => {
-    try {
-      const value = localStorage.getItem(key)
-      if (value && (oldProjectIds.some(id => value.includes(id)) || key.includes('yjtsyuibemnkjfyonfjt') || key.includes('onezabszpxqdjqerrjxo'))) {
-        localStorage.removeItem(key)
-        cleaned = true
-        console.log('🔴 Removido do localStorage (banco antigo):', key)
-      }
-    } catch (e) {
-      // Ignorar erros
-    }
-  })
-  
-  if (cleaned) {
-    console.log('✅ Limpeza automática concluída - dados do banco antigo removidos')
-  }
+
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
+
+export const isSupabaseConfigured = Boolean(supabaseUrl && supabaseAnonKey)
+
+if (!isSupabaseConfigured) {
+  console.error('Variáveis de ambiente do Supabase não configuradas.')
 }
 
-// Usar variáveis de ambiente ou valores padrão
-// IMPORTANTE: O Project ID correto é qgyjfzsihoxtrvrheqvc
-// Para obter a chave anônima correta, vá em Settings → API no Supabase Dashboard
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://qgyjfzsihoxtrvrheqvc.supabase.co'
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'SUBSTITUA_PELA_CHAVE_ANONIMA_DO_SEU_PROJETO'
+const resolvedUrl = supabaseUrl || 'http://localhost:54321'
+const resolvedKey = supabaseAnonKey || 'invalid-supabase-anon-key'
 
-// Debug: verificar se as variáveis estão sendo carregadas
-console.log('🔧 Supabase Config:', {
-  url: supabaseUrl ? '✅ Configurada' : '❌ Não configurada',
-  key: supabaseAnonKey ? '✅ Configurada' : '❌ Não configurada',
-  usingEnv: !!import.meta.env.VITE_SUPABASE_URL,
-  actualUrl: supabaseUrl // Mostrar a URL real sendo usada
-})
-
-if (!supabaseUrl || !supabaseAnonKey) {
-  console.error('❌ Variáveis de ambiente do Supabase não configuradas!')
-  throw new Error('Variáveis de ambiente do Supabase não configuradas!')
-}
-
-// Criar storage customizado para garantir que não há cache do banco antigo
-const customStorage = typeof window !== 'undefined' ? {
-  getItem: (key: string) => {
-    // Verificar se a chave não é do banco antigo
-    const value = window.localStorage.getItem(key)
-    if (value) {
-      try {
-        const parsed = JSON.parse(value)
-        // Se contém URL do banco antigo, retornar null para forçar nova sessão
-        if (JSON.stringify(parsed).includes('yjtsyuibemnkjfyonfjt') || 
-            JSON.stringify(parsed).includes('onezabszpxqdjqerrjxo')) {
-          console.warn('🔴 Sessão do banco antigo detectada, removendo...')
-          window.localStorage.removeItem(key)
-          return null
-        }
-      } catch (e) {
-        // Não é JSON, verificar se é string
-        if (value.includes('yjtsyuibemnkjfyonfjt') || value.includes('onezabszpxqdjqerrjxo')) {
-          console.warn('🔴 Dados do banco antigo detectados, removendo...')
-          window.localStorage.removeItem(key)
-          return null
-        }
-      }
-    }
-    return value
-  },
-  setItem: (key: string, value: string) => {
-    window.localStorage.setItem(key, value)
-  },
-  removeItem: (key: string) => {
-    window.localStorage.removeItem(key)
-  }
-} : undefined
-
-// Criar cliente com configurações de autenticação adequadas
-export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+export const supabase = createClient(resolvedUrl, resolvedKey, {
   auth: {
-    storage: customStorage,
-    persistSession: true,
-    autoRefreshToken: true,
-    detectSessionInUrl: true
+    persistSession: isSupabaseConfigured,
+    autoRefreshToken: isSupabaseConfigured,
+    detectSessionInUrl: isSupabaseConfigured
   }
 })
 
