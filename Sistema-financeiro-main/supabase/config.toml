@@ -130,5 +130,3 @@ enable_confirmations = false
 
 [edge_runtime]
 enabled = true
-# Port to use for the Edge Runtime.
-port = 54325

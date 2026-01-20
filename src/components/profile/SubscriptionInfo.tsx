@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { useAuth } from '@/hooks/useAuth'
 import { useSubscription } from '@/hooks/useSubscription'
-import { cancelSubscription, renewSubscription } from '@/integrations/firebase/subscriptionService'
+import { cancelSubscription, renewSubscription } from '@/services/subscriptionService'
 import { toast } from '@/hooks/use-toast'
 import { CreditCard, RefreshCw, AlertCircle, CheckCircle, XCircle, Calendar, DollarSign } from 'lucide-react'
 import { formatDate } from '@/utils/date'
@@ -55,11 +55,11 @@ export function SubscriptionInfo() {
   }
 
   const handleCancelSubscription = async () => {
-    if (!user?.uid) return;
+    if (!user?.id) return;
 
     try {
       setCancelling(true);
-      const { success, error } = await cancelSubscription(user.uid);
+      const { success, error } = await cancelSubscription(user.id);
       
       if (success) {
         toast({
@@ -81,11 +81,11 @@ export function SubscriptionInfo() {
   };
 
   const handleRenewSubscription = async () => {
-    if (!user?.uid) return;
+    if (!user?.id) return;
 
     try {
       setRenewing(true);
-      const { success, error } = await renewSubscription(user.uid);
+      const { success, error } = await renewSubscription(user.id);
       
       if (success) {
         toast({

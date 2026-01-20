@@ -1,84 +1,55 @@
-import { supabase, Transacao, Categoria } from '@/lib/supabase'
+import { supabase, Transacao, Categoria, Lembrete } from '@/lib/supabase'
+
+type NovaTransacao = Omit<Transacao, 'id' | 'created_at' | 'categorias' | 'category_id'> & {
+  category_id?: string
+}
+type NovaCategoria = Omit<Categoria, 'id' | 'created_at' | 'updated_at' | 'subcategorias'>
+type NovoLembrete = Omit<Lembrete, 'id' | 'created_at'>
 
 export class TransacoesService {
-  // Buscar todas as transações do usuário com categorias hierárquicas
   static async getTransacoes(userId: string): Promise<Transacao[]> {
-    console.log('📊 TransacoesService: Buscando transações para userId:', userId)
-    console.log('📊 TransacoesService: Tipo do userId:', typeof userId, 'Comprimento:', userId?.length)
-    
-    try {
-      // Buscar transações SEM CACHE - sempre buscar dados frescos do servidor
-      const { data: transacoesData, error: transacoesError } = await supabase
+    let transacoesData: Transacao[] | null = null
+
+    const { data, error } = await supabase
+      .from('transacoes')
+      .select('*')
+      .eq('userid', userId)
+      .order('quando', { ascending: false })
+
+    if (error?.code === '42703') {
+      const fallback = await supabase
         .from('transacoes')
         .select('*')
         .eq('userid', userId)
         .order('created_at', { ascending: false })
-      
-      if (transacoesError) {
-        console.error('❌ TransacoesService: Erro ao buscar transações:', transacoesError)
-        console.error('❌ TransacoesService: Detalhes do erro:', {
-          message: transacoesError.message,
-          details: transacoesError.details,
-          hint: transacoesError.hint,
-          code: transacoesError.code
-        })
-        throw transacoesError
-      }
-      
-      console.log('📊 TransacoesService: Transações encontradas (sem join):', transacoesData?.length || 0)
-      
-      if (transacoesData && transacoesData.length > 0) {
-        console.log('📊 TransacoesService: Primeira transação (raw):', transacoesData[0])
-      }
-      
-      // Se não há transações, retornar vazio
-      if (!transacoesData || transacoesData.length === 0) {
-        console.log('⚠️ TransacoesService: Nenhuma transação encontrada para userId:', userId)
-        return []
-      }
-      
-      // Buscar categorias separadamente e fazer join manual
-      const categoryIds = [...new Set(transacoesData.map(t => t.category_id).filter(Boolean))]
-      console.log('📊 TransacoesService: Category IDs encontrados:', categoryIds)
-      
-      let categoriasMap: Record<string, { id: string; nome: string }> = {}
-      
-      if (categoryIds.length > 0) {
-        const { data: categoriasData, error: categoriasError } = await supabase
-          .from('categorias')
-          .select('id, nome')
-          .in('id', categoryIds)
-        
-        if (categoriasError) {
-          console.warn('⚠️ TransacoesService: Erro ao buscar categorias (continuando sem categorias):', categoriasError)
-        } else if (categoriasData) {
-          categoriasMap = categoriasData.reduce((acc, cat) => {
-            acc[cat.id] = { id: cat.id, nome: cat.nome }
-            return acc
-          }, {} as Record<string, { id: string; nome: string }>)
-          console.log('📊 TransacoesService: Categorias carregadas:', Object.keys(categoriasMap).length)
-        }
-      }
-      
-      // Adicionar categorias às transações
-      const data = transacoesData.map(transacao => ({
-        ...transacao,
-        categorias: transacao.category_id ? categoriasMap[transacao.category_id] : undefined
-      }))
 
-      console.log('✅ TransacoesService: Transações processadas:', data?.length || 0)
-      if (data && data.length > 0) {
-        console.log('📊 TransacoesService: Primeira transação (final):', data[0])
+      if (fallback.error) {
+        throw fallback.error
       }
 
-      return data || []
-    } catch (error: any) {
-      console.error('❌ TransacoesService: Erro inesperado:', error)
+      transacoesData = fallback.data || []
+    } else if (error) {
       throw error
+    } else {
+      transacoesData = data || []
     }
+
+    if (!transacoesData || transacoesData.length === 0) {
+      return []
+    }
+
+    const categorias = await this.getCategoriasFlat(userId)
+    const categoriasMap = categorias.reduce<Record<string, Categoria>>((acc, categoria) => {
+      acc[categoria.id] = categoria
+      return acc
+    }, {})
+
+    return transacoesData.map(transacao => ({
+      ...transacao,
+      categorias: transacao.category_id ? categoriasMap[transacao.category_id] : undefined,
+    }))
   }
 
-  // Buscar transações por período com categorias hierárquicas
   static async getTransacoesPorPeriodo(
     userId: string,
     dataInicio: string,
@@ -86,60 +57,64 @@ export class TransacoesService {
   ): Promise<Transacao[]> {
     const { data, error } = await supabase
       .from('transacoes')
-      .select(`
-        *,
-        categorias (
-          id,
-          nome
-        )
-      `)
+      .select('*')
       .eq('userid', userId)
-      .gte('created_at', dataInicio)
-      .lte('created_at', dataFim)
-      .order('created_at', { ascending: false })
+      .gte('quando', dataInicio)
+      .lte('quando', dataFim)
+      .order('quando', { ascending: false })
+
+    if (error?.code === '42703') {
+      const fallback = await supabase
+        .from('transacoes')
+        .select('*')
+        .eq('userid', userId)
+        .gte('created_at', dataInicio)
+        .lte('created_at', dataFim)
+        .order('created_at', { ascending: false })
+
+      if (fallback.error) {
+        throw fallback.error
+      }
+
+      return fallback.data || []
+    }
 
     if (error) {
-      console.error('Erro ao buscar transações por período:', error)
       throw error
     }
 
     return data || []
   }
 
-  // Adicionar nova transação
-  static async addTransacao(transacao: Omit<Transacao, 'id' | 'created_at'>): Promise<Transacao> {
+  static async addTransacao(transacao: NovaTransacao): Promise<Transacao> {
     const { data, error } = await supabase
       .from('transacoes')
-      .insert([transacao])
-      .select()
+      .insert(transacao)
+      .select('*')
       .single()
 
     if (error) {
-      console.error('Erro ao adicionar transação:', error)
       throw error
     }
 
     return data
   }
 
-  // Atualizar transação
   static async updateTransacao(id: number, updates: Partial<Transacao>): Promise<Transacao> {
     const { data, error } = await supabase
       .from('transacoes')
       .update(updates)
       .eq('id', id)
-      .select()
+      .select('*')
       .single()
 
     if (error) {
-      console.error('Erro ao atualizar transação:', error)
       throw error
     }
 
     return data
   }
 
-  // Deletar transação
   static async deleteTransacao(id: number): Promise<void> {
     const { error } = await supabase
       .from('transacoes')
@@ -147,13 +122,11 @@ export class TransacoesService {
       .eq('id', id)
 
     if (error) {
-      console.error('Erro ao deletar transação:', error)
       throw error
     }
   }
 
-  // Buscar categorias hierárquicas do usuário
-  static async getCategorias(userId: string): Promise<Categoria[]> {
+  static async getCategoriasFlat(userId: string): Promise<Categoria[]> {
     const { data, error } = await supabase
       .from('categorias')
       .select('*')
@@ -161,170 +134,229 @@ export class TransacoesService {
       .order('nome')
 
     if (error) {
-      console.error('Erro ao buscar categorias:', error)
       throw error
     }
 
-    // Organizar em estrutura hierárquica
-    const categorias = data || []
-    const mainCategories = categorias.filter(cat => cat.is_main_category)
-    
+    return data || []
+  }
+
+  static async getCategorias(userId: string): Promise<Categoria[]> {
+    const categorias = await this.getCategoriasFlat(userId)
+
+    const hasHierarchy = categorias.some(
+      categoria => categoria.is_main_category !== undefined || categoria.parent_id
+    )
+
+    if (!hasHierarchy) {
+      return categorias
+    }
+
+    const mainCategories = categorias.filter(cat =>
+      cat.is_main_category === true || (!cat.is_main_category && !cat.parent_id)
+    )
+
     mainCategories.forEach(mainCat => {
-      mainCat.subcategorias = categorias.filter(subCat => 
-        subCat.parent_id === mainCat.id && !subCat.is_main_category
-      )
+      mainCat.subcategorias = categorias.filter(subCat => subCat.parent_id === mainCat.id)
     })
 
     return mainCategories
   }
 
-  // Buscar apenas categorias principais
   static async getMainCategories(userId: string): Promise<Categoria[]> {
-    const { data, error } = await supabase
-      .from('categorias')
-      .select('*')
-      .eq('userid', userId)
-      .eq('is_main_category', true)
-      .order('nome')
+    const categorias = await this.getCategorias(userId)
+    const hasHierarchy = categorias.some(categoria => Array.isArray(categoria.subcategorias))
 
-    if (error) {
-      console.error('Erro ao buscar categorias principais:', error)
-      throw error
+    if (!hasHierarchy) {
+      return categorias
     }
 
-    return data || []
+    return categorias
   }
 
-  // Buscar subcategorias de uma categoria principal
   static async getSubCategories(userId: string, parentId: string): Promise<Categoria[]> {
+    const categorias = await this.getCategoriasFlat(userId)
+    const hasHierarchy = categorias.some(categoria => categoria.parent_id !== undefined)
+
+    if (!hasHierarchy) {
+      return []
+    }
+
+    return categorias.filter(cat => cat.parent_id === parentId)
+  }
+
+  static async addCategoria(categoria: NovaCategoria): Promise<Categoria> {
     const { data, error } = await supabase
       .from('categorias')
+      .insert({
+        ...categoria,
+        tags: categoria.tags ?? null,
+      })
       .select('*')
-      .eq('userid', userId)
-      .eq('parent_id', parentId)
-      .eq('is_main_category', false)
-      .order('nome')
+      .single()
 
     if (error) {
-      console.error('Erro ao buscar subcategorias:', error)
+      throw error
+    }
+
+    return data
+  }
+
+  static async updateCategoria(id: string, updates: Partial<Categoria>): Promise<Categoria> {
+    const { data, error } = await supabase
+      .from('categorias')
+      .update(updates)
+      .eq('id', id)
+      .select('*')
+      .single()
+
+    if (error) {
+      throw error
+    }
+
+    return data
+  }
+
+  static async deleteCategoria(id: string): Promise<void> {
+    const { error } = await supabase
+      .from('categorias')
+      .delete()
+      .eq('id', id)
+
+    if (error) {
+      throw error
+    }
+  }
+
+  static async getLembretes(userId: string): Promise<Lembrete[]> {
+    const { data, error } = await supabase
+      .from('lembretes')
+      .select('*')
+      .eq('userid', userId)
+      .order('data', { ascending: true })
+
+    if (error) {
       throw error
     }
 
     return data || []
   }
 
-  // Importar múltiplas transações em lote
+  static async addLembrete(lembrete: NovoLembrete): Promise<Lembrete> {
+    const { data, error } = await supabase
+      .from('lembretes')
+      .insert(lembrete)
+      .select('*')
+      .single()
+
+    if (error) {
+      throw error
+    }
+
+    return data
+  }
+
+  static async updateLembrete(id: number, updates: Partial<Lembrete>): Promise<Lembrete> {
+    const { data, error } = await supabase
+      .from('lembretes')
+      .update(updates)
+      .eq('id', id)
+      .select('*')
+      .single()
+
+    if (error) {
+      throw error
+    }
+
+    return data
+  }
+
+  static async deleteLembrete(id: number): Promise<void> {
+    const { error } = await supabase
+      .from('lembretes')
+      .delete()
+      .eq('id', id)
+
+    if (error) {
+      throw error
+    }
+  }
+
   static async importTransacoes(
     userId: string,
-    transacoes: Omit<Transacao, 'id' | 'created_at'>[]
+    transacoes: NovaTransacao[]
   ): Promise<{ success: number; errors: string[] }> {
     if (transacoes.length === 0) {
       return { success: 0, errors: ['Nenhuma transação para importar'] }
     }
 
-    // Buscar ou criar uma categoria padrão (obrigatório - banco não aceita null)
     let defaultCategoryId: string
-    
+
     try {
-      // Tentar buscar categorias existentes
-      const categorias = await this.getMainCategories(userId)
-      
+      const categorias = await this.getCategoriasFlat(userId)
+
       if (categorias.length > 0) {
-        // Usar primeira categoria disponível
         defaultCategoryId = categorias[0].id
       } else {
-        // Criar categoria padrão "Geral" se não existir nenhuma
-        console.log('Nenhuma categoria encontrada, criando categoria padrão...')
-        console.log('🔍 Tentando criar categoria com userId:', userId, 'Tipo:', typeof userId)
-        
-        // Garantir que userId é string (RLS pode exigir tipo específico)
-        const userIdString = String(userId).trim()
-        
-        // Inserir apenas campos obrigatórios (userid e nome)
-        // Não incluir tags, parent_id, is_main_category, icon, color pois podem não existir no banco
         const { data: newCategory, error: createError } = await supabase
           .from('categorias')
           .insert({
-            userid: userIdString,
+            userid: userId,
             nome: 'Geral',
           })
-          .select()
+          .select('*')
           .single()
 
         if (createError) {
-          console.error('❌ Erro ao criar categoria:', createError)
-          console.error('❌ Detalhes do erro:', {
-            message: createError.message,
-            details: createError.details,
-            hint: createError.hint,
-            code: createError.code
-          })
-          
-          // Se for erro de RLS, fornecer mensagem mais clara
-          if (createError.message?.includes('row-level security') || createError.message?.includes('RLS')) {
-            throw new Error(`Erro de segurança: Não foi possível criar categoria. Verifique se as políticas RLS estão configuradas corretamente no Supabase. Erro: ${createError.message}`)
-          }
-          
-          throw new Error(`Não foi possível criar categoria padrão: ${createError?.message || 'Erro desconhecido'}`)
+          throw createError
         }
-        
+
         if (!newCategory) {
-          throw new Error('Categoria não foi criada (sem erro, mas sem dados retornados)')
+          throw new Error('Categoria não foi criada (sem dados retornados)')
         }
-        
+
         defaultCategoryId = newCategory.id
-        console.log('✅ Categoria padrão criada:', defaultCategoryId)
       }
     } catch (error: any) {
-      console.error('Erro ao buscar/criar categoria padrão:', error)
       throw new Error(`Não foi possível garantir categoria para importação: ${error.message || 'Erro desconhecido'}`)
     }
 
-    // Adicionar userid e category_id padrão a todas as transações
-    // IMPORTANTE: category_id é obrigatório (NOT NULL no banco)
     const transacoesComUserId = transacoes.map(t => {
-      // Garantir que category_id seja sempre um UUID válido
       let finalCategoryId: string = defaultCategoryId
-      
-      // Se a transação já tem um category_id válido, usar esse
+
       if (t.category_id && t.category_id.trim() !== '' && t.category_id !== 'null' && t.category_id !== 'undefined') {
-        // Validar se é um UUID válido
         const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
         if (uuidRegex.test(t.category_id)) {
           finalCategoryId = t.category_id
         }
       }
-      
+
       return {
         ...t,
         userid: userId,
-        category_id: finalCategoryId // Sempre um UUID válido
+        category_id: finalCategoryId,
       }
     })
 
-    // Inserir em lotes (Supabase tem limite de 1000 por vez)
     const batchSize = 1000
     let successCount = 0
     const errors: string[] = []
 
     for (let i = 0; i < transacoesComUserId.length; i += batchSize) {
       const batch = transacoesComUserId.slice(i, i + batchSize)
-      
+
       try {
         const { data, error } = await supabase
           .from('transacoes')
           .insert(batch)
-          .select()
+          .select('*')
 
         if (error) {
           errors.push(`Erro no lote ${Math.floor(i / batchSize) + 1}: ${error.message}`)
-          console.error('Erro ao importar lote:', error)
         } else {
           successCount += data?.length || 0
         }
       } catch (error: any) {
         errors.push(`Erro no lote ${Math.floor(i / batchSize) + 1}: ${error.message}`)
-        console.error('Erro ao importar lote:', error)
       }
     }
 

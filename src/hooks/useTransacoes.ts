@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react';
-import { useAuth } from '@/hooks/useAuth';
-import { getTransacoes, addTransacao, updateTransacao, deleteTransacao } from '@/integrations/firebase/services';
-import { toast } from 'sonner';
-import type { Transacao } from '@/integrations/firebase/types';
+import { useState, useEffect } from 'react'
+import { useAuth } from '@/hooks/useAuth'
+import { TransacoesService } from '@/services/transacoes'
+import { toast } from 'sonner'
+import type { Transacao } from '@/lib/supabase'
 
 export function useTransacoes() {
   const { user } = useAuth();
@@ -15,24 +15,17 @@ export function useTransacoes() {
 
   // Buscar transações do usuário
   const fetchTransacoes = async () => {
-    if (!user?.uid) {
+    if (!user?.id) {
       setError('Usuário não autenticado');
       return;
     }
 
-    console.log('🔍 useTransacoes: Iniciando busca para usuário:', user.uid);
+    console.log('🔍 useTransacoes: Iniciando busca para usuário:', user.id);
     setIsLoading(true);
     setError(null);
 
     try {
-      const { data, error: fetchError } = await getTransacoes(user.uid);
-
-      console.log('🔍 useTransacoes: Resposta do Firebase:', { data: data?.length, error: fetchError });
-
-      if (fetchError) {
-        throw new Error(fetchError);
-      }
-
+      const data = await TransacoesService.getTransacoes(user.id)
       setTransacoes(data || []);
       console.log('🔍 useTransacoes: Transações definidas:', data?.length || 0);
     } catch (err) {
@@ -54,7 +47,7 @@ export function useTransacoes() {
     tipo: string; 
     category_id: string; 
   }) => {
-    if (!user?.uid) {
+    if (!user?.id) {
       toast.error('Usuário não autenticado');
       return;
     }
@@ -63,37 +56,19 @@ export function useTransacoes() {
     setError(null);
 
     try {
-      const { id, error: createError } = await addTransacao({
+      const created = await TransacoesService.addTransacao({
         quando: newTransacao.quando,
         estabelecimento: newTransacao.estabelecimento.trim(),
         valor: newTransacao.valor,
         detalhes: newTransacao.detalhes.trim(),
         tipo: newTransacao.tipo,
         category_id: newTransacao.category_id,
-        userid: user.uid,
-      });
+        userid: user.id,
+      })
 
-      if (createError) {
-        throw new Error(createError);
-      }
-
-      if (id) {
-        const newTransacaoData = {
-          id,
-          quando: newTransacao.quando,
-          estabelecimento: newTransacao.estabelecimento.trim(),
-          valor: newTransacao.valor,
-          detalhes: newTransacao.detalhes.trim(),
-          tipo: newTransacao.tipo,
-          category_id: newTransacao.category_id,
-          userid: user.uid,
-          created_at: new Date().toISOString(),
-        };
-        setTransacoes(prev => [...prev, newTransacaoData]);
-        toast.success('Transação criada com sucesso!');
-        return newTransacaoData;
-      }
-      return null;
+      setTransacoes(prev => [...prev, created])
+      toast.success('Transação criada com sucesso!')
+      return created
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Erro ao criar transação';
       setError(errorMessage);
@@ -106,7 +81,7 @@ export function useTransacoes() {
 
   // Atualizar transação
   const updateTransacaoById = async ({ id, updates }: { 
-    id: string; 
+    id: number; 
     updates: { 
       quando: string; 
       estabelecimento: string; 
@@ -116,7 +91,7 @@ export function useTransacoes() {
       category_id: string; 
     } 
   }) => {
-    if (!user?.uid) {
+    if (!user?.id) {
       toast.error('Usuário não autenticado');
       return;
     }
@@ -125,32 +100,16 @@ export function useTransacoes() {
     setError(null);
 
     try {
-      const { error: updateError } = await updateTransacao(id, {
+      const updated = await TransacoesService.updateTransacao(id, {
         quando: updates.quando,
         estabelecimento: updates.estabelecimento.trim(),
         valor: updates.valor,
         detalhes: updates.detalhes.trim(),
         tipo: updates.tipo,
         category_id: updates.category_id,
-      });
+      })
 
-      if (updateError) {
-        throw new Error(updateError);
-      }
-
-      setTransacoes(prev => prev.map(trans => 
-        trans.id === id 
-          ? { 
-              ...trans, 
-              quando: updates.quando,
-              estabelecimento: updates.estabelecimento.trim(),
-              valor: updates.valor,
-              detalhes: updates.detalhes.trim(),
-              tipo: updates.tipo,
-              category_id: updates.category_id,
-            }
-          : trans
-      ));
+      setTransacoes(prev => prev.map(trans => (trans.id === id ? updated : trans)));
       toast.success('Transação atualizada com sucesso!');
       return true;
     } catch (err) {
@@ -164,8 +123,8 @@ export function useTransacoes() {
   };
 
   // Deletar transação
-  const deleteTransacaoById = async (id: string) => {
-    if (!user?.uid) {
+  const deleteTransacaoById = async (id: number) => {
+    if (!user?.id) {
       toast.error('Usuário não autenticado');
       return;
     }
@@ -174,11 +133,7 @@ export function useTransacoes() {
     setError(null);
 
     try {
-      const { error: deleteError } = await deleteTransacao(id);
-
-      if (deleteError) {
-        throw new Error(deleteError);
-      }
+      await TransacoesService.deleteTransacao(id)
 
       setTransacoes(prev => prev.filter(trans => trans.id !== id));
       toast.success('Transação deletada com sucesso!');
@@ -195,13 +150,13 @@ export function useTransacoes() {
 
   // Buscar transações quando o usuário mudar
   useEffect(() => {
-    if (user?.uid) {
+    if (user?.id) {
       fetchTransacoes();
     } else {
       setTransacoes([]);
       setError(null);
     }
-  }, [user?.uid]); // fetchTransacoes não precisa estar nas dependências pois é estável
+  }, [user?.id]); // fetchTransacoes não precisa estar nas dependências pois é estável
 
   // Função para limpar erros
   const clearError = () => setError(null);

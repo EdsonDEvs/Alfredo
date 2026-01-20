@@ -93,3 +93,6 @@ Para produção, você deve criar uma Supabase Edge Function para gerar a apiKey
 - [ ] Servidor reiniciado após adicionar variáveis
 - [ ] Teste de conexão realizado com sucesso
 
+
+
+

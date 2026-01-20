@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react';
-import { useAuth } from '@/hooks/useAuth';
-import { getLembretes, addLembrete, updateLembrete, deleteLembrete } from '@/integrations/firebase/services';
-import { toast } from 'sonner';
-import type { Lembrete } from '@/integrations/firebase/types';
+import { useState, useEffect } from 'react'
+import { useAuth } from '@/hooks/useAuth'
+import { TransacoesService } from '@/services/transacoes'
+import { toast } from 'sonner'
+import type { Lembrete } from '@/lib/supabase'
 
 export function useLembretes() {
   const { user } = useAuth();
@@ -15,7 +15,7 @@ export function useLembretes() {
 
   // Buscar lembretes do usuário
   const fetchLembretes = async () => {
-    if (!user?.uid) {
+    if (!user?.id) {
       setError('Usuário não autenticado');
       return;
     }
@@ -24,12 +24,7 @@ export function useLembretes() {
     setError(null);
 
     try {
-      const { data, error: fetchError } = await getLembretes(user.uid);
-
-      if (fetchError) {
-        throw new Error(fetchError);
-      }
-
+      const data = await TransacoesService.getLembretes(user.id)
       setLembretes(data || []);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Erro ao buscar lembretes';
@@ -42,7 +37,7 @@ export function useLembretes() {
 
   // Criar novo lembrete
   const createLembrete = async (newLembrete: { descricao: string; data: string; valor: number }) => {
-    if (!user?.uid) {
+    if (!user?.id) {
       toast.error('Usuário não autenticado');
       return;
     }
@@ -51,31 +46,16 @@ export function useLembretes() {
     setError(null);
 
     try {
-      const { id, error: createError } = await addLembrete({
+      const created = await TransacoesService.addLembrete({
         descricao: newLembrete.descricao.trim(),
         data: newLembrete.data,
         valor: newLembrete.valor,
-        userid: user.uid,
-      });
+        userid: user.id,
+      })
 
-      if (createError) {
-        throw new Error(createError);
-      }
-
-      if (id) {
-        const newLembreteData = {
-          id,
-          descricao: newLembrete.descricao.trim(),
-          data: newLembrete.data,
-          valor: newLembrete.valor,
-          userid: user.uid,
-          created_at: new Date().toISOString(),
-        };
-        setLembretes(prev => [...prev, newLembreteData]);
-        toast.success('Lembrete criado com sucesso!');
-        return newLembreteData;
-      }
-      return null;
+      setLembretes(prev => [...prev, created])
+      toast.success('Lembrete criado com sucesso!')
+      return created
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Erro ao criar lembrete';
       setError(errorMessage);
@@ -87,8 +67,8 @@ export function useLembretes() {
   };
 
   // Atualizar lembrete
-  const updateLembreteById = async ({ id, updates }: { id: string; updates: { descricao: string; data: string; valor: number } }) => {
-    if (!user?.uid) {
+  const updateLembreteById = async ({ id, updates }: { id: number; updates: { descricao: string; data: string; valor: number } }) => {
+    if (!user?.id) {
       toast.error('Usuário não autenticado');
       return;
     }
@@ -97,21 +77,13 @@ export function useLembretes() {
     setError(null);
 
     try {
-      const { error: updateError } = await updateLembrete(id, {
+      const updated = await TransacoesService.updateLembrete(id, {
         descricao: updates.descricao.trim(),
         data: updates.data,
         valor: updates.valor,
-      });
+      })
 
-      if (updateError) {
-        throw new Error(updateError);
-      }
-
-      setLembretes(prev => prev.map(lem => 
-        lem.id === id 
-          ? { ...lem, descricao: updates.descricao.trim(), data: updates.data, valor: updates.valor }
-          : lem
-      ));
+      setLembretes(prev => prev.map(lem => (lem.id === id ? updated : lem)))
       toast.success('Lembrete atualizado com sucesso!');
       return true;
     } catch (err) {
@@ -125,8 +97,8 @@ export function useLembretes() {
   };
 
   // Deletar lembrete
-  const deleteLembreteById = async (id: string) => {
-    if (!user?.uid) {
+  const deleteLembreteById = async (id: number) => {
+    if (!user?.id) {
       toast.error('Usuário não autenticado');
       return;
     }
@@ -135,11 +107,7 @@ export function useLembretes() {
     setError(null);
 
     try {
-      const { error: deleteError } = await deleteLembrete(id);
-
-      if (deleteError) {
-        throw new Error(deleteError);
-      }
+      await TransacoesService.deleteLembrete(id)
 
       setLembretes(prev => prev.filter(lem => lem.id !== id));
       toast.success('Lembrete deletado com sucesso!');
@@ -156,13 +124,13 @@ export function useLembretes() {
 
   // Buscar lembretes quando o usuário mudar
   useEffect(() => {
-    if (user?.uid) {
+    if (user?.id) {
       fetchLembretes();
     } else {
       setLembretes([]);
       setError(null);
     }
-  }, [user?.uid]); // fetchLembretes não precisa estar nas dependências pois é estável
+  }, [user?.id]); // fetchLembretes não precisa estar nas dependências pois é estável
 
   // Função para limpar erros
   const clearError = () => setError(null);

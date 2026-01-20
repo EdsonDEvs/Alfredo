@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Calendar, Lightbulb } from 'lucide-react'
 import { formatCurrency } from '@/utils/currency'
 import { formatDate } from '@/utils/date'
-import type { Lembrete } from '@/integrations/firebase/types'
+import type { Lembrete } from '@/lib/supabase'
 
 interface DashboardSidebarProps {
   lembretes: Lembrete[]

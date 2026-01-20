@@ -182,3 +182,6 @@ Em produção (Vercel, etc.), configure a variável de ambiente:
 
 Agora você pode conectar contas bancárias e importar transações automaticamente via Open Finance!
 
+
+
+

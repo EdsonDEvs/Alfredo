@@ -43,3 +43,6 @@ WHERE tablename = 'transacoes'
 -- 7. Comentário para documentação
 COMMENT ON COLUMN public.transacoes.external_id IS 'ID externo da transação (da API do agregador) para evitar duplicatas. Índice único por usuário.';
 
+
+
+

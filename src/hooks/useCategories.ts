@@ -1,21 +1,15 @@
 
-import { useState, useEffect } from 'react';
-import { useAuth } from '@/hooks/useAuth';
-import { getCategorias, addCategoria, updateCategoria, deleteCategoria } from '@/integrations/firebase/services';
-import { toast } from 'sonner';
+import { useState, useEffect } from 'react'
+import { useAuth } from '@/hooks/useAuth'
+import { TransacoesService } from '@/services/transacoes'
+import { toast } from 'sonner'
+import type { Categoria } from '@/lib/supabase'
 
-export interface Category {
-  id: string;
-  nome: string;
-  tags: string | null;
-  created_at: string;
-  updated_at: string;
-  userid: string;
-}
+export type Category = Categoria
 
 export function useCategories() {
   const { user } = useAuth();
-  const [categories, setCategories] = useState<Category[]>([]);
+  const [categories, setCategories] = useState<Categoria[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
@@ -24,7 +18,7 @@ export function useCategories() {
 
   // Buscar categorias do usuário
   const fetchCategories = async () => {
-    if (!user?.uid) {
+    if (!user?.id) {
       setError('Usuário não autenticado');
       return;
     }
@@ -33,12 +27,7 @@ export function useCategories() {
     setError(null);
 
     try {
-      const { data, error: fetchError } = await getCategorias(user.uid);
-
-      if (fetchError) {
-        throw new Error(fetchError);
-      }
-
+      const data = await TransacoesService.getCategoriasFlat(user.id)
       setCategories(data || []);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Erro ao buscar categorias';
@@ -51,7 +40,7 @@ export function useCategories() {
 
   // Criar nova categoria
   const createCategory = async (newCategory: { nome: string; tags?: string }) => {
-    if (!user?.uid) {
+    if (!user?.id) {
       toast.error('Usuário não autenticado');
       return;
     }
@@ -60,30 +49,15 @@ export function useCategories() {
     setError(null);
 
     try {
-      const { id, error: createError } = await addCategoria({
+      const created = await TransacoesService.addCategoria({
         nome: newCategory.nome.trim(),
         tags: newCategory.tags?.trim() || null,
-        userid: user.uid,
-      });
+        userid: user.id,
+      })
 
-      if (createError) {
-        throw new Error(createError);
-      }
-
-      if (id) {
-        const newCategoryData = {
-          id,
-          nome: newCategory.nome.trim(),
-          tags: newCategory.tags?.trim() || null,
-          userid: user.uid,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        };
-        setCategories(prev => [...prev, newCategoryData]);
-        toast.success('Categoria criada com sucesso!');
-        return newCategoryData;
-      }
-      return null;
+      setCategories(prev => [...prev, created])
+      toast.success('Categoria criada com sucesso!')
+      return created
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Erro ao criar categoria';
       setError(errorMessage);
@@ -96,7 +70,7 @@ export function useCategories() {
 
   // Atualizar categoria
   const updateCategory = async ({ id, updates }: { id: string; updates: { nome: string; tags?: string } }) => {
-    if (!user?.uid) {
+    if (!user?.id) {
       toast.error('Usuário não autenticado');
       return;
     }
@@ -105,20 +79,12 @@ export function useCategories() {
     setError(null);
 
     try {
-      const { error: updateError } = await updateCategoria(id, {
+      const updated = await TransacoesService.updateCategoria(id, {
         nome: updates.nome.trim(),
         tags: updates.tags?.trim() || null,
-      });
+      })
 
-      if (updateError) {
-        throw new Error(updateError);
-      }
-
-      setCategories(prev => prev.map(cat => 
-        cat.id === id 
-          ? { ...cat, nome: updates.nome.trim(), tags: updates.tags?.trim() || null, updated_at: new Date().toISOString() }
-          : cat
-      ));
+      setCategories(prev => prev.map(cat => (cat.id === id ? updated : cat)));
       toast.success('Categoria atualizada com sucesso!');
       return true;
     } catch (err) {
@@ -133,7 +99,7 @@ export function useCategories() {
 
   // Deletar categoria
   const deleteCategory = async (id: string) => {
-    if (!user?.uid) {
+    if (!user?.id) {
       toast.error('Usuário não autenticado');
       return;
     }
@@ -142,11 +108,7 @@ export function useCategories() {
     setError(null);
 
     try {
-      const { error: deleteError } = await deleteCategoria(id);
-
-      if (deleteError) {
-        throw new Error(deleteError);
-      }
+      await TransacoesService.deleteCategoria(id)
 
       setCategories(prev => prev.filter(cat => cat.id !== id));
       toast.success('Categoria deletada com sucesso!');
@@ -163,13 +125,13 @@ export function useCategories() {
 
   // Buscar categorias quando o usuário mudar
   useEffect(() => {
-    if (user?.uid) {
+    if (user?.id) {
       fetchCategories();
     } else {
       setCategories([]);
       setError(null);
     }
-  }, [user?.uid]);
+  }, [user?.id]);
 
   // Função para limpar erros
   const clearError = () => setError(null);

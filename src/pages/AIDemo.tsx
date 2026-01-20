@@ -339,7 +339,7 @@ export default function AIDemo() {
                 <Badge variant="outline">n8n Workflows</Badge>
                 <Badge variant="outline">OpenAI GPT-4</Badge>
                 <Badge variant="outline">WhatsApp Business API</Badge>
-                <Badge variant="outline">Firebase Firestore</Badge>
+                <Badge variant="outline">Supabase Postgres</Badge>
                 <Badge variant="outline">React + TypeScript</Badge>
                 <Badge variant="outline">Processamento de Linguagem Natural</Badge>
               </CardContent>

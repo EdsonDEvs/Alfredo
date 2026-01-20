@@ -1,6 +1,6 @@
 
 import { NavLink, useLocation } from 'react-router-dom'
-import { Home, CreditCard, Calendar, User, LogOut, Tag, FileText, Target } from 'lucide-react'
+import { Home, CreditCard, Calendar, User, LogOut, Tag, FileText, Target, MessageCircle } from 'lucide-react'
 import {
   Sidebar,
   SidebarContent,
@@ -27,6 +27,8 @@ const items = [
   { title: 'Metas', url: '/metas', icon: Target },
   { title: 'Perfil', url: '/perfil', icon: User },
 ]
+
+const WHATSAPP_URL = 'https://wa.me/553197599924'
 
 export function AppSidebar() {
   const { state } = useSidebar()
@@ -81,7 +83,19 @@ export function AppSidebar() {
 
       <SidebarFooter className="p-4 space-y-4">
         <UserProfile />
-        
+
+        <Button
+          asChild
+          variant="secondary"
+          size={isCollapsed ? "icon" : "default"}
+          className="w-full"
+        >
+          <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer">
+            <MessageCircle className="h-4 w-4" />
+            <span className="group-data-[collapsible=icon]:hidden ml-2">Falar com Alfredo</span>
+          </a>
+        </Button>
+
         <Button
           onClick={signOut}
           variant="outline"

@@ -70,3 +70,6 @@ console.log('   1. Verifique se este itemId está salvo em profiles.bank_connect
 console.log('   2. Execute "Sincronizar Agora" no Dashboard')
 console.log('   3. Verifique as transações no banco de dados')
 
+
+
+

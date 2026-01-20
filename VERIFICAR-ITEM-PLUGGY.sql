@@ -48,3 +48,6 @@ FROM public.transacoes
 WHERE userid = 'USER_ID_AQUI'  -- Substitua pelo userid correto
   AND external_id IS NOT NULL;
 
+
+
+

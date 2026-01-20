@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
-import { createOrUpdateSubscription } from '@/integrations/firebase/subscriptionService';
+import { createOrUpdateSubscription } from '@/services/subscriptionService';
 import { n8nService } from '@/integrations/n8n/webhookService';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -12,7 +12,7 @@ export default function PaymentSuccess() {
   const navigate = useNavigate();
   const location = useLocation();
   const [searchParams] = useSearchParams();
-  const { user, signUp, signIn } = useAuth();
+  const { user, signIn } = useAuth();
   const [isProcessing, setIsProcessing] = useState(true);
   const [isSuccess, setIsSuccess] = useState(false);
   const [userData, setUserData] = useState<any>(null);
@@ -91,12 +91,12 @@ export default function PaymentSuccess() {
         }
         
         // Atualizar assinatura se o usuário estiver logado
-        if (user?.uid) {
-          const { data: subscription, error } = await createOrUpdateSubscription(user.uid, {
+        if (user?.id) {
+          const { data: subscription, error } = await createOrUpdateSubscription(user.id, {
             status: 'active',
             amount: 0.01,
-            paymentMethod: 'asaas',
-            asaasPaymentId: paymentId || 'manual'
+            payment_method: 'asaas',
+            subscription_id: paymentId || 'manual',
           });
           
           if (error) {
@@ -125,7 +125,7 @@ export default function PaymentSuccess() {
     };
 
     processPaymentSuccess();
-  }, [searchParams, user, signUp, signIn]);
+  }, [searchParams, user, signIn]);
 
   const handleGoToDashboard = () => {
     navigate('/dashboard');

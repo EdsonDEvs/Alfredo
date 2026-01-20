@@ -4,8 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { updatePassword } from 'firebase/auth'
-import { auth } from '@/integrations/firebase/config'
+import { supabase } from '@/lib/supabase'
 import { toast } from '@/hooks/use-toast'
 import { Lock } from 'lucide-react'
 
@@ -40,14 +39,16 @@ export function ChangePasswordForm() {
     setLoading(true)
 
     try {
-      // Verificar se há um usuário autenticado
-      const currentUser = auth.currentUser
-      if (!currentUser?.email) {
+      const { data: sessionData } = await supabase.auth.getSession()
+      if (!sessionData?.session?.user) {
         throw new Error('Usuário não encontrado')
       }
 
       // Atualizar senha
-      await updatePassword(currentUser, newPassword)
+      const { error } = await supabase.auth.updateUser({ password: newPassword })
+      if (error) {
+        throw error
+      }
 
       // Limpar formulário
       setCurrentPassword('')
