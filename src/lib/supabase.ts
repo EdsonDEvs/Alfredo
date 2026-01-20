@@ -3,11 +3,22 @@ import { createClient } from '@supabase/supabase-js'
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
 
-if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error('Variáveis de ambiente do Supabase não configuradas.')
+export const isSupabaseConfigured = Boolean(supabaseUrl && supabaseAnonKey)
+
+if (!isSupabaseConfigured) {
+  console.error('Variáveis de ambiente do Supabase não configuradas.')
 }
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey)
+const resolvedUrl = supabaseUrl || 'http://localhost:54321'
+const resolvedKey = supabaseAnonKey || 'invalid-supabase-anon-key'
+
+export const supabase = createClient(resolvedUrl, resolvedKey, {
+  auth: {
+    persistSession: isSupabaseConfigured,
+    autoRefreshToken: isSupabaseConfigured,
+    detectSessionInUrl: isSupabaseConfigured,
+  },
+})
 
 export interface Categoria {
   id: string

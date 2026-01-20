@@ -10,16 +10,16 @@
   "scope": "/",
   "icons": [
     {
-      "src": "/lovable-uploads/d58baa4c-1273-42fb-83d0-950387ad313b.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any maskable"
+      "src": "/favicon.ico",
+      "sizes": "64x64",
+      "type": "image/x-icon",
+      "purpose": "any"
     },
     {
-      "src": "/lovable-uploads/d58baa4c-1273-42fb-83d0-950387ad313b.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any maskable"
+      "src": "/favicon.ico",
+      "sizes": "64x64",
+      "type": "image/x-icon",
+      "purpose": "any"
     }
   ],
   "categories": ["finance", "productivity", "business"],
@@ -32,8 +32,8 @@
       "url": "/dashboard",
       "icons": [
         {
-          "src": "/lovable-uploads/d58baa4c-1273-42fb-83d0-950387ad313b.png",
-          "sizes": "96x96"
+          "src": "/favicon.ico",
+          "sizes": "64x64"
         }
       ]
     },
@@ -44,8 +44,8 @@
       "url": "/transacoes",
       "icons": [
         {
-          "src": "/lovable-uploads/d58baa4c-1273-42fb-83d0-950387ad313b.png",
-          "sizes": "96x96"
+          "src": "/favicon.ico",
+          "sizes": "64x64"
         }
       ]
     }
