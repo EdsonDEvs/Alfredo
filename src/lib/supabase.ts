@@ -3,13 +3,23 @@ import { createClient } from '@supabase/supabase-js'
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
 
-export const isSupabaseConfigured = Boolean(supabaseUrl && supabaseAnonKey)
+const isValidSupabaseUrl = (() => {
+  if (!supabaseUrl) return false
+  try {
+    new URL(supabaseUrl)
+    return true
+  } catch {
+    return false
+  }
+})()
+
+export const isSupabaseConfigured = Boolean(isValidSupabaseUrl && supabaseAnonKey)
 
 if (!isSupabaseConfigured) {
-  console.error('Variáveis de ambiente do Supabase não configuradas.')
+  console.error('Variáveis de ambiente do Supabase não configuradas ou inválidas.')
 }
 
-const resolvedUrl = supabaseUrl || 'http://localhost:54321'
+const resolvedUrl = isValidSupabaseUrl ? supabaseUrl : 'http://localhost:54321'
 const resolvedKey = supabaseAnonKey || 'invalid-supabase-anon-key'
 
 export const supabase = createClient(resolvedUrl, resolvedKey, {
