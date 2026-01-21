@@ -75,7 +75,7 @@ export default function Relatorios() {
   const baseCalculo = Math.max(0, rendaTributavel - parseAmount(deducoes))
   const faixa = IRPF_TABLE.find((entry) => baseCalculo <= entry.limit) || IRPF_TABLE[IRPF_TABLE.length - 1]
   const impostoDevido = Math.max(0, baseCalculo * faixa.rate - faixa.deduction)
-  const saldo = impostoDevido - parseAmount(irRetido)
+  const saldoIr = impostoDevido - parseAmount(irRetido)
 
   // Filtrar transações
   const filteredTransactions = transactions.filter(transaction => {
@@ -315,11 +315,11 @@ export default function Relatorios() {
                 <div>
                   <p className="text-sm text-muted-foreground">Saldo</p>
                   <p className="text-lg font-semibold">
-                    {saldo >= 0 ? 'A pagar' : 'A restituir'}: {format(Math.abs(saldo))}
+                    {saldoIr >= 0 ? 'A pagar' : 'A restituir'}: {format(Math.abs(saldoIr))}
                   </p>
                 </div>
-                <Badge variant={saldo >= 0 ? 'destructive' : 'default'}>
-                  {saldo >= 0 ? 'Imposto devido' : 'Restituição'}
+                <Badge variant={saldoIr >= 0 ? 'destructive' : 'default'}>
+                  {saldoIr >= 0 ? 'Imposto devido' : 'Restituição'}
                 </Badge>
               </div>
 
