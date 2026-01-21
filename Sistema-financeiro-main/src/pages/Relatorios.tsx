@@ -1,5 +1,5 @@
 
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -10,16 +10,72 @@ import { FileText, TrendingUp, TrendingDown, DollarSign } from 'lucide-react'
 import { useTransacoesSync } from '@/hooks/useTransacoesSync'
 import { useFormattedCurrency } from '@/hooks/useFormattedCurrency'
 import type { Transacao } from '@/lib/supabase'
+import { usePlanAccess } from '@/hooks/usePlanAccess'
+import { useNavigate } from 'react-router-dom'
 
 export default function Relatorios() {
   const { transacoes: transactions, loading: isLoading } = useTransacoesSync()
   const { format } = useFormattedCurrency()
+  const { hasAccess, loading: planLoading } = usePlanAccess()
+  const navigate = useNavigate()
   const [filters, setFilters] = useState({
     startDate: '',
     endDate: '',
     type: 'all',
     categoryId: 'all'
   })
+
+  const availableYears = useMemo(() => {
+    const years = new Set<number>()
+    transactions.forEach((transaction) => {
+      const rawDate = transaction.quando || transaction.created_at
+      if (!rawDate) return
+      const parsed = new Date(rawDate)
+      if (!Number.isNaN(parsed.getTime())) {
+        years.add(parsed.getFullYear())
+      }
+    })
+    if (years.size === 0) {
+      years.add(new Date().getFullYear())
+    }
+    return Array.from(years).sort((a, b) => b - a)
+  }, [transactions])
+
+  const [irYear, setIrYear] = useState<string>(() => `${new Date().getFullYear()}`)
+  const [deducoes, setDeducoes] = useState('0')
+  const [irRetido, setIrRetido] = useState('0')
+
+  const parseAmount = (value: string) => {
+    const normalized = value.replace(',', '.')
+    const parsed = Number(normalized)
+    return Number.isFinite(parsed) ? parsed : 0
+  }
+
+  const rendaTributavel = useMemo(() => {
+    const selectedYear = Number(irYear)
+    return transactions
+      .filter((transaction) => transaction.tipo === 'receita')
+      .filter((transaction) => {
+        const rawDate = transaction.quando || transaction.created_at
+        if (!rawDate) return false
+        const parsed = new Date(rawDate)
+        return !Number.isNaN(parsed.getTime()) && parsed.getFullYear() === selectedYear
+      })
+      .reduce((acc, transaction) => acc + (transaction.valor || 0), 0)
+  }, [transactions, irYear])
+
+  const IRPF_TABLE = [
+    { limit: 22847.76, rate: 0, deduction: 0 },
+    { limit: 33919.8, rate: 0.075, deduction: 1713.58 },
+    { limit: 45012.6, rate: 0.15, deduction: 4257.57 },
+    { limit: 55976.16, rate: 0.225, deduction: 7633.51 },
+    { limit: Number.POSITIVE_INFINITY, rate: 0.275, deduction: 10432.32 },
+  ]
+
+  const baseCalculo = Math.max(0, rendaTributavel - parseAmount(deducoes))
+  const faixa = IRPF_TABLE.find((entry) => baseCalculo <= entry.limit) || IRPF_TABLE[IRPF_TABLE.length - 1]
+  const impostoDevido = Math.max(0, baseCalculo * faixa.rate - faixa.deduction)
+  const saldo = impostoDevido - parseAmount(irRetido)
 
   // Filtrar transações
   const filteredTransactions = transactions.filter(transaction => {
@@ -181,6 +237,97 @@ export default function Relatorios() {
               </div>
             </div>
           </div>
+        </CardContent>
+      </Card>
+
+      {/* Imposto de Renda */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <DollarSign className="h-5 w-5" />
+            Imposto de Renda (Pro)
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {!planLoading && !hasAccess('pro') ? (
+            <div className="space-y-4">
+              <p className="text-sm text-muted-foreground">
+                Este recurso está disponível apenas no plano Pro ou superior.
+              </p>
+              <Button onClick={() => navigate('/plano')}>Ver planos</Button>
+            </div>
+          ) : (
+            <div className="grid gap-4 md:grid-cols-2">
+              <div className="space-y-2">
+                <Label>Ano-base</Label>
+                <Select value={irYear} onValueChange={setIrYear}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione o ano" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {availableYears.map((year) => (
+                      <SelectItem key={year} value={`${year}`}>
+                        {year}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Rendimentos tributáveis (ano)</Label>
+                <Input value={format(rendaTributavel)} disabled />
+              </div>
+
+              <div className="space-y-2">
+                <Label>Deduções totais (ano)</Label>
+                <Input
+                  type="number"
+                  step="0.01"
+                  value={deducoes}
+                  onChange={(event) => setDeducoes(event.target.value)}
+                  placeholder="0,00"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label>IR retido na fonte</Label>
+                <Input
+                  type="number"
+                  step="0.01"
+                  value={irRetido}
+                  onChange={(event) => setIrRetido(event.target.value)}
+                  placeholder="0,00"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label>Base de cálculo</Label>
+                <Input value={format(baseCalculo)} disabled />
+              </div>
+
+              <div className="space-y-2">
+                <Label>Imposto devido (estimado)</Label>
+                <Input value={format(impostoDevido)} disabled />
+              </div>
+
+              <div className="md:col-span-2 flex items-center justify-between rounded-lg border p-3">
+                <div>
+                  <p className="text-sm text-muted-foreground">Saldo</p>
+                  <p className="text-lg font-semibold">
+                    {saldo >= 0 ? 'A pagar' : 'A restituir'}: {format(Math.abs(saldo))}
+                  </p>
+                </div>
+                <Badge variant={saldo >= 0 ? 'destructive' : 'default'}>
+                  {saldo >= 0 ? 'Imposto devido' : 'Restituição'}
+                </Badge>
+              </div>
+
+              <p className="text-xs text-muted-foreground md:col-span-2">
+                Estimativa baseada na tabela anual padrão. Revise a tabela vigente e suas deduções com um contador.
+              </p>
+            </div>
+          )}
         </CardContent>
       </Card>
 
