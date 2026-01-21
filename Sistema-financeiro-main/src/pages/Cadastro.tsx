@@ -35,7 +35,17 @@ export default function Cadastro() {
 
   const plans = {
     basico: { name: 'Básico', price: 29.90, features: ['Registro ilimitado', 'Dashboard completo', 'Relatórios mensais'] },
-    premium: { name: 'Premium', price: 49.90, features: ['Tudo do Básico', 'Lembretes automáticos', 'Múltiplas moedas', 'Importação de planilhas'] },
+    premium: {
+      name: 'Premium',
+      price: 49.90,
+      features: [
+        'Tudo do Básico',
+        'Lembretes automáticos',
+        'Múltiplas moedas',
+        'Importação de planilhas',
+        'Cálculo de imposto de renda'
+      ]
+    },
     profissional: { name: 'Profissional', price: 79.90, features: ['Tudo do Premium', 'Integração WhatsApp', 'Relatórios avançados', 'API de integração'] }
   }
 
